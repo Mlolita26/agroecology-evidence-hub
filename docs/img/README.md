@@ -1,27 +1,38 @@
 # Hero photographs
 
-Right now every page header shows the dataset itself: one small cell per
-comparison, coloured teal for a decrease and pink for an increase. It is a real
-picture of the evidence rather than decoration, and it costs nothing to license.
+Three pages use a photograph in the header:
 
-If you would rather show a photograph, put the file in this folder and name it
-on the page header in `index.html`:
+| Page | File | Caption credit |
+|---|---|---|
+| Home | `home.jpg` | Olivier Asselin / FAO |
+| About | `about.webp` | not known |
+| Methodology | `methodology.jpg` | not known |
+
+**Rights are not confirmed.** These came from the team's own downloads and only
+the FAO photograph has a known photographer. This repository is public, so
+before the site is promoted, check that the project may publish each one and put
+the right credit in its caption. If a photograph cannot be cleared, delete the
+file and remove `data-photo` from that page; the fallback artwork returns on its
+own.
+
+## Get involved and Contact still need a photograph
+
+Both currently fall back to the artwork, which draws the dataset itself. To give
+them a photograph, drop the file here and name it on that page's header in
+`index.html`:
 
 ```html
-<figure class="hero-art" data-art="outcome" data-photo="img/about.jpg">
+<figure class="hero-art" data-photo="img/involved.jpg">
 ```
 
-The photograph then replaces the artwork on that page. Remove `data-photo` to
-get the artwork back. Each page can differ, so you can use a photograph on Home
-and keep the artwork elsewhere.
+Remove `data-photo` to go back to the artwork. Each page is independent.
 
-Practical notes:
+## Practical notes
 
 - About 1600 by 1100 pixels is plenty. The box is roughly half the page width
   and 320 to 400 pixels tall, and the image is cropped to fill it.
 - Keep each file under about 400 KB, or the page gets slow on a phone.
-- The caption underneath sits on a translucent strip, so avoid photographs with
+- The caption sits on a solid strip across the bottom, so avoid photographs with
   important detail along the bottom edge.
-- Use photographs the project has the right to publish. The repository is
-  public, so anything added here is public too. Credit the photographer in the
-  caption.
+- Captions are translated. Edit the matching key (`home.06`, `about.04`,
+  `methodology.04`) in `../i18n.js` when you change one.

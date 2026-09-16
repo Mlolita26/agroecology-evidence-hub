@@ -60,6 +60,22 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
   padding:5px 8px;cursor:pointer}
 .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
 
+/* language switcher: the current language, then the others on a click */
+.lang{position:relative;align-self:center;margin-left:12px}
+.lang > button{display:flex;align-items:center;gap:6px;background:none;cursor:pointer;
+  border:1px solid var(--line-2);color:var(--ink-2);padding:5px 8px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+.lang > button:hover,.lang.open > button{border-color:var(--accent);color:var(--accent)}
+.lang .car{font-size:9px}
+.lang-pop{display:none;position:absolute;top:calc(100% + 5px);right:0;min-width:132px;z-index:700;
+  background:var(--panel);border:1px solid var(--rule);box-shadow:5px 5px 0 var(--accent-soft)}
+.lang.open .lang-pop{display:block}
+.lang-pop button{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  padding:8px 11px;font-family:var(--sans);font-size:13px;color:var(--ink-2)}
+.lang-pop button:hover{background:var(--wash);color:var(--ink)}
+.lang-pop button.on{color:var(--accent)}
+.lang-pop button.on::after{content:" ✓"}
+
 .page{display:none}
 .page.on{display:block}
 

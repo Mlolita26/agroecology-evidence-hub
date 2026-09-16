@@ -13,10 +13,10 @@
   const uniq = (k) => [...new Set(D.map(r => r[k]).filter(v => v !== '' && v != null))].sort();
 
   const DIMS = [
-    { key: 'country', label: 'Country' },
-    { key: 'crop', label: 'Crop' },
-    { key: 'outcome', label: 'Outcome' },
-    { key: 'practice', label: 'Practice' }
+    { key: 'country', label: 'dimCountry' },
+    { key: 'crop', label: 'dimCrop' },
+    { key: 'outcome', label: 'dimOutcome' },
+    { key: 'practice', label: 'dimPractice' }
   ];
   const sel = { country: new Set(), crop: new Set(), outcome: new Set(), practice: new Set() };
   let sort = { key: 'value', dir: -1 };
@@ -25,13 +25,61 @@
   let started = false;  /* true once the first render has run, so the theme
                            switch knows the drawing helpers are ready */
 
+  /* ---------- language ----------
+     English is what index.html already contains, so it is kept as a snapshot
+     and restored rather than stored twice. t() reads the runtime strings and
+     fills {name} placeholders. */
+  let lang = 'en';
+  const english = new Map();
+  document.querySelectorAll('[data-t]').forEach(el => english.set(el, el.innerHTML));
+
+  function t(key, vars) {
+    const table = (window.KH_UI && window.KH_UI[lang]) || {};
+    let s = key in table ? table[key] : window.KH_UI.en[key];
+    if (s === undefined) return key;
+    if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+    return s;
+  }
+
+  function setLang(code) {
+    lang = window.KH_LANGS[code] ? code : 'en';
+    const words = (window.KH_TEXT && window.KH_TEXT[lang]) || {};
+    english.forEach((originalHtml, el) => {
+      const key = el.dataset.t;
+      el.innerHTML = key in words ? words[key] : originalHtml;
+    });
+    document.documentElement.lang = lang;
+    $('#lang-now').textContent = window.KH_LANGS[lang];
+    document.querySelectorAll('#lang-pop button').forEach(b =>
+      b.classList.toggle('on', b.dataset.lang === lang));
+    try { localStorage.setItem('kh-lang', lang); } catch (e) {}
+    $('#theme-btn').textContent =
+      document.documentElement.getAttribute('data-theme') === 'dark' ? t('themeLight') : t('themeDark');
+    if (started) { buildFilters(); buildHead(); closeDetail(); render(); }
+  }
+
+  Object.keys(window.KH_LANGS).forEach(code => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.lang = code;
+    b.textContent = window.KH_LANGS[code];
+    b.addEventListener('click', () => { $('#lang').classList.remove('open'); setLang(code); });
+    $('#lang-pop').appendChild(b);
+  });
+  $('#lang-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    $('#lang').classList.toggle('open');
+  });
+  $('#lang-pop').addEventListener('click', e => e.stopPropagation());
+  document.addEventListener('click', () => $('#lang').classList.remove('open'));
+
   /* ---------- theme ---------- */
   const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-  function setTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
+  function setTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode);
     const b = $('#theme-btn');
-    if (b) b.textContent = t === 'dark' ? 'Light' : 'Dark';
-    try { localStorage.setItem('kh-theme', t); } catch (e) {}
+    if (b) b.textContent = mode === 'dark' ? t('themeLight') : t('themeDark');
+    try { localStorage.setItem('kh-theme', mode); } catch (e) {}
     if (map) redrawMap();
     if (started) paintHeroes();
   }
@@ -91,13 +139,15 @@
 
   /* ---------- filter dropdowns ---------- */
   const groups = $('#filter-groups');
+  function buildFilters() {
+  groups.innerHTML = '';
   DIMS.forEach(d => {
     const dd = document.createElement('div');
     dd.className = 'dd';
     dd.dataset.key = d.key;
-    dd.innerHTML = '<button type="button"><span class="dl-name">' + d.label +
-      '</span><span class="dl-val">All</span><span class="car">▾</span></button>' +
-      '<div class="pop"><input class="search" type="text" placeholder="Search…"><div class="list"></div></div>';
+    dd.innerHTML = '<button type="button"><span class="dl-name">' + t(d.label) +
+      '</span><span class="dl-val">' + t('all') + '</span><span class="car">▾</span></button>' +
+      '<div class="pop"><input class="search" type="text" placeholder="' + t('search') + '"><div class="list"></div></div>';
     const list = dd.querySelector('.list');
     uniq(d.key).forEach(v => {
       const l = document.createElement('label');
@@ -125,13 +175,15 @@
     });
     groups.appendChild(dd);
   });
+  syncBoxes();
+  }
   document.addEventListener('click', () => document.querySelectorAll('.dd.open').forEach(o => o.classList.remove('open')));
 
   function ddLabels() {
     groups.querySelectorAll('.dd').forEach(dd => {
       const s = sel[dd.dataset.key];
       dd.querySelector('.dl-val').textContent =
-        s.size === 0 ? 'All' : s.size === 1 ? [...s][0] : s.size + ' selected';
+        s.size === 0 ? t('all') : s.size === 1 ? [...s][0] : t('nSelected', { n: s.size });
     });
   }
   function syncBoxes() {
@@ -253,7 +305,7 @@
           const n = f.properties && f.properties.name;
           if (!n) return;
           const country = NAME2C[n];
-          l.bindTooltip(country ? n + ', click to select' : n, { className: 'tip', sticky: true });
+          l.bindTooltip(country ? t('clickToSelect', { name: n }) : n, { className: 'tip', sticky: true });
           l.on('mouseover', () => l.setStyle(country
             ? { weight: 1.2, color: cssVar('--ink-2'), fillColor: cssVar('--geo-hover') }
             : { weight: .8, color: cssVar('--geo-line') }));
@@ -379,8 +431,8 @@
       borders.bringToBack();
       if (feats.length) fitTo(borders.getBounds());
       if (note) note.textContent = feats.length
-        ? 'Country view: ' + [...sel.country].join(', ') + '. Thin lines are regional boundaries.'
-        : 'No boundary shape found, so only the points are shown.';
+        ? t('countryView', { names: [...sel.country].join(', ') })
+        : t('noBoundary');
       if (regions) regions.bringToFront();
       if (layer) layer.eachLayer(m => m.bringToFront());
     });
@@ -432,7 +484,7 @@
       });
       m.bindTooltip(
         '<div class="tv">' + sgn(r.value) + ', ' + r.outcome + '</div>' +
-        '<div>' + r.practice + ' vs ' + r.comparator + '</div>' +
+        '<div>' + t('tipVs', { practice: r.practice, comparator: r.comparator }) + '</div>' +
         '<div class="tm">' + r.crop + ', ' + r.country + (r.tN ? ', n=' + r.tN : '') + '</div>',
         { className: 'tip', direction: 'top', offset: [0, -3] }
       );
@@ -451,29 +503,31 @@
       metas.forEach(n => n.textContent = m);
     };
     if (!rows.length) {
-      put('No comparisons match these filters.', 'Remove a filter to see records again.');
+      put(t('noMatch'), t('noMatchHint'));
       return;
     }
     const med = median(rows.map(r => r.value));
     const pos = rows.filter(r => r.value > 0).length;
     const scope = DIMS.filter(d => sel[d.key].size)
-      .map(d => [...sel[d.key]].slice(0, 3).join(', ') + (sel[d.key].size > 3 ? ' and ' + (sel[d.key].size - 3) + ' more' : ''));
-    const where = scope.length ? scope.join(', ') : 'the whole dataset';
+      .map(d => [...sel[d.key]].slice(0, 3).join(', ') +
+        (sel[d.key].size > 3 ? t('andMore', { n: sel[d.key].size - 3 }) : ''));
+    const where = scope.length ? scope.join(', ') : t('wholeDataset');
     const byP = {};
     rows.forEach(r => (byP[r.practice] = byP[r.practice] || []).push(r.value));
     const best = Object.entries(byP).filter(e => e[1].length >= 5)
       .sort((a, b) => median(b[1]) - median(a[1]))[0];
-    const html = '<b>' + rows.length + ' comparisons</b> in ' + where +
-      '. The median change against the control is <b>' + sgn(med) + '</b>, and <b>' +
-      Math.round(pos / rows.length * 100) + '%</b> of comparisons report an increase' +
-      (best ? '. <b>' + best[0] + '</b> has the highest median, ' + sgn(median(best[1])) +
-        ' across ' + best[1].length + ' comparisons' : '') + '.';
+    const html = t('readout', {
+      n: rows.length, scope: where, median: sgn(med),
+      percent: Math.round(pos / rows.length * 100)
+    }) + (best ? t('readoutBest', {
+      practice: best[0], median: sgn(median(best[1])), n: best[1].length
+    }) : '') + '.';
     const ns = rows.map(r => r.tN).filter(Boolean);
     put(html, [
-      new Set(rows.map(r => r.country)).size + ' countries',
-      new Set(rows.map(r => r.crop)).size + ' crops',
-      new Set(rows.map(r => r.study)).size + ' studies',
-      ns.length ? 'median sample size ' + median(ns) : 'sample size not reported'
+      t('metaCountries', { n: new Set(rows.map(r => r.country)).size }),
+      t('metaCrops', { n: new Set(rows.map(r => r.crop)).size }),
+      t('metaStudies', { n: new Set(rows.map(r => r.study)).size }),
+      ns.length ? t('metaMedianN', { n: median(ns) }) : t('metaNoN')
     ].join(' · '));
   }
 
@@ -481,7 +535,7 @@
   function chart(rows) {
     const box = $('#chart');
     box.innerHTML = '';
-    if (!rows.length) { box.innerHTML = '<span class="lbl">Nothing to summarise.</span>'; return; }
+    if (!rows.length) { box.innerHTML = '<span class="lbl">' + t('nothingToSummarise') + '</span>'; return; }
     const cells = {}, pCount = {}, oCount = {};
     rows.forEach(r => {
       const k = r.practice + '||' + r.outcome;
@@ -491,13 +545,13 @@
     });
     const practices = Object.keys(pCount).sort((a, b) => pCount[b] - pCount[a]);
     const outcomes = Object.keys(oCount).sort((a, b) => oCount[b] - oCount[a]);
-    let html = '<div class="heat"><table><thead><tr><th class="rowh"><span>Practice</span></th>';
+    let html = '<div class="heat"><table><thead><tr><th class="rowh"><span>' + t('heatPractice') + '</span></th>';
     outcomes.forEach(o => {
-      html += '<th data-o="' + o + '" title="' + o + ', ' + oCount[o] + ' comparisons"><span>' + o + '</span></th>';
+      html += '<th data-o="' + o + '" title="' + t('heatCount', { name: o, n: oCount[o] }) + '"><span>' + o + '</span></th>';
     });
     html += '</tr></thead><tbody>';
     practices.forEach(p => {
-      html += '<tr><td class="rowh" data-p="' + p + '" title="' + p + ', ' + pCount[p] + ' comparisons">' + p + '</td>';
+      html += '<tr><td class="rowh" data-p="' + p + '" title="' + t('heatCount', { name: p, n: pCount[p] }) + '">' + p + '</td>';
       outcomes.forEach(o => {
         const v = cells[p + '||' + o];
         if (!v) { html += '<td class="cell empty">·</td>'; return; }
@@ -505,7 +559,7 @@
         const lab = Math.abs(m) >= 100 ? Math.round(m) : Math.round(m * 10) / 10;
         html += '<td class="cell" data-p="' + p + '" data-o="' + o + '"' +
           ' style="background:' + color(m) + ';color:' + inkOn(m) + '"' +
-          ' title="' + p + ' for ' + o + ': median ' + sgn(m) + ' across ' + v.length + ' comparisons">' +
+          ' title="' + t('heatCell', { practice: p, outcome: o, median: sgn(m), n: v.length }) + '">' +
           (m > 0 ? '+' : '') + lab + '%<span class="cn">n ' + v.length + '</span></td>';
       });
       html += '</tr>';
@@ -525,20 +579,25 @@
   }
 
   /* ---------- table ---------- */
+  /* label is a key into the runtime strings; lnRR and SE are the same everywhere */
   const COLS = [
-    { k: 'country', t: 'Country' }, { k: 'crop', t: 'Crop' }, { k: 'practice', t: 'Practice' },
-    { k: 'comparator', t: 'Comparator' }, { k: 'outcome', t: 'Outcome' },
-    { k: 'value', t: 'Change', num: 1 }, { k: 'lnRR', t: 'lnRR', num: 1 },
-    { k: 'lnRR_SE', t: 'SE', num: 1 }, { k: 'tN', t: 'n', num: 1 },
-    { k: 'lat', t: 'Lat', num: 1 }, { k: 'lon', t: 'Lon', num: 1 }, { k: 'study', t: 'Study' }
+    { k: 'country', label: 'dimCountry' }, { k: 'crop', label: 'dimCrop' },
+    { k: 'practice', label: 'dimPractice' }, { k: 'comparator', label: 'colComparator' },
+    { k: 'outcome', label: 'dimOutcome' }, { k: 'value', label: 'colChange', num: 1 },
+    { k: 'lnRR', plain: 'lnRR', num: 1 }, { k: 'lnRR_SE', plain: 'SE', num: 1 },
+    { k: 'tN', label: 'colN', num: 1 }, { k: 'lat', label: 'colLat', num: 1 },
+    { k: 'lon', label: 'colLon', num: 1 }, { k: 'study', label: 'colStudy' }
   ];
   const thr = $('#thead-row');
-  thr.innerHTML = '<th></th>' + COLS.map(c => '<th data-k="' + c.k + '">' + c.t + '<span class="ar"></span></th>').join('');
-  thr.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
-    const k = th.dataset.k;
-    sort = { key: k, dir: sort.key === k ? -sort.dir : (['value', 'lnRR', 'lnRR_SE', 'tN'].includes(k) ? -1 : 1) };
-    render();
-  }));
+  function buildHead() {
+    thr.innerHTML = '<th></th>' + COLS.map(c =>
+      '<th data-k="' + c.k + '">' + (c.plain || t(c.label)) + '<span class="ar"></span></th>').join('');
+    thr.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      sort = { key: k, dir: sort.key === k ? -sort.dir : (['value', 'lnRR', 'lnRR_SE', 'tN'].includes(k) ? -1 : 1) };
+      render();
+    }));
+  }
 
   const MAXROWS = 300;
   const fmt = (c, r) => {
@@ -566,8 +625,8 @@
       tr.addEventListener('click', () => showDetail(rows.find(r => r.id === tr.dataset.id)));
     });
     $('#t-note').textContent = rows.length > MAXROWS
-      ? 'Showing the first ' + MAXROWS + ' of ' + rows.length + ' rows. Narrow the filters, or download the whole selection.'
-      : rows.length + ' row' + (rows.length === 1 ? '' : 's') + ' shown.';
+      ? t('rowsTruncated', { shown: MAXROWS, total: rows.length })
+      : t('rowsShown', { n: rows.length });
   }
 
   function chips() {
@@ -576,7 +635,7 @@
       DIMS.forEach(d => sel[d.key].forEach(v => {
         const c = document.createElement('span');
         c.className = 'chip';
-        c.innerHTML = '<span>' + v + '</span><button title="Remove">✕</button>';
+        c.innerHTML = '<span>' + v + '</span><button title="' + t('remove') + '">✕</button>';
         c.querySelector('button').addEventListener('click', () => { sel[d.key].delete(v); syncBoxes(); render(); });
         box.appendChild(c);
       }));
@@ -597,29 +656,29 @@
     if (!r) return;
     const num = (v, dp) => (v === null || v === undefined || v === '') ? '—' : (typeof v === 'number' ? v.toFixed(dp) : v);
     const rows = [
-      ['Outcome', r.outcome], ['Measured as', r.subOutcome || '—'], ['Unit', r.unit || '—'],
-      ['Practice', r.practiceDetail || r.practice], ['Comparator', r.comparator],
-      ['Crop or tree', r.cropFull], ['Country', r.country], ['Region', r.region],
-      ['Site', r.site || '—'], ['Coordinates', r.lat + ', ' + r.lon],
-      ['Control mean', num(r.cMean, 2) + (r.cSD !== null ? ' ± ' + num(r.cSD, 2) : '')],
-      ['Treatment mean', num(r.tMean, 2) + (r.tSD !== null ? ' ± ' + num(r.tSD, 2) : '')],
-      ['Sample size', (r.cN || '—') + ' / ' + (r.tN || '—')],
-      ['lnRR', num(r.lnRR, 3) + (r.lnRR_SE !== null ? ' (SE ' + num(r.lnRR_SE, 3) + ')' : '')],
-      ['Duration', r.years ? r.years + (r.years === 1 ? ' season' : ' seasons') : '—'],
-      ['Study', r.study], ['Journal', r.journal || '—'],
-      ['DOI', r.doi ? '<a href="https://doi.org/' + r.doi + '" target="_blank" rel="noopener">' + r.doi + '</a>' : '—'],
-      ['Source synthesis', r.synthesis]
+      [t('dlOutcome'), r.outcome], [t('dlMeasured'), r.subOutcome || '—'], [t('dlUnit'), r.unit || '—'],
+      [t('dlPractice'), r.practiceDetail || r.practice], [t('dlComparator'), r.comparator],
+      [t('dlCrop'), r.cropFull], [t('dlCountry'), r.country], [t('dlRegion'), r.region],
+      [t('dlSite'), r.site || '—'], [t('dlCoords'), r.lat + ', ' + r.lon],
+      [t('dlControlMean'), num(r.cMean, 2) + (r.cSD !== null ? ' ± ' + num(r.cSD, 2) : '')],
+      [t('dlTreatmentMean'), num(r.tMean, 2) + (r.tSD !== null ? ' ± ' + num(r.tSD, 2) : '')],
+      [t('dlSample'), (r.cN || '—') + ' / ' + (r.tN || '—')],
+      [t('dlLnRR'), num(r.lnRR, 3) + (r.lnRR_SE !== null ? ' (SE ' + num(r.lnRR_SE, 3) + ')' : '')],
+      [t('dlDuration'), r.years ? t(r.years === 1 ? 'season' : 'seasons', { n: r.years }) : '—'],
+      [t('dlStudy'), r.study], [t('dlJournal'), r.journal || '—'],
+      [t('dlDoi'), r.doi ? '<a href="https://doi.org/' + r.doi + '" target="_blank" rel="noopener">' + r.doi + '</a>' : '—'],
+      [t('dlSynthesis'), r.synthesis]
     ];
     $('#detail-body').innerHTML =
       '<span class="lbl">' + r.id + '</span>' +
       '<h3>' + r.practice + '</h3>' +
       '<div style="font-size:13px;color:var(--ink-2)">' + r.crop + ', ' + r.country + '</div>' +
       '<div class="big" style="color:' + color(r.value) + '">' + sgn(r.value) + '</div>' +
-      '<div class="lbl">' + r.outcome + ', change against control</div>' +
+      '<div class="lbl">' + t('detailChange', { outcome: r.outcome }) + '</div>' +
       '<dl class="dl">' + rows.map(p => '<dt>' + p[0] + '</dt><dd>' + p[1] + '</dd>').join('') + '</dl>' +
       '<div style="display:flex;gap:7px;margin-top:16px;flex-wrap:wrap">' +
-      '<button class="btn sm ghost" data-f="country">Only ' + r.country + '</button>' +
-      '<button class="btn sm ghost" data-f="practice">Only this practice</button></div>';
+      '<button class="btn sm ghost" data-f="country">' + t('onlyCountry', { country: r.country }) + '</button>' +
+      '<button class="btn sm ghost" data-f="practice">' + t('onlyPractice') + '</button></div>';
     $('#detail-body').querySelectorAll('[data-f]').forEach(b =>
       b.addEventListener('click', () => toggle(b.dataset.f, r[b.dataset.f], true)));
     $('#detail').classList.add('on');
@@ -628,7 +687,7 @@
     const badge = $('#sel-badge');
     if (badge) {
       badge.classList.add('on');
-      badge.querySelector('span').textContent = 'One record highlighted, ' + r.country + ', ' + r.practice;
+      badge.querySelector('span').textContent = t('oneHighlighted', { country: r.country, practice: r.practice });
     }
     if (map) {
       drawPoints(D.filter(match));
@@ -674,6 +733,12 @@
     drawPoints(rows); readout(rows); chart(rows); table(rows); chips(); counts(); ddLabels(); applyMapMode();
   }
 
+  /* pick the language first, so the filters and table header are built in it */
+  let savedLang = null;
+  try { savedLang = localStorage.getItem('kh-lang'); } catch (e) {}
+  setLang(savedLang || (navigator.language || 'en').slice(0, 2));
+  buildFilters();
+  buildHead();
   started = true;
   render();
   route();
