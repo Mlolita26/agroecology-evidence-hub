@@ -51,14 +51,6 @@
           </figure>
       </div>
     </header>
-    <!-- a decorative sketch: real coastlines, invented points; see app.js -->
-    <a class="mapcard" href="#explore" id="map-preview">
-      <canvas></canvas>
-      <span class="mapcard-cap">
-        <b data-t="home.28">Explore the evidence</b>
-        <span data-t="home.29">Open the map →</span>
-      </span>
-    </a>
     <div class="doc solo">
       <div class="doc-main">
         <div class="copy">
@@ -325,43 +317,57 @@
 </main>
 <!-- ============ CONTACT ============ -->
 <main class="page" id="page-contact">
-  <header class="hero">
-    <div class="hero-in">
-      <div class="hero-txt">
+  <section class="contact">
+    <div class="contact-in">
+
+      <div class="contact-say">
         <span class="kicker" data-t="contact.01">Contact</span>
-        <h1 class="title" data-t="contact.02">Get in touch.</h1>
+        <h1 data-t="contact.02">Tell us what you are working on</h1>
+        <p data-t="contact.05">One address reaches the data team. Say which crop, country, practice or outcome you are working on and we will point you at the relevant records, or tell you honestly that there are none yet.</p>
+
+        <div class="contact-grid">
+          <div>
+            <span class="lbl" data-t="contact.06">Data team</span>
+            <p data-t="contact.08">Address to be confirmed</p>
+          </div>
+          <div>
+            <span class="lbl" data-t="contact.09">Host</span>
+            <p>Alliance of Bioversity International &amp; CIAT</p>
+          </div>
+          <div>
+            <span class="lbl" data-t="contact.11">Data corrections</span>
+            <p data-t="contact.12">Quote the comparison ID from the record panel</p>
+          </div>
+          <div>
+            <span class="lbl" data-t="contact.13">Response time</span>
+            <p data-t="contact.14">To be confirmed</p>
+          </div>
+        </div>
       </div>
-      <figure class="hero-art" data-photo="img/contact.jpg">
-        <canvas></canvas>
-    </figure>
-  </div>
-</header>
-<div class="doc">
-  <div class="doc-main">
-    <div class="copy">
-      <p class="open" data-t="contact.05">One address reaches the data team. Say which crop, country, practice or outcome you are working on and we will point you at the relevant records, or tell you honestly that there are none yet.</p>
+
+      <form class="contact-form" id="contact-form">
+        <label>
+          <span data-t="contact.20">Your name</span>
+          <input name="Name" required type="text"/>
+        </label>
+        <label>
+          <span data-t="contact.21">Email address</span>
+          <input name="Email" required type="email"/>
+        </label>
+        <label>
+          <span data-t="contact.22">Organisation</span>
+          <input name="Organisation" type="text"/>
+        </label>
+        <label>
+          <span data-t="contact.23">What are you working on?</span>
+          <textarea name="Message" rows="4"></textarea>
+        </label>
+        <button class="btn" type="submit" data-t="contact.24">Send message</button>
+        <p class="form-note" id="form-note"></p>
+      </form>
+
     </div>
-  </div>
-  <aside class="doc-rail">
-    <div class="doc-sec">
-      <span class="lbl" data-t="contact.06">Details</span>
-      <table class="meta-t">
-        <tr><td data-t="contact.07">Email</td><td data-t="contact.08">to be confirmed</td></tr>
-        <tr><td data-t="contact.09">Host</td><td data-t="contact.10">Alliance of Bioversity International &amp; CIAT</td></tr>
-        <tr><td data-t="contact.11">Data corrections</td><td data-t="contact.12">Quote the comparison ID from the record panel</td></tr>
-        <tr><td data-t="contact.13">Response time</td><td data-t="contact.14">to be confirmed</td></tr>
-      </table>
-    </div>
-    <div class="doc-sec">
-      <span class="lbl" data-t="contact.15">Team</span>
-      <div class="stub">
-        <b data-t="contact.16">To be filled</b>
-        <span data-t="contact.17">Names, roles and institutional address.</span>
-      </div>
-    </div>
-  </aside>
-</div>
-<div class="doc-foot"><span data-t="contact.18">Agroecology Knowledge Hub</span><span data-t="contact.19">Draft 0.4</span></div>
+  </section>
 </main>
 <footer>
   <div class="f-in">

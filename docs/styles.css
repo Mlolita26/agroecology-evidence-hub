@@ -86,15 +86,38 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 .hero-art.photo{background-size:cover;background-position:center}
 .hero-art.photo canvas{display:none}
 
-/* landing-page map preview: a drawing on the page, no panel behind it */
-.mapcard{display:block;border:0;max-width:1240px;margin:0 auto;padding:34px 26px 0}
-.mapcard canvas{display:block;width:100%;height:clamp(190px,23vw,320px)}
-.mapcard-cap{display:flex;flex-direction:column;gap:3px;margin-top:14px;
-  padding-top:13px;border-top:1px solid var(--line)}
-.mapcard-cap b{font-family:var(--display);font-size:19px;font-weight:400;line-height:1.2;color:var(--ink)}
-.mapcard-cap span{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;
-  text-transform:uppercase;color:var(--ink-3)}
-.mapcard:hover .mapcard-cap b,.mapcard:hover .mapcard-cap span{color:var(--accent)}
+/* contact page: one full-bleed panel, the brand ramp laid over the photograph */
+.contact{position:relative;background:url("img/contact.jpg") center/cover;color:#fff}
+.contact::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(118deg,var(--r1),var(--r3) 48%,var(--r5));opacity:.8}
+.contact-in{position:relative;max-width:1240px;margin:0 auto;padding:62px 26px 70px;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:0 60px;align-items:start}
+.contact .kicker{color:rgba(255,255,255,.72)}
+.contact-say h1{font-family:var(--display);font-size:clamp(34px,4.3vw,56px);line-height:1.02;
+  margin:14px 0 0;max-width:15ch;font-weight:400;text-wrap:pretty}
+.contact-say > p{font-size:16px;line-height:1.7;max-width:46ch;margin:22px 0 0;color:rgba(255,255,255,.84)}
+.contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 40px;margin-top:54px}
+.contact-grid .lbl{display:block;color:rgba(255,255,255,.62);margin-bottom:8px}
+.contact-grid p{margin:0;font-size:15px;line-height:1.5}
+
+.contact-form{background:var(--panel);color:var(--ink);padding:36px 38px 40px;
+  display:flex;flex-direction:column;gap:24px}
+.contact-form label{display:block}
+.contact-form label span{display:block;font-size:14px;color:var(--ink-2);margin-bottom:9px}
+.contact-form input,.contact-form textarea{width:100%;border:0;border-bottom:1px solid var(--line-2);
+  background:none;border-radius:0;padding:6px 0;font-family:var(--sans);font-size:15px;color:var(--ink)}
+.contact-form input:focus,.contact-form textarea:focus{outline:none;border-bottom-color:var(--accent)}
+.contact-form textarea{resize:vertical}
+.contact-form .btn{align-self:flex-start;margin-top:4px}
+.form-note{margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--ink-3)}
+
+/* the panel runs the full height of the page, so no gap before the footer */
+body:has(#page-contact.on) footer{margin-top:0}
+
+@media (max-width:900px){
+  .contact-in{grid-template-columns:minmax(0,1fr);gap:40px}
+  .contact-grid{margin-top:38px}
+}
 
 /* document pages */
 .doc{max-width:1240px;margin:0 auto;padding:46px 26px 0;display:grid;

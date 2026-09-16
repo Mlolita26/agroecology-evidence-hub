@@ -88,7 +88,7 @@
     if (b) b.textContent = mode === 'dark' ? t('themeLight') : t('themeDark');
     try { localStorage.setItem('kh-theme', mode); } catch (e) {}
     if (map) redrawMap();
-    if (started) { paintHeroes(); paintMapPreview(); }
+    if (started) paintHeroes();
   }
   let stored = null;
   try { stored = localStorage.getItem('kh-theme'); } catch (e) {}
@@ -262,11 +262,6 @@
       .then(r => r.json())
       .then(topo => {
         world = fixAntimeridian(topojson.feature(topo, topo.objects.countries));
-        /* the same countries dissolved into one landmass, with the shared
-           borders removed, for the coastline-only drawing on the home page.
-           Left unshifted: that drawing is flat, and splits the rings that
-           cross the antimeridian itself. */
-        world.land = topojson.merge(topo, topo.objects.countries.geometries);
         return world;
       })
       .catch(err => { console.warn('Country geometry failed to load:', err); return null; });
@@ -418,101 +413,6 @@
   const watch = new ResizeObserver(entries => entries.forEach(e => paintHero(e.target)));
   heroes.forEach(box => watch.observe(box));
 
-  /* ---------- landing-page map preview ----------
-     A DECORATIVE sketch, not a chart. The coastlines are real, drawn as one
-     dissolved landmass so that no country borders show, but the scattered
-     points are invented and spread over every continent. They are there to
-     invite people into the explorer, which is why the caption promises
-     nothing about coverage. The real, and far sparser, distribution of
-     records is on the explore map. */
-  const preview = $('#map-preview');
-  function paintMapPreview() {
-    if (!preview) return;
-    const canvas = preview.querySelector('canvas');
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    if (!w || !h) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, w, h);
-
-    /* plate carree, cropped to the latitudes people farm in */
-    const TOP = 74, BOTTOM = -52;
-    const x = (lon) => (lon + 180) / 360 * w;
-    const y = (lat) => (TOP - lat) / (TOP - BOTTOM) * h;
-
-    /* a repeatable scatter of dots, used to fill the land like a pen sketch */
-    const stipple = (ink) => {
-      const tile = document.createElement('canvas');
-      tile.width = tile.height = 11;
-      const t = tile.getContext('2d');
-      t.fillStyle = ink;
-      [[2, 2], [7, 1], [4, 6], [9, 5], [1, 9], [8, 9], [10, 10], [5, 10]]
-        .forEach(([dx, dy]) => { t.beginPath(); t.arc(dx, dy, .8, 0, Math.PI * 2); t.fill(); });
-      return ctx.createPattern(tile, 'repeat');
-    };
-    /* nudge each point off the true line, so the coast reads as drawn by hand */
-    const wobble = (seed) => (Math.sin(seed * 12.9898) * 43758.5453 % 1) * 2.2;
-    /* one fixed sequence, so the scatter is identical on every redraw */
-    let seed = 7;
-    const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
-
-    loadWorld().then(world => {
-      if (!world || !world.land) return;
-
-      ctx.beginPath();
-      const trace = (rings) => rings.forEach(ring => {
-        let last = null;
-        ring.forEach(p => {
-          const px = x(p[0]) + wobble(p[0] + ring.length);
-          const py = y(p[1]) + wobble(p[1] * 3 + ring.length);
-          /* a jump most of the way across means the ring crosses the
-             antimeridian; start a new line instead of drawing a streak */
-          if (last === null || Math.abs(px - last) > w / 8) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-          last = px;
-        });
-      });
-      const g = world.land;
-      if (g.type === 'Polygon') trace(g.coordinates);
-      else g.coordinates.forEach(trace);
-
-      ctx.globalAlpha = .55;
-      ctx.fillStyle = stipple(cssVar('--ink-3'));
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = cssVar('--ink-3');
-      ctx.lineWidth = .8;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-
-      /* keep only the invented points that fall on farmed land: on the
-         drawing, and south of roughly 60 degrees north */
-      const spots = [];
-      const northEdge = y(60);
-      while (spots.length < 115) {
-        const px = rnd() * w, py = northEdge + rnd() * (h - northEdge);
-        if (ctx.isPointInPath(px, py)) spots.push([px, py, rnd()]);
-      }
-
-      /* the pale middle of the scale disappears against the paper, so the
-         points use the six that read: three teal, three pink */
-      const stops = ramp().filter((c, i) => i !== 3);
-      ctx.strokeStyle = cssVar('--wash');
-      ctx.lineWidth = 1.4;
-      spots.forEach(([px, py, r]) => {
-        ctx.beginPath();
-        ctx.arc(px, py, 2.6 + r * 2, 0, Math.PI * 2);
-        ctx.fillStyle = stops[Math.floor(r * stops.length)];
-        ctx.fill();
-        ctx.stroke();
-      });
-    });
-  }
-  if (preview) new ResizeObserver(paintMapPreview).observe(preview);
 
   function applyMapMode() {
     if (!map) return;
@@ -846,6 +746,25 @@
     $('#m-shown').textContent = rows.length;
     drawPoints(rows); readout(rows); chart(rows); table(rows); chips(); counts(); ddLabels(); applyMapMode();
   }
+
+  /* ---------- contact form ----------
+     The site is static, so there is nowhere to post to. The form opens the
+     reader's mail program with the fields already filled in. Put the team's
+     address here once it is agreed; until then the form says so rather than
+     pretending to send. */
+  const CONTACT_EMAIL = '';
+  const contactForm = $('#contact-form');
+  if (contactForm) contactForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!CONTACT_EMAIL) { $('#form-note').textContent = t('formNoAddress'); return; }
+    const body = [...new FormData(contactForm)]
+      .filter(([, v]) => v.trim())
+      .map(([k, v]) => k + ': ' + v)
+      .join('\n');
+    location.href = 'mailto:' + CONTACT_EMAIL +
+      '?subject=' + encodeURIComponent(t('formSubject')) +
+      '&body=' + encodeURIComponent(body);
+  });
 
   /* pick the language first, so the filters and table header are built in it */
   let savedLang = null;

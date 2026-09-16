@@ -67,6 +67,24 @@ The dataset is committed, so the live site works for anyone who opens it and
 the Download button returns the current selection. It is a draft and not yet
 citable; treat it as something to give feedback on, not to cite.
 
+## The contact form
+
+The Contact page has a form. This is a static site, so there is nothing to post
+to: on submit it opens the reader's mail program with the fields already filled
+in. **It needs an address.** Set `CONTACT_EMAIL` near the end of `docs/app.js`:
+
+```js
+const CONTACT_EMAIL = 'someone@example.org';
+```
+
+While it is empty the form says "The contact address is not published yet"
+instead of pretending to send. Fill that in, and update the Data team and
+Response time lines on the page, before the site is promoted.
+
+If you would rather the message arrived in an inbox without the reader's mail
+program opening, that needs a form service such as Formspree, which means an
+account and sending the data through a third party. Worth a conversation first.
+
 ## Rebuilding the data
 
 Run this whenever a new synthesis is harmonised, or an existing one changes:
