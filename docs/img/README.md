@@ -8,21 +8,14 @@ Every page header now uses a photograph.
 | About | `about.webp` | not known | **missing** |
 | Methodology | `methodology.jpg` | not known | **missing** |
 | Get involved | `involved.jpg` | filename suggests IBP, Bolgatanga, March 2022 | **missing** |
-| Contact | `contact.jpg` | **iStock preview file** | **missing, and see below** |
+| Contact | `contact.jpg` | not known | **missing** |
 
-## Two things to settle before the site is promoted
+## Credits are still missing
 
-**1. `contact.jpg` is an iStock preview.** The original filename was
-`istockphoto-1255942692-612x612.jpg`. The `612x612` size is the free comp image
-iStock hands out for layout roughs, not a licensed file. This repository is
-public, so publishing it as is risks a copyright claim. Either buy the licence
-and drop in the full-size file under the same name, or replace the photograph.
-It is also only 612 pixels wide, so it looks soft next to the others.
-
-**2. Four of the five photographs have no credit.** Only the FAO image has a
-known photographer. The footer currently says "Olivier Asselin / FAO; other
-credits to follow", which is honest but temporary. Fill in the rest and update
-`footer.06` in `../i18n.js` in all three languages.
+Only the FAO image has a known photographer. The footer says "Olivier Asselin /
+FAO; other credits to follow", which is honest but temporary. Fill in the rest
+and update `footer.06` in `../i18n.js` in all three languages. Check too that
+the project may publish each one: this repository is public.
 
 If a photograph cannot be cleared, delete the file and remove `data-photo` from
 that page in `index.html`. The generated artwork comes back on its own, so the

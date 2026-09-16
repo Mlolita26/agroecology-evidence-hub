@@ -81,7 +81,7 @@
     if (b) b.textContent = mode === 'dark' ? t('themeLight') : t('themeDark');
     try { localStorage.setItem('kh-theme', mode); } catch (e) {}
     if (map) redrawMap();
-    if (started) paintHeroes();
+    if (started) { paintHeroes(); paintMapPreview(); }
   }
   let stored = null;
   try { stored = localStorage.getItem('kh-theme'); } catch (e) {}
@@ -401,6 +401,63 @@
      layout, and when a hidden page is shown and finally has a width. */
   const watch = new ResizeObserver(entries => entries.forEach(e => paintHero(e.target)));
   heroes.forEach(box => watch.observe(box));
+
+  /* ---------- landing-page map preview ----------
+     The same countries and the same records as the explore map, drawn flat on
+     a canvas. It is a picture of the real data, not an illustration. */
+  const preview = $('#map-preview');
+  function paintMapPreview() {
+    if (!preview) return;
+    const canvas = preview.querySelector('canvas');
+    const w = preview.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    /* plate carree, cropped to the latitudes people farm in */
+    const TOP = 74, BOTTOM = -52;
+    const x = (lon) => (lon + 180) / 360 * w;
+    const y = (lat) => (TOP - lat) / (TOP - BOTTOM) * h;
+
+    loadWorld().then(world => {
+      if (!world) return;
+      const withData = new Set(uniq('country').map(wname));
+      const drawRings = (rings) => rings.forEach(ring => {
+        ctx.beginPath();
+        ring.forEach((p, i) => (i ? ctx.lineTo(x(p[0]), y(p[1])) : ctx.moveTo(x(p[0]), y(p[1]))));
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      ctx.lineWidth = 0.6;
+      world.features.forEach(f => {
+        const has = withData.has(f.properties && f.properties.name);
+        ctx.fillStyle = cssVar(has ? '--geo-fill' : '--geo-fill-dim');
+        ctx.strokeStyle = cssVar(has ? '--geo-line' : '--geo-line-dim');
+        const g = f.geometry;
+        if (!g) return;
+        if (g.type === 'Polygon') drawRings(g.coordinates);
+        else if (g.type === 'MultiPolygon') g.coordinates.forEach(drawRings);
+      });
+
+      ctx.strokeStyle = cssVar('--panel');
+      ctx.lineWidth = 1;
+      D.forEach(r => {
+        ctx.beginPath();
+        ctx.arc(x(r.lon), y(r.lat), 4, 0, Math.PI * 2);
+        ctx.fillStyle = color(r.value);
+        ctx.fill();
+        ctx.stroke();
+      });
+    });
+  }
+  if (preview) new ResizeObserver(paintMapPreview).observe(preview);
 
   function applyMapMode() {
     if (!map) return;
