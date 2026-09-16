@@ -141,12 +141,15 @@ harmonised so far, not on any geographic limit. Reporting follows ROSES.
 The site is served by GitHub Pages from the `docs/` folder on `main`.
 Push to `main` and the change is live in a minute or two.
 
-GitHub Pages sends `Cache-Control: max-age=600`, so a browser may hold the old
-stylesheet or script for up to ten minutes after a change. Nothing needs doing
-about it; a hard refresh (Ctrl+F5, or Cmd+Shift+R) skips the wait. Do not add
-`?v=1` version strings to the asset links: they pin a browser to whatever it
-cached under that name until someone remembers to change the number, which is
-exactly the bug they are meant to prevent.
+GitHub Pages sends `Cache-Control: max-age=600`, so without help a browser can
+show an old stylesheet or script for ten minutes after a change. `build.py`
+handles this: it tags each asset link in `index.html` with a hash of that
+file's contents, so a changed file gets a new URL and is fetched at once, and
+an unchanged one keeps its URL and stays cached.
+
+**So run `python build.py` before you commit, even when the data has not
+changed.** It is what refreshes those tags. Never edit the `?v=` values by
+hand: a number someone has to remember to bump is the bug this replaces.
 
 ## Credits
 

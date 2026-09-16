@@ -10,6 +10,7 @@ Set SOURCE_DIR below if your copy of the Hub lives somewhere else.
 
 import csv
 import glob
+import hashlib
 import json
 import math
 import os
@@ -241,6 +242,30 @@ def write_outputs(records):
     return js_path, csv_path
 
 
+
+# Files index.html links to. Each gets a tag built from its own contents.
+ASSETS = ["styles.css", "explore.css", "data.js", "i18n.js", "vocab.js", "app.js"]
+
+
+def stamp_assets():
+    """Tag each asset link in index.html with a hash of that file's contents.
+
+    Browsers cache by URL. An unchanged file keeps its tag and stays cached;
+    a changed file gets a new tag and is fetched again straight away. Doing it
+    from the contents means nobody has to remember to bump a version number.
+    """
+    page = os.path.join(OUT_DIR, "index.html")
+    html = open(page, encoding="utf-8").read()
+    for name in ASSETS:
+        path = os.path.join(OUT_DIR, name)
+        if not os.path.exists(path):
+            continue
+        tag = hashlib.md5(open(path, "rb").read()).hexdigest()[:8]
+        html = re.sub(r'"' + re.escape(name) + r'(\?v=[0-9a-f]+)?"', f'"{name}?v={tag}"', html)
+    open(page, "w", encoding="utf-8", newline="\n").write(html)
+    print(f"Stamped {len(ASSETS)} asset links in {page}")
+
+
 def main():
     sources = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.csv")))
     if not sources:
@@ -250,6 +275,7 @@ def main():
     records = [r for path in sources for r in read_source(path)]
 
     js_path, csv_path = write_outputs(records)
+    stamp_assets()
     countries = {r["country"] for r in records}
     print(f"\n{len(records)} records, {len(countries)} countries")
     print(f"Wrote {js_path}")

@@ -752,7 +752,7 @@
      reader's mail program with the fields already filled in. Put the team's
      address here once it is agreed; until then the form says so rather than
      pretending to send. */
-  const CONTACT_EMAIL = '';
+  const CONTACT_EMAIL = 'm.lolita@cgiar.org';
   const contactForm = $('#contact-form');
   if (contactForm) contactForm.addEventListener('submit', e => {
     e.preventDefault();

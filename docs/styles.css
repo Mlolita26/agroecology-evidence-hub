@@ -99,6 +99,8 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 .contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 40px;margin-top:54px}
 .contact-grid .lbl{display:block;color:rgba(255,255,255,.62);margin-bottom:8px}
 .contact-grid p{margin:0;font-size:15px;line-height:1.5}
+.contact-grid a{color:#fff;border-bottom-color:rgba(255,255,255,.45)}
+.contact-grid a:hover{color:#fff;border-bottom-color:#fff}
 
 .contact-form{background:var(--panel);color:var(--ink);padding:36px 38px 40px;
   display:flex;flex-direction:column;gap:24px}
