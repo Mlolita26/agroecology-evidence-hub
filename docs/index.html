@@ -6,7 +6,7 @@
     <meta content="width=device-width,initial-scale=1" name="viewport"/>
     <title>Agroecology Knowledge Hub</title>
     <link crossorigin="anonymous" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" rel="stylesheet"/>
-    <link href="styles.css?v=69c2b1f2" rel="stylesheet"/>
+    <link href="styles.css?v=c3e18e1e" rel="stylesheet"/>
     <link href="explore.css?v=d7db5eef" rel="stylesheet"/>
   </head>
   <body>
@@ -278,42 +278,128 @@
 </main>
 <!-- ============ GET INVOLVED ============ -->
 <main class="page" id="page-involved">
-  <header class="hero">
-    <div class="hero-in">
-      <div class="hero-txt">
+  <section class="contact wide" id="submit-hero">
+    <div class="contact-in">
+      <div class="contact-say">
         <span class="kicker" data-t="involved.01">Get involved</span>
-        <h1 class="title" data-t="involved.02">Bring a dataset, extract a study, or reuse the table.</h1>
-      </div>
-      <figure class="hero-art" data-photo="img/involved.jpg">
-        <canvas></canvas>
-    </figure>
-  </div>
-</header>
-<div class="doc">
-  <div class="doc-main">
-    <div class="copy">
-      <p class="open" data-t="involved.05">The Hub grows by contribution, and the most valuable contribution is usually a dataset that already exists. Four ways to take part, in rising order of commitment.</p>
-      <h2 data-t="involved.06">Point us at a synthesis</h2>
-      <p data-t="involved.07">If you published a meta-analysis with a primary study dataset, or you know of one, tell us. Harmonising an existing dataset adds far more evidence per hour than extracting papers one by one.</p>
-      <h2 data-t="involved.08">Extract a study</h2>
-      <p data-t="involved.09">Where a source captured only part of what we need, records are completed by hand from the original paper into a standard workbook. Extractors work on one paper at a time and are credited.</p>
-      <h2 data-t="involved.10">Propose a vocabulary term</h2>
-      <p data-t="involved.11">Practice and outcome names are controlled. When a term is missing, it is requested rather than invented, so that comparisons stay valid across sources.</p>
-      <h2 data-t="involved.12">Reuse the data</h2>
-      <p>The current selection downloads as CSV from the <a data-t="involved.13" href="#explore">Explore data</a> page, with coordinates, means, dispersion, sample sizes and effect sizes. Tell us if you need a programmatic feed instead.</p>
-    </div>
-  </div>
-  <aside class="doc-rail">
-    <div class="doc-sec">
-      <span class="lbl" data-t="involved.14">Submission pack</span>
-      <div class="stub">
-        <b data-t="involved.15">To be filled</b>
-        <span data-t="involved.16">Template workbook, required fields, review timetable and where to send a submission.</span>
+        <h1 data-t="involved.02">Have data that belongs in the Hub?</h1>
+        <p data-t="involved.05">The Hub grows by contribution, and the most useful contribution is a dataset that already exists. If you have pulled comparisons out of field trials, or published a synthesis with its extraction table, tell us about it below. Harmonising data that already exists adds far more evidence per hour than extracting papers one by one.</p>
+
+        <div class="contact-grid">
+          <div>
+            <span class="lbl" data-t="involved.06">What we can use</span>
+            <p data-t="involved.07">Any table with one row per control-versus-treatment comparison, at any stage of tidiness.</p>
+          </div>
+          <div>
+            <span class="lbl" data-t="involved.08">Before you send</span>
+            <p data-t="involved.09">Check you are allowed to share it. We cannot include data you do not have the right to pass on.</p>
+          </div>
+          <div>
+            <span class="lbl" data-t="involved.10">What happens next</span>
+            <p data-t="involved.11">We read it, tell you whether it fits, and credit you in the release that uses it.</p>
+          </div>
+        </div>
       </div>
     </div>
-  </aside>
-</div>
-<div class="doc-foot"><span data-t="involved.17">Contributors credited per release</span><span data-t="involved.18">CC BY 4.0</span></div>
+  </section>
+
+  <div class="submit">
+    <form class="submit-form" id="submit-form">
+
+      <section class="f-sec">
+        <h2 data-t="involved.12">Tell us about you</h2>
+        <div class="f-row">
+          <label><span data-t="involved.13">Your name</span><input name="Name" required type="text"/></label>
+          <label><span data-t="involved.14">Email address</span><input name="Email" required type="email"/></label>
+        </div>
+        <label><span data-t="involved.15">Institution</span><input name="Institution" type="text"/></label>
+      </section>
+
+      <section class="f-sec">
+        <h2 data-t="involved.16">Tell us about the dataset</h2>
+        <label><span data-t="involved.17">Short name for the dataset</span><input name="Dataset" required type="text"/></label>
+        <label><span data-t="involved.18">What is it, in a sentence or two?</span><textarea name="Description" required rows="3"></textarea></label>
+
+        <span class="f-q" data-t="involved.19">Where does it come from?</span>
+        <div class="chips-row">
+          <label class="pick"><input name="Provenance" type="radio" value="A synthesis I published"/><b>a</b><span data-t="involved.20">A synthesis I published</span></label>
+          <label class="pick"><input name="Provenance" type="radio" value="A synthesis someone else published"/><b>b</b><span data-t="involved.21">A synthesis someone else published</span></label>
+          <label class="pick"><input name="Provenance" type="radio" value="Primary studies I ran"/><b>c</b><span data-t="involved.22">Primary studies I ran</span></label>
+          <label class="pick"><input name="Provenance" type="radio" value="A database or repository"/><b>d</b><span data-t="involved.23">A database or repository</span></label>
+          <label class="pick"><input name="Provenance" type="radio" value="Something else"/><b>e</b><span data-t="involved.24">Something else</span></label>
+        </div>
+
+        <div class="f-row">
+          <label><span data-t="involved.25">Publication DOI or citation</span><input name="Publication" type="text"/></label>
+          <label><span data-t="involved.26">Link to the data, if it is online</span><input name="Data link" type="url"/></label>
+        </div>
+
+        <span class="f-q" data-t="involved.27">Licence</span>
+        <div class="chips-row">
+          <label class="pick"><input name="Licence" type="radio" value="CC BY"/><b>a</b><span data-t="involved.28">CC BY</span></label>
+          <label class="pick"><input name="Licence" type="radio" value="CC BY-NC"/><b>b</b><span data-t="involved.29">CC BY-NC</span></label>
+          <label class="pick"><input name="Licence" type="radio" value="CC0, public domain"/><b>c</b><span data-t="involved.30">CC0, public domain</span></label>
+          <label class="pick"><input name="Licence" type="radio" value="Another licence"/><b>d</b><span data-t="involved.31">Another licence</span></label>
+          <label class="pick"><input name="Licence" type="radio" value="Not decided yet"/><b>e</b><span data-t="involved.32">Not decided yet</span></label>
+          <label class="pick"><input name="Licence" type="radio" value="I am not sure"/><b>f</b><span data-t="involved.33">I am not sure</span></label>
+        </div>
+
+        <span class="f-q" data-t="involved.34">May we republish it as part of the Hub?</span>
+        <div class="chips-row">
+          <label class="pick"><input name="Redistribution" type="radio" value="Yes"/><b>a</b><span data-t="involved.35">Yes</span></label>
+          <label class="pick"><input name="Redistribution" type="radio" value="Yes, with conditions"/><b>b</b><span data-t="involved.36">Yes, with conditions</span></label>
+          <label class="pick"><input name="Redistribution" type="radio" value="No, but you may point at the source"/><b>c</b><span data-t="involved.37">No, but you may point at the source</span></label>
+          <label class="pick"><input name="Redistribution" type="radio" value="I need to check"/><b>d</b><span data-t="involved.38">I need to check</span></label>
+        </div>
+      </section>
+
+      <section class="f-sec">
+        <h2 data-t="involved.39">What does it cover?</h2>
+        <p class="f-hint" data-t="involved.40">These lists are the Hub's own vocabulary. Tick whatever applies, and use the box underneath for anything that is missing.</p>
+
+        <span class="f-q" data-t="involved.41">Practices</span>
+        <div class="chips-row" data-vocab="practice"></div>
+        <span class="f-q" data-t="involved.42">Outcomes</span>
+        <div class="chips-row" data-vocab="outcome"></div>
+        <span class="f-q" data-t="involved.43">Crops</span>
+        <div class="chips-row" data-vocab="crop"></div>
+        <span class="f-q" data-t="involved.44">Regions</span>
+        <div class="chips-row" data-vocab="region"></div>
+
+        <label><span data-t="involved.45">Anything not on those lists</span><input name="Not listed" type="text"/></label>
+        <div class="f-row">
+          <label><span data-t="involved.46">Years the data covers</span><input name="Years" placeholder="1998 to 2021" type="text"/></label>
+          <label><span data-t="involved.47">Roughly how many studies and comparisons?</span><input name="Size" placeholder="40 studies, 900 comparisons" type="text"/></label>
+        </div>
+      </section>
+
+      <section class="f-sec">
+        <h2 data-t="involved.48">How was it made?</h2>
+        <label><span data-t="involved.49">How were the data extracted? Describe the method.</span><textarea name="Method" required rows="4"></textarea></label>
+        <label><span data-t="involved.50">What was each treatment compared against?</span><textarea name="Comparator" rows="3"></textarea></label>
+        <p class="f-hint" data-t="involved.51">A treatment arm is not automatically agroecological, so the comparator matters as much as the practice.</p>
+
+        <span class="f-q" data-t="involved.52">Does the dataset include</span>
+        <div class="chips-row">
+          <label class="pick"><input name="Includes" type="checkbox" value="Site coordinates"/><span data-t="involved.53">Site coordinates</span></label>
+          <label class="pick"><input name="Includes" type="checkbox" value="Sample sizes"/><span data-t="involved.54">Sample sizes</span></label>
+          <label class="pick"><input name="Includes" type="checkbox" value="Dispersion, SD SE or CI"/><span data-t="involved.55">Dispersion: SD, SE or confidence intervals</span></label>
+          <label class="pick"><input name="Includes" type="checkbox" value="Effect sizes already computed"/><span data-t="involved.56">Effect sizes already computed</span></label>
+          <label class="pick"><input name="Includes" type="checkbox" value="Units for every outcome"/><span data-t="involved.57">Units for every outcome</span></label>
+        </div>
+      </section>
+
+      <section class="f-sec">
+        <h2 data-t="involved.58">Anything else?</h2>
+        <label><span data-t="involved.59">Caveats, conditions, or anything we should know</span><textarea name="Notes" rows="3"></textarea></label>
+      </section>
+
+      <div class="f-send">
+        <button class="btn" type="submit" data-t="involved.60">Send this to the data team</button>
+        <p class="form-note" id="submit-note"></p>
+      </div>
+    </form>
+  </div>
 </main>
 <!-- ============ CONTACT ============ -->
 <main class="page" id="page-contact">
@@ -378,8 +464,8 @@
 <script crossorigin="anonymous" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="data.js?v=8f401137"></script>
-<script src="i18n.js?v=0f0780b9"></script>
-<script src="vocab.js?v=3d59a92b"></script>
-<script src="app.js?v=7248ba00"></script>
+<script src="i18n.js?v=833ccf4b"></script>
+<script src="vocab.js?v=73725ac3"></script>
+<script src="app.js?v=cb2e2fcc"></script>
 </body>
 </html>

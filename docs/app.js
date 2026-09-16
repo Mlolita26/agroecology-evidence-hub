@@ -62,7 +62,7 @@
     try { localStorage.setItem('kh-lang', lang); } catch (e) {}
     $('#theme-btn').textContent =
       document.documentElement.getAttribute('data-theme') === 'dark' ? t('themeLight') : t('themeDark');
-    if (started) { buildFilters(); buildHead(); closeDetail(); render(); }
+    if (started) { buildFilters(); buildHead(); buildTicks(); closeDetail(); render(); }
   }
 
   Object.keys(window.KH_LANGS).forEach(code => {
@@ -766,12 +766,60 @@
       '&body=' + encodeURIComponent(body);
   });
 
+  /* ---------- dataset submission form ----------
+     The tick lists are built from the Hub's own vocabulary, so a contributor
+     sees exactly the terms the data uses. Regions are a fixed world list,
+     because an offer can come from anywhere, not only from what is loaded. */
+  const REGIONS = [
+    'Northern Africa', 'Eastern Africa', 'Middle Africa', 'Western Africa', 'Southern Africa',
+    'Northern America', 'Central America', 'Caribbean', 'South America',
+    'Western Asia', 'Central Asia', 'Southern Asia', 'Eastern Asia', 'South-eastern Asia',
+    'Northern Europe', 'Western Europe', 'Southern Europe', 'Eastern Europe', 'Oceania'
+  ];
+  const submitForm = $('#submit-form');
+
+  function buildTicks() {
+    document.querySelectorAll('.chips-row[data-vocab]').forEach(box => {
+      const field = box.dataset.vocab;
+      const values = field === 'region' ? REGIONS : uniq(field);
+      /* keep anything already picked when the labels are rebuilt in another language */
+      const picked = new Set([...box.querySelectorAll('input:checked')].map(i => i.value));
+      box.innerHTML = '';
+      values.slice().sort((a, b) => term(a).localeCompare(term(b))).forEach(v => {
+        const l = document.createElement('label');
+        l.className = 'pick';
+        l.innerHTML = '<input type="checkbox"><span></span>';
+        const input = l.querySelector('input');
+        input.name = field;
+        input.value = v;            /* English, so the team reads one vocabulary */
+        input.checked = picked.has(v);
+        l.querySelector('span').textContent = term(v);
+        box.appendChild(l);
+      });
+    });
+  }
+
+  if (submitForm) submitForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!CONTACT_EMAIL) { $('#submit-note').textContent = t('formNoAddress'); return; }
+    const data = new FormData(submitForm);
+    const lines = [];
+    new Set([...data.keys()]).forEach(key => {
+      const values = data.getAll(key).filter(v => String(v).trim());
+      if (values.length) lines.push(key + ': ' + values.join(', '));
+    });
+    location.href = 'mailto:' + CONTACT_EMAIL +
+      '?subject=' + encodeURIComponent(t('submitSubject')) +
+      '&body=' + encodeURIComponent(lines.join('\n\n'));
+  });
+
   /* pick the language first, so the filters and table header are built in it */
   let savedLang = null;
   try { savedLang = localStorage.getItem('kh-lang'); } catch (e) {}
   setLang(savedLang || (navigator.language || 'en').slice(0, 2));
   buildFilters();
   buildHead();
+  buildTicks();
   started = true;
   render();
   route();
