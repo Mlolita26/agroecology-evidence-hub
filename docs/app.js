@@ -802,12 +802,24 @@
   if (submitForm) submitForm.addEventListener('submit', e => {
     e.preventDefault();
     if (!CONTACT_EMAIL) { $('#submit-note').textContent = t('formNoAddress'); return; }
+
+    /* A browser cannot attach a file to a mailto, so name the chosen files in
+       the message and ask the sender to attach them to the mail that opens. */
+    const chosen = [...($('#submit-files') || { files: [] }).files].map(f => f.name);
+
     const data = new FormData(submitForm);
     const lines = [];
     new Set([...data.keys()]).forEach(key => {
+      if (key === 'Files') return;
       const values = data.getAll(key).filter(v => String(v).trim());
       if (values.length) lines.push(key + ': ' + values.join(', '));
     });
+    if (chosen.length) lines.push(t('submitAttachLine') + ' ' + chosen.join(', '));
+
+    $('#submit-note').textContent = chosen.length
+      ? t('submitAttach', { files: chosen.join(', ') })
+      : t('submitOpened');
+
     location.href = 'mailto:' + CONTACT_EMAIL +
       '?subject=' + encodeURIComponent(t('submitSubject')) +
       '&body=' + encodeURIComponent(lines.join('\n\n'));

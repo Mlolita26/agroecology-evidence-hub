@@ -186,6 +186,8 @@ window.KH_TEXT = {
     'involved.58': '¿Algo más?',
     'involved.59': 'Salvedades, condiciones o cualquier cosa que debamos saber',
     'involved.60': 'Enviar al equipo de datos',
+    'involved.61': 'O elija el archivo',
+    'involved.62': 'Una web no puede enviar un archivo por sí sola. Al elegirlo aquí, su nombre queda en el mensaje y usted lo adjunta al correo que se abre. Si tiene un enlace a los datos, es más fácil para todos.',
 
     'contact.01': 'Contacto',
     'contact.02': 'Cuéntenos en qué está trabajando',
@@ -372,6 +374,8 @@ window.KH_TEXT = {
     'involved.58': 'Autre chose ?',
     'involved.59': 'Réserves, conditions, ou tout ce que nous devrions savoir',
     'involved.60': 'Envoyer à l’équipe données',
+    'involved.61': 'Ou choisissez le fichier',
+    'involved.62': 'Un site web ne peut pas envoyer un fichier tout seul. En le choisissant ici, son nom figure dans le message et vous l’attachez au courriel qui s’ouvre. Un lien vers les données est plus simple pour tout le monde si vous en avez un.',
 
     'contact.01': 'Contact',
     'contact.02': 'Dites-nous sur quoi vous travaillez',
@@ -432,6 +436,9 @@ window.KH_UI = {
     dlStudy: 'Study', dlJournal: 'Journal', dlDoi: 'DOI', dlSynthesis: 'Source synthesis',
     formSubject: 'Agroecology Knowledge Hub enquiry',
     submitSubject: 'Dataset offered to the Agroecology Knowledge Hub',
+    submitOpened: 'Your email is open. Send it and we will reply.',
+    submitAttach: 'Your email is open. Attach these before sending: {files}',
+    submitAttachLine: 'Files the sender meant to attach:',
     formNoAddress: 'The contact address is not published yet.',
     season: '{n} season', seasons: '{n} seasons',
     onlyCountry: 'Only {country}', onlyPractice: 'Only this practice'
@@ -471,6 +478,9 @@ window.KH_UI = {
     dlStudy: 'Estudio', dlJournal: 'Revista', dlDoi: 'DOI', dlSynthesis: 'Síntesis de origen',
     formSubject: 'Consulta al Agroecology Knowledge Hub',
     submitSubject: 'Conjunto de datos ofrecido al Agroecology Knowledge Hub',
+    submitOpened: 'Su correo está abierto. Envíelo y le responderemos.',
+    submitAttach: 'Su correo está abierto. Adjunte esto antes de enviarlo: {files}',
+    submitAttachLine: 'Archivos que el remitente quería adjuntar:',
     formNoAddress: 'La dirección de contacto aún no se ha publicado.',
     season: '{n} temporada', seasons: '{n} temporadas',
     onlyCountry: 'Solo {country}', onlyPractice: 'Solo esta práctica'
@@ -510,6 +520,9 @@ window.KH_UI = {
     dlStudy: 'Étude', dlJournal: 'Revue', dlDoi: 'DOI', dlSynthesis: 'Synthèse source',
     formSubject: 'Question à l’Agroecology Knowledge Hub',
     submitSubject: 'Jeu de données proposé à l’Agroecology Knowledge Hub',
+    submitOpened: 'Votre courriel est ouvert. Envoyez-le et nous vous répondrons.',
+    submitAttach: 'Votre courriel est ouvert. Joignez ceci avant de l’envoyer : {files}',
+    submitAttachLine: 'Fichiers que l’expéditeur voulait joindre :',
     formNoAddress: 'L’adresse de contact n’est pas encore publiée.',
     season: '{n} saison', seasons: '{n} saisons',
     onlyCountry: 'Seulement {country}', onlyPractice: 'Seulement cette pratique'

@@ -85,6 +85,23 @@ If you would rather the message arrived in an inbox without the reader's mail
 program opening, that needs a form service such as Formspree, which means an
 account and sending the data through a third party. Worth a conversation first.
 
+## The dataset submission form
+
+Get involved asks people to offer a dataset. Like the contact form it opens the
+sender's mail program, because a static site has nowhere to post to.
+
+**It cannot upload files.** No browser lets a page attach a file to a `mailto:`
+link. The file picker on that page only reads the names of the files chosen,
+puts them in the message, and tells the sender to attach them to the email that
+opens. That is honest but clumsy, and some people will not do it.
+
+If uploads matter, the page needs a real form service. The obvious candidate is
+Microsoft Forms through the CGIAR Microsoft 365 account: uploads land in
+OneDrive, it costs nothing extra, and the data stays inside the institution.
+Tally and Formspree also work but route submissions through a third party. Any
+of them replaces the form on this page; the wording and the vocabulary lists
+can be carried across.
+
 ## Rebuilding the data
 
 Run this whenever a new synthesis is harmonised, or an existing one changes:
