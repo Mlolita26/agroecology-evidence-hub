@@ -139,10 +139,11 @@ body:has(#page-involved.on) footer{margin-top:0}
    The colour carries on below the banner and settles into the page, so the
    white card sits on the gradient rather than on bare paper. */
 .submit{background:linear-gradient(180deg,
-    color-mix(in srgb,var(--r5) 15%,transparent),
-    color-mix(in srgb,var(--r3) 11%,transparent) 45%,
-    color-mix(in srgb,var(--r1) 7%,transparent) 76%,
-    transparent),var(--paper);
+    color-mix(in srgb,var(--d2) 34%,transparent),
+    color-mix(in srgb,var(--d3) 30%,transparent) 24%,
+    color-mix(in srgb,var(--d4) 34%,transparent) 50%,
+    color-mix(in srgb,var(--d5) 32%,transparent) 74%,
+    color-mix(in srgb,var(--d6) 26%,transparent)),var(--paper);
   padding:54px 26px 64px}
 .submit-form{max-width:900px;margin:0 auto;background:var(--panel);
   border:1px solid var(--line);padding:40px 44px 36px}
@@ -171,10 +172,11 @@ body:has(#page-involved.on) footer{margin-top:0}
   text-transform:uppercase;opacity:.55}
 .submit-form .pick input{position:absolute;width:1px;height:1px;opacity:0;margin:0}
 .submit-form .pick:hover{border-color:var(--ink-3);color:var(--ink)}
-.chips-row[data-vocab="practice"]{--pick:var(--r2)}
-.chips-row[data-vocab="outcome"]{--pick:var(--r3)}
-.chips-row[data-vocab="crop"]{--pick:var(--r4)}
-.chips-row[data-vocab="region"]{--pick:var(--r1)}
+/* a picked chip takes a colour from the same scale as the heatmap */
+.chips-row[data-vocab="practice"]{--pick:var(--d2)}
+.chips-row[data-vocab="outcome"]{--pick:var(--d1)}
+.chips-row[data-vocab="crop"]{--pick:var(--d6)}
+.chips-row[data-vocab="region"]{--pick:var(--d7)}
 .submit-form .pick:has(input:checked){color:var(--ink);
   background:color-mix(in srgb,var(--pick,var(--accent)) 22%,transparent);
   border-color:color-mix(in srgb,var(--pick,var(--accent)) 70%,transparent)}
