@@ -123,6 +123,13 @@ harmonised so far, not on any geographic limit. Reporting follows ROSES.
 The site is served by GitHub Pages from the `docs/` folder on `main`.
 Push to `main` and the change is live in a minute or two.
 
+GitHub Pages sends `Cache-Control: max-age=600`, so a browser may hold the old
+stylesheet or script for up to ten minutes after a change. Nothing needs doing
+about it; a hard refresh (Ctrl+F5, or Cmd+Shift+R) skips the wait. Do not add
+`?v=1` version strings to the asset links: they pin a browser to whatever it
+cached under that name until someone remembers to change the number, which is
+exactly the bug they are meant to prevent.
+
 ## Credits
 
 Boundaries from Natural Earth and geoBoundaries. Maps by Leaflet.
