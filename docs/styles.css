@@ -118,13 +118,22 @@ body:has(#page-contact.on) footer,
 body:has(#page-involved.on) footer{margin-top:0}
 /* the same panel, used as a banner with no form beside it */
 .contact.wide .contact-in{grid-template-columns:minmax(0,1fr);padding-bottom:58px}
-.contact.wide .contact-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1000px}
-/* Get involved keeps the photograph as shot. No colour wash over it, only a
-   soft neutral scrim on the side the words sit on, so white type stays legible. */
-#submit-hero{background-image:url("img/involved.jpg")}
-#submit-hero::before{opacity:1;background:
-  linear-gradient(100deg,rgba(0,0,0,.58),rgba(0,0,0,.26) 52%,rgba(0,0,0,.04)),
-  linear-gradient(0deg,rgba(0,0,0,.38),transparent 46%)}
+/* Get involved shows the photograph as shot. Nothing is laid over the picture
+   itself; the words sit on their own panel, which covers about half of it and
+   leaves the rest clear. */
+#submit-hero{background-image:url("img/involved.jpg");min-height:clamp(420px,46vw,560px);
+  display:flex;align-items:center}
+#submit-hero::before{content:none}
+#submit-hero .contact-in{width:100%;padding:34px 26px}
+#submit-hero .contact-say{background:rgba(16,13,20,.62);padding:40px 44px 44px;max-width:620px}
+#submit-hero .contact-say h1{max-width:16ch}
+#submit-hero .contact-say > p{max-width:none;margin-top:18px}
+
+/* the three notes, moved off the photograph onto the tint below it */
+.submit-notes{max-width:900px;margin:0 auto 30px;display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 32px}
+.submit-notes .lbl{display:block;margin-bottom:8px}
+.submit-notes p{margin:0;font-size:14.5px;line-height:1.55;color:var(--ink-2)}
 
 /* dataset submission form: one page, options picked as chips.
    The colour carries on below the banner and settles into the page, so the
@@ -178,7 +187,7 @@ body:has(#page-involved.on) footer{margin-top:0}
 
 @media (max-width:760px){
   .f-row,.f-ticks,.ticks.wide{grid-template-columns:minmax(0,1fr)}
-  .contact.wide .contact-grid{grid-template-columns:minmax(0,1fr)}
+  .submit-notes{grid-template-columns:minmax(0,1fr);gap:20px}
 }
 
 @media (max-width:900px){
