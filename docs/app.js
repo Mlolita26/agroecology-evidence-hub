@@ -22,6 +22,8 @@
   let sort = { key: 'value', dir: -1 };
   let selId = null;
   let map, layer, base, borders, regions, world = null, worldPending = null;
+  let started = false;  /* true once the first render has run, so the theme
+                           switch knows the drawing helpers are ready */
 
   /* ---------- theme ---------- */
   const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -31,6 +33,7 @@
     if (b) b.textContent = t === 'dark' ? 'Light' : 'Dark';
     try { localStorage.setItem('kh-theme', t); } catch (e) {}
     if (map) redrawMap();
+    if (started) paintHeroes();
   }
   let stored = null;
   try { stored = localStorage.getItem('kh-theme'); } catch (e) {}
@@ -293,6 +296,60 @@
   measureHead();
   window.addEventListener('resize', measureHead);
 
+  /* ---------- hero artwork ----------
+     Every comparison drawn as one cell, coloured on the same scale as the map.
+     data-art names a field to band the cells by, so each page gets its own
+     pattern; data-photo on the same element shows a photograph instead. */
+  function paintHero(box) {
+    const photo = box.dataset.photo;
+    if (photo) {
+      box.classList.add('photo');
+      box.style.backgroundImage = 'url("' + photo + '")';
+      return;
+    }
+    const canvas = box.querySelector('canvas');
+    const w = box.clientWidth, h = box.clientHeight;
+    if (!canvas || !w || !h) return;
+
+    const groupBy = box.dataset.art;
+    const byValue = (a, b) => a - b;
+    let values;
+    if (groupBy) {
+      const bands = {};
+      D.forEach(r => (bands[r[groupBy]] = bands[r[groupBy]] || []).push(r.value));
+      values = Object.values(bands).sort((a, b) => b.length - a.length)
+        .flatMap(band => band.sort(byValue));
+    } else {
+      values = D.map(r => r.value).sort(byValue);
+    }
+    if (!values.length) return;
+
+    const cols = Math.max(1, Math.round(Math.sqrt(values.length * w / h)));
+    const rows = Math.ceil(values.length / cols);
+    /* size the cells to cover the box and let the edges crop, so the artwork
+       bleeds to all four sides instead of leaving a ragged margin */
+    const cell = Math.max(w / cols, h / rows);
+    const left = (w - cols * cell) / 2, top = (h - rows * cell) / 2;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+    values.forEach((v, i) => {
+      ctx.fillStyle = color(v);
+      ctx.fillRect(left + (i % cols) * cell, top + Math.floor(i / cols) * cell,
+        Math.max(1, cell - 1), Math.max(1, cell - 1));
+    });
+  }
+  const heroes = document.querySelectorAll('.hero-art');
+  const paintHeroes = () => heroes.forEach(paintHero);
+  /* Redraw whenever a box changes size: on resize, when fonts settle the
+     layout, and when a hidden page is shown and finally has a width. */
+  const watch = new ResizeObserver(entries => entries.forEach(e => paintHero(e.target)));
+  heroes.forEach(box => watch.observe(box));
+
   function applyMapMode() {
     if (!map) return;
     const picked = [...sel.country];
@@ -300,6 +357,9 @@
     if (!picked.length) {
       if (borders) { map.removeLayer(borders); borders = null; }
       if (regions) { map.removeLayer(regions); regions = null; }
+      /* Clicking a country removes this layer while the pointer is still over
+         it, so its hover style never gets cleared. Reset it on the way back. */
+      if (base) base.resetStyle();
       if (base && !map.hasLayer(base)) { base.addTo(map); base.bringToBack(); if (layer) layer.eachLayer(m => m.bringToFront()); }
       if (note) note.textContent = '';
       fitTo(dataBounds(D.filter(match)));
@@ -614,6 +674,7 @@
     drawPoints(rows); readout(rows); chart(rows); table(rows); chips(); counts(); ddLabels(); applyMapMode();
   }
 
+  started = true;
   render();
   route();
 })();

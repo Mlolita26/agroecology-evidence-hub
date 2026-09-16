@@ -63,20 +63,47 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 .page{display:none}
 .page.on{display:block}
 
+/* page hero: words on the left, the dataset itself on the right */
+.hero{border-bottom:1px solid var(--rule);background:var(--panel)}
+.hero-in{max-width:1240px;margin:0 auto;padding:0 26px;display:grid;
+  grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);align-items:stretch}
+.hero-txt{padding:52px 56px 52px 0;display:flex;flex-direction:column;justify-content:center}
+.hero.tall .hero-txt{padding-top:72px;padding-bottom:72px}
+.hero-act{display:flex;gap:9px;flex-wrap:wrap;margin-top:32px}
+.hero-art{position:relative;margin:0;border-left:1px solid var(--line);
+  min-height:320px;background:var(--wash);overflow:hidden}
+.hero.tall .hero-art{min-height:400px}
+.hero-art canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* drop a photograph in with data-photo="img/about.jpg"; see docs/img/README.md */
+.hero-art.photo{background-size:cover;background-position:center}
+.hero-art.photo canvas{display:none}
+.hero-art figcaption{position:absolute;left:0;right:0;bottom:0;padding:11px 16px;
+  background:var(--panel);border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:10px;line-height:1.5;letter-spacing:.04em;color:var(--ink-2)}
+
+/* the six headline counts */
+.figs{border-bottom:1px solid var(--rule);background:var(--paper)}
+.figs-in{max-width:1240px;margin:0 auto;padding:0 26px;display:grid;
+  grid-template-columns:repeat(6,1fr)}
+.figs-in > div{padding:20px 18px;border-left:1px solid var(--line)}
+.figs-in > div:first-child{border-left:0;padding-left:0}
+.figs-in b{display:block;font-family:var(--display);font-size:36px;line-height:1;
+  font-weight:400;margin-top:7px}
+
 /* document pages */
-.doc{max-width:820px;margin:0 auto;padding:34px 26px 0}
-.sheet{background:var(--panel);border:1px solid var(--line);padding:0 0 54px}
-.sheet-top{display:flex;height:4px}
-.sheet-top i{flex:1}
-.sheet-in{padding:42px 62px 0}
+.doc{max-width:1240px;margin:0 auto;padding:46px 26px 0;display:grid;
+  grid-template-columns:minmax(0,1fr) 316px;gap:0 60px;align-items:start}
+.doc-main{min-width:0}
+.doc-rail{min-width:0;position:sticky;top:calc(var(--mh,58px) + 26px)}
+.doc-rail .doc-sec:first-child{margin-top:0}
 .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}
-.title{font-family:var(--display);font-size:clamp(32px,4.2vw,50px);line-height:1.05;margin:12px 0 0;
-  max-width:27ch;text-wrap:pretty;font-weight:400}
-.standfirst{font-family:var(--display);font-size:21px;line-height:1.4;color:var(--ink-2);
-  margin:20px 0 0;max-width:48ch}
+.title{font-family:var(--display);font-size:clamp(34px,4.6vw,56px);line-height:1.04;margin:14px 0 0;
+  max-width:20ch;text-wrap:pretty;font-weight:400}
+.standfirst{font-family:var(--display);font-size:20px;line-height:1.45;color:var(--ink-2);
+  margin:18px 0 0;max-width:44ch}
 .hr{border:0;border-top:1px solid var(--line);margin:30px 0}
 
-.copy{font-size:15.5px;line-height:1.75;color:var(--ink-2);max-width:62ch}
+.copy{font-size:16px;line-height:1.78;color:var(--ink-2);max-width:70ch}
 .copy p{margin:0 0 17px}
 .copy p:last-child{margin-bottom:0}
 .copy > p.open::first-letter{font-family:var(--display);font-size:54px;line-height:.84;
@@ -90,7 +117,7 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 .pull{border-left:2px solid var(--accent);padding:1px 0 1px 17px;margin:24px 0;
   font-family:var(--display);font-size:19px;line-height:1.42;color:var(--ink);max-width:52ch}
 
-.meta-t{width:100%;border-collapse:collapse;max-width:560px}
+.meta-t{width:100%;border-collapse:collapse}
 .meta-t td{padding:7px 0;border-bottom:1px dotted var(--line-2);font-size:13px;vertical-align:baseline}
 .meta-t td:first-child{width:40%;color:var(--ink-3);font-family:var(--mono);font-size:11px;
   letter-spacing:.05em;text-transform:uppercase;padding-right:16px}
@@ -99,11 +126,13 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 
 .doc-sec{margin-top:40px;padding-top:15px;border-top:1px solid var(--line)}
 .doc-sec > .lbl{display:block;margin-bottom:11px}
-.doc-foot{margin:44px 62px 0;padding-top:13px;border-top:1px solid var(--rule);display:flex;gap:20px;
+.doc-foot{max-width:1240px;margin:56px auto 0;padding:13px 26px 0;border-top:1px solid var(--rule);
+  display:flex;gap:20px;
   flex-wrap:wrap;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 
 .stub{border:1px solid var(--line-2);border-left:2px solid var(--line-2);background:var(--wash);
-  padding:16px 18px;max-width:56ch}
+  padding:16px 18px}
+.doc-main .stub{max-width:56ch}
 .stub b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
   text-transform:uppercase;font-weight:500;color:var(--ink-2)}
 .stub span{display:block;margin-top:4px;font-size:13px;color:var(--ink-3)}
@@ -121,12 +150,32 @@ footer .f-in{max-width:1240px;margin:0 auto;padding:0 26px;display:flex;gap:20px
   align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
   text-transform:uppercase;color:var(--ink-3)}
 
+/* one column once the rail stops earning its width */
+@media (max-width:1040px){
+  .doc{grid-template-columns:minmax(0,1fr);gap:0}
+  .doc-rail{position:static;margin-top:8px}
+  .figs-in{grid-template-columns:repeat(3,1fr)}
+  .figs-in > div:nth-child(4){border-left:0;padding-left:0}
+}
+@media (max-width:860px){
+  .hero-in{grid-template-columns:minmax(0,1fr)}
+  .hero-txt{padding:38px 0 34px}
+  .hero.tall .hero-txt{padding:44px 0 38px}
+  .hero-art{border-left:0;border-top:1px solid var(--line);min-height:260px;
+    margin:0 -26px;min-width:calc(100% + 52px)}
+  .hero.tall .hero-art{min-height:280px}
+}
 @media (max-width:760px){
-  .doc{padding:18px 0 0}
-  .sheet{border-left:0;border-right:0}
-  .sheet-in{padding:30px 22px 0}
-  .doc-foot{margin:32px 22px 0}
-  .mh-1{display:none}
+  .doc{padding:30px 22px 0}
+  .doc-foot{margin-top:40px;padding-left:22px;padding-right:22px}
+  .hero-in{padding:0 22px}
+  .hero-art{margin:0 -22px;min-width:calc(100% + 44px)}
+  .figs-in{grid-template-columns:repeat(2,1fr);padding:0 22px}
+  .figs-in > div:nth-child(odd){border-left:0;padding-left:0}
+  .figs-in b{font-size:30px}
+  /* keep the wordmark on one line so the nav keeps its room */
+  .mark-t{font-size:17px;white-space:nowrap}
+  .mh-2-in{padding:0 22px;gap:14px}
   nav.main{overflow:auto}
 }
 

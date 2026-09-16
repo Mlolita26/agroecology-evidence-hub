@@ -11,24 +11,13 @@
 <body>
 
 <header class="masthead">
-  <div class="mh-1">
-    <span class="org">Alliance of Bioversity International &amp; CIAT &middot; CGIAR Multifunctional Landscapes, AoW05</span>
-    <span class="stamp">
-      <span>Living review</span>
-      <span>Draft 0.4</span>
-      <span>CC BY 4.0</span>
-    </span>
-  </div>
   <div class="mh-2">
     <div class="mh-2-in">
       <a class="mark" href="#home">
         <span class="mark-glyph">
           <i style="height:7px;background:var(--r1)"></i><i style="height:11px;background:var(--r2)"></i><i style="height:15px;background:var(--r3)"></i><i style="height:11px;background:var(--r4)"></i><i style="height:7px;background:var(--r5)"></i>
         </span>
-        <span>
-          <span class="mark-t">Agroecology Evidence Hub</span>
-          <span class="mark-s">A living evidence synthesis</span>
-        </span>
+        <span class="mark-t">Agroecology Evidence Hub</span>
       </a>
       <nav class="main" id="nav">
         <a href="#home">Home</a>
@@ -45,39 +34,40 @@
 
 <!-- ============ HOME ============ -->
 <main class="page" id="page-home">
-  <div class="doc"><div class="sheet">
-    <div class="sheet-top">
-      <i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i>
+  <header class="hero tall">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="kicker">Agroecology Evidence Hub</span>
+        <h1 class="title">How well do agroecological practices perform, and where?</h1>
+        <p class="standfirst">One harmonised table of field comparisons, drawn from the primary studies that earlier syntheses already extracted.</p>
+        <div class="hero-act">
+          <a class="btn" href="#explore">Explore data</a>
+          <a class="btn ghost" href="#methodology">How the data is built</a>
+        </div>
+      </div>
+      <figure class="hero-art" data-art>
+        <canvas></canvas>
+        <figcaption>Every comparison in the Hub, one cell each, sorted by effect. Teal is a decrease against the control, pink an increase.</figcaption>
+      </figure>
     </div>
-    <div class="sheet-in">
-      <span class="kicker">Agroecology Evidence Hub</span>
-      <h1 class="title">How well do agroecological practices perform, and where?</h1>
-      <p class="standfirst">One harmonised table of field comparisons, drawn from the primary studies that earlier syntheses already extracted.</p>
-      <hr class="hr">
+  </header>
+
+  <div class="figs">
+    <div class="figs-in">
+      <div><span class="lbl">Comparisons</span><b id="h-obs">0</b></div>
+      <div><span class="lbl">Countries</span><b id="h-cty">0</b></div>
+      <div><span class="lbl">Crops</span><b id="h-crop">0</b></div>
+      <div><span class="lbl">Practices</span><b id="h-prac">0</b></div>
+      <div><span class="lbl">Outcomes</span><b id="h-out">0</b></div>
+      <div><span class="lbl">Source syntheses</span><b id="h-syn">0</b></div>
+    </div>
+  </div>
+
+  <div class="doc">
+    <div class="doc-main">
       <div class="copy">
         <p class="open">Each record is a single control against treatment comparison for one outcome: a place, a crop, a practice, and the measured difference. Filter the records, read them on the map, and download the selection.</p>
       </div>
-      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:26px">
-        <a class="btn" href="#explore">Explore data</a>
-        <a class="btn ghost" href="#methodology">How the data is built</a>
-      </div>
-
-      <div class="doc-sec">
-        <span class="lbl">What is loaded today</span>
-        <table class="meta-t">
-          <tr><td>Comparisons</td><td id="h-obs">0</td></tr>
-          <tr><td>Countries</td><td id="h-cty">0</td></tr>
-          <tr><td>Crops</td><td id="h-crop">0</td></tr>
-          <tr><td>Practices</td><td id="h-prac">0</td></tr>
-          <tr><td>Outcomes</td><td id="h-out">0</td></tr>
-          <tr><td>Source syntheses</td><td id="h-syn">0</td></tr>
-        </table>
-        <div class="stub" style="margin-top:18px">
-          <b>Coverage is a property of the sources</b>
-          <span>The Hub is global in scope. Which countries appear today depends on which syntheses have been harmonised so far, not on any geographic limit.</span>
-        </div>
-      </div>
-
       <div class="doc-sec">
         <span class="lbl">Homepage text</span>
         <div class="stub">
@@ -85,7 +75,16 @@
           <span>Framing paragraph, headline findings and featured figures are still to be decided.</span>
         </div>
       </div>
+    </div>
 
+    <aside class="doc-rail">
+      <div class="doc-sec">
+        <span class="lbl">Coverage</span>
+        <div class="stub">
+          <b>Coverage is a property of the sources</b>
+          <span>The Hub is global in scope. Which countries appear today depends on which syntheses have been harmonised so far, not on any geographic limit.</span>
+        </div>
+      </div>
       <div class="doc-sec">
         <span class="lbl">Release notes</span>
         <table class="meta-t">
@@ -93,9 +92,10 @@
           <tr><td>Next</td><td>Further syntheses, social and economic outcomes</td></tr>
         </table>
       </div>
-    </div>
-    <div class="doc-foot"><span>Draft 0.4</span><span>Data CC BY 4.0</span><span>Not yet citable</span></div>
-  </div></div>
+    </aside>
+  </div>
+
+  <div class="doc-foot"><span>Draft 0.4</span><span>Data CC BY 4.0</span><span>Not yet citable</span></div>
 </main>
 
 <!-- ============ EXPLORE ============ -->
@@ -188,14 +188,22 @@
 
 <!-- ============ ABOUT ============ -->
 <main class="page" id="page-about">
-  <div class="doc"><div class="sheet">
-    <div class="sheet-top">
-      <i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i>
+  <header class="hero">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="kicker">About</span>
+        <h1 class="title">A living evidence hub for agroecological meta-analyses.</h1>
+        <p class="standfirst">Built as evidence infrastructure rather than a single study, and global in scope, with no restriction on year, language or region.</p>
+      </div>
+      <figure class="hero-art" data-art="outcome">
+        <canvas></canvas>
+        <figcaption>The same comparisons, banded by outcome. Each band is one outcome, widest first.</figcaption>
+      </figure>
     </div>
-    <div class="sheet-in">
-      <span class="kicker">About</span>
-      <h1 class="title">A living evidence hub for agroecological meta-analyses.</h1>
-      <hr class="hr">
+  </header>
+
+  <div class="doc">
+    <div class="doc-main">
       <div class="copy">
         <p class="open">The Hub answers one question, and keeps answering it as new evidence arrives: how effective are agroecological farming practices at improving agronomic, economic, environmental and social outcomes, compared with non-agroecological practices or with natural and semi-natural habitats?</p>
         <p>It is developed by the Alliance of Bioversity International and CIAT within the CGIAR Multifunctional Landscapes Science Program, and is built as evidence infrastructure rather than a single study. Scope is global, with no restriction on year, language or region.</p>
@@ -219,7 +227,9 @@
         <h2>What it is not</h2>
         <p>The Hub is not a recommendation engine. Effects depend on soil, rainfall, season and management, so a positive median does not mean a practice will work on a given farm. Agroecology is also a gradient rather than a binary, and source datasets rarely label their arms that way, so deciding which arm counts as agroecological is sometimes an analytical judgement rather than a fact inherited from the source.</p>
       </div>
+    </div>
 
+    <aside class="doc-rail">
       <div class="doc-sec">
         <span class="lbl">Partners</span>
         <table class="meta-t">
@@ -239,21 +249,30 @@
           <span>Steering arrangements, funding statement and release governance.</span>
         </div>
       </div>
-    </div>
-    <div class="doc-foot"><span>Reporting standard: ROSES</span><span>FAIR metadata</span><span>CC BY 4.0</span></div>
-  </div></div>
+    </aside>
+  </div>
+
+  <div class="doc-foot"><span>Reporting standard: ROSES</span><span>FAIR metadata</span><span>CC BY 4.0</span></div>
 </main>
 
 <!-- ============ METHODOLOGY ============ -->
 <main class="page" id="page-methodology">
-  <div class="doc"><div class="sheet">
-    <div class="sheet-top">
-      <i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i>
+  <header class="hero">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="kicker">Methodology</span>
+        <h1 class="title">Evidence recycling, then one shared template.</h1>
+        <p class="standfirst">The Hub does not read the primary literature afresh. It harvests the datasets earlier meta-analyses already extracted.</p>
+      </div>
+      <figure class="hero-art" data-art="practice">
+        <canvas></canvas>
+        <figcaption>Banded by practice, widest band first. Every cell is one harmonised comparison.</figcaption>
+      </figure>
     </div>
-    <div class="sheet-in">
-      <span class="kicker">Methodology</span>
-      <h1 class="title">Evidence recycling, then one shared template.</h1>
-      <hr class="hr">
+  </header>
+
+  <div class="doc">
+    <div class="doc-main">
       <div class="copy">
         <p class="open">The Hub does not read the primary literature afresh. It harvests the primary study datasets that earlier meta-analyses already extracted, harmonises them into one shared template, and analyses them again, filling gaps by hand only where a source dataset was incomplete.</p>
 
@@ -287,7 +306,9 @@
           <li>Treatment does not automatically mean agroecological. Read the comparator field before pooling.</li>
         </ul>
       </div>
+    </div>
 
+    <aside class="doc-rail">
       <div class="doc-sec">
         <span class="lbl">Fields published on this site</span>
         <table class="meta-t">
@@ -308,21 +329,30 @@
           <span>Published protocol, search strategy, inclusion criteria and version history.</span>
         </div>
       </div>
-    </div>
-    <div class="doc-foot"><span>Effect sizes: lnRR and SMD</span><span>Living review</span><span>ROSES</span></div>
-  </div></div>
+    </aside>
+  </div>
+
+  <div class="doc-foot"><span>Effect sizes: lnRR and SMD</span><span>Living review</span><span>ROSES</span></div>
 </main>
 
 <!-- ============ GET INVOLVED ============ -->
 <main class="page" id="page-involved">
-  <div class="doc"><div class="sheet">
-    <div class="sheet-top">
-      <i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i>
+  <header class="hero">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="kicker">Get involved</span>
+        <h1 class="title">Bring a dataset, extract a study, or reuse the table.</h1>
+        <p class="standfirst">The Hub grows by contribution. Four ways to take part, in rising order of commitment.</p>
+      </div>
+      <figure class="hero-art" data-art="country">
+        <canvas></canvas>
+        <figcaption>Banded by country, largest first. The bands are uneven because coverage follows the sources.</figcaption>
+      </figure>
     </div>
-    <div class="sheet-in">
-      <span class="kicker">Get involved</span>
-      <h1 class="title">Bring a dataset, extract a study, or reuse the table.</h1>
-      <hr class="hr">
+  </header>
+
+  <div class="doc">
+    <div class="doc-main">
       <div class="copy">
         <p class="open">The Hub grows by contribution, and the most valuable contribution is usually a dataset that already exists. Four ways to take part, in rising order of commitment.</p>
 
@@ -338,7 +368,9 @@
         <h2>Reuse the data</h2>
         <p>The current selection downloads as CSV from the <a href="#explore">Explore data</a> page, with coordinates, means, dispersion, sample sizes and effect sizes. Tell us if you need a programmatic feed instead.</p>
       </div>
+    </div>
 
+    <aside class="doc-rail">
       <div class="doc-sec">
         <span class="lbl">Submission pack</span>
         <div class="stub">
@@ -346,25 +378,36 @@
           <span>Template workbook, required fields, review timetable and where to send a submission.</span>
         </div>
       </div>
-    </div>
-    <div class="doc-foot"><span>Contributors credited per release</span><span>CC BY 4.0</span></div>
-  </div></div>
+    </aside>
+  </div>
+
+  <div class="doc-foot"><span>Contributors credited per release</span><span>CC BY 4.0</span></div>
 </main>
 
 <!-- ============ CONTACT ============ -->
 <main class="page" id="page-contact">
-  <div class="doc"><div class="sheet">
-    <div class="sheet-top">
-      <i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i>
+  <header class="hero">
+    <div class="hero-in">
+      <div class="hero-txt">
+        <span class="kicker">Contact</span>
+        <h1 class="title">Get in touch.</h1>
+        <p class="standfirst">Questions, data corrections and offers of a dataset all reach the same team.</p>
+      </div>
+      <figure class="hero-art" data-art="synthesis">
+        <canvas></canvas>
+        <figcaption>Banded by source synthesis. Two are loaded today; each new one adds a band.</figcaption>
+      </figure>
     </div>
-    <div class="sheet-in">
-      <span class="kicker">Contact</span>
-      <h1 class="title">Get in touch.</h1>
-      <hr class="hr">
+  </header>
+
+  <div class="doc">
+    <div class="doc-main">
       <div class="copy">
         <p class="open">One address reaches the data team. Say which crop, country, practice or outcome you are working on and we will point you at the relevant records, or tell you honestly that there are none yet.</p>
       </div>
+    </div>
 
+    <aside class="doc-rail">
       <div class="doc-sec">
         <span class="lbl">Details</span>
         <table class="meta-t">
@@ -382,9 +425,10 @@
           <span>Names, roles and institutional address.</span>
         </div>
       </div>
-    </div>
-    <div class="doc-foot"><span>Agroecology Evidence Hub</span><span>Draft 0.4</span></div>
-  </div></div>
+    </aside>
+  </div>
+
+  <div class="doc-foot"><span>Agroecology Evidence Hub</span><span>Draft 0.4</span></div>
 </main>
 
 <footer>
