@@ -62,7 +62,6 @@ window.KH_TEXT = {
 
     'about.01': 'Qué es',
     'about.02': 'Un hub de conocimiento vivo para los metaanálisis agroecológicos.',
-    'about.03': 'Es una base de datos común, no un estudio suelto. Cubre todo el mundo, sin límite de año, idioma ni región.',
     'about.05': 'El Hub responde a una pregunta, y la sigue respondiendo cada vez que llega nueva evidencia: ¿qué tan bien funcionan las prácticas agroecológicas para mejorar los resultados agronómicos, económicos, ambientales y sociales? Las comparamos con prácticas no agroecológicas y con hábitats naturales y seminaturales.',
     'about.06': 'Lo desarrollan la Alianza de Bioversity International y el CIAT, dentro del programa CGIAR Multifunctional Landscapes. Es una base de datos común, no un estudio suelto. Cubre todo el mundo, sin límite de año, idioma ni región.',
     'about.07': 'Por qué existe',
@@ -87,7 +86,6 @@ window.KH_TEXT = {
 
     'methodology.01': 'Metodología',
     'methodology.02': 'Reaprovechar la evidencia, y luego una sola plantilla.',
-    'methodology.03': 'El Hub no vuelve a leer los artículos originales. Recoge los datos que los metaanálisis anteriores ya habían extraído.',
     'methodology.05': 'El Hub no vuelve a leer los artículos originales. Recoge los datos de estudios primarios que los metaanálisis anteriores ya habían extraído, los pasa a una plantilla común y los vuelve a analizar. Solo completamos a mano lo que faltaba en la fuente.',
     'methodology.06': 'Paso uno',
     'methodology.07': 'Revisamos cada síntesis y la mandamos a un registro. El registro de segundo orden guarda lo que concluyó cada síntesis. El de primer orden guarda los estudios primarios que salieron de esas síntesis, que es donde están las mediciones. Una síntesis puede ir a un registro o a los dos.',
@@ -131,7 +129,6 @@ window.KH_TEXT = {
 
     'involved.01': 'Participar',
     'involved.02': 'Traiga datos, extraiga un estudio o use la tabla.',
-    'involved.03': 'El Hub crece con lo que aporta la gente. Hay cuatro formas de participar, de menor a mayor esfuerzo.',
     'involved.05': 'El Hub crece con lo que aporta la gente, y lo más útil suele ser un conjunto de datos que ya existe. Hay cuatro formas de participar, de menor a mayor esfuerzo.',
     'involved.06': 'Indíquenos una síntesis',
     'involved.07': 'Si publicó un metaanálisis con datos de estudios primarios, o conoce alguno, díganoslo. Armonizar datos que ya existen aporta mucha más evidencia por hora de trabajo que extraer artículos uno a uno.',
@@ -148,7 +145,6 @@ window.KH_TEXT = {
 
     'contact.01': 'Contacto',
     'contact.02': 'Escríbanos.',
-    'contact.03': 'Las preguntas, las correcciones de datos y las propuestas de nuevos datos llegan al mismo equipo.',
     'contact.05': 'Una sola dirección llega al equipo de datos. Díganos con qué cultivo, país, práctica o resultado trabaja y le indicaremos los registros que le sirven, o le diremos con franqueza que todavía no hay ninguno.',
     'contact.06': 'Datos de contacto',
     'contact.07': 'Correo electrónico',
@@ -211,7 +207,6 @@ window.KH_TEXT = {
 
     'about.01': 'Le Hub',
     'about.02': 'Un hub de connaissances vivant pour les méta-analyses agroécologiques.',
-    'about.03': 'C’est une base de données commune, pas une étude isolée. Elle couvre le monde entier, sans limite d’année, de langue ni de région.',
     'about.05': 'Le Hub répond à une seule question, et il continue d’y répondre à mesure que de nouvelles données arrivent : les pratiques agroécologiques, ça marche à quel point pour améliorer les résultats agronomiques, économiques, environnementaux et sociaux ? Nous les comparons à des pratiques non agroécologiques et à des milieux naturels et semi-naturels.',
     'about.06': 'Il est développé par l’Alliance of Bioversity International et du CIAT, dans le programme CGIAR Multifunctional Landscapes. C’est une base de données commune, pas une étude isolée. Elle couvre le monde entier, sans limite d’année, de langue ni de région.',
     'about.07': 'Pourquoi il existe',
@@ -236,7 +231,6 @@ window.KH_TEXT = {
 
     'methodology.01': 'Méthode',
     'methodology.02': 'Réutiliser les données, puis un seul modèle commun.',
-    'methodology.03': 'Le Hub ne relit pas les articles d’origine. Il récupère les données que les méta-analyses précédentes avaient déjà extraites.',
     'methodology.05': 'Le Hub ne relit pas les articles d’origine. Il récupère les données d’études primaires que les méta-analyses précédentes avaient déjà extraites, les met dans un modèle commun et les analyse de nouveau. Nous complétons à la main seulement ce qui manquait à la source.',
     'methodology.06': 'Étape un',
     'methodology.07': 'Nous examinons chaque synthèse et nous l’orientons vers un registre. Le registre de second ordre garde ce que chaque synthèse a conclu. Celui de premier ordre garde les études primaires issues de ces synthèses, là où se trouvent les mesures. Une synthèse peut aller dans un registre ou dans les deux.',
@@ -280,7 +274,6 @@ window.KH_TEXT = {
 
     'involved.01': 'Participer',
     'involved.02': 'Apportez des données, extrayez une étude, ou servez-vous du tableau.',
-    'involved.03': 'Le Hub grandit grâce à ce que les gens apportent. Il y a quatre façons de participer, de la plus légère à la plus engageante.',
     'involved.05': 'Le Hub grandit grâce à ce que les gens apportent, et le plus utile est souvent un jeu de données qui existe déjà. Il y a quatre façons de participer, de la plus légère à la plus engageante.',
     'involved.06': 'Signalez-nous une synthèse',
     'involved.07': 'Si vous avez publié une méta-analyse avec des données d’études primaires, ou si vous en connaissez une, dites-le-nous. Harmoniser des données qui existent déjà apporte bien plus par heure de travail que d’extraire les articles un par un.',
@@ -297,7 +290,6 @@ window.KH_TEXT = {
 
     'contact.01': 'Contact',
     'contact.02': 'Écrivez-nous.',
-    'contact.03': 'Les questions, les corrections de données et les propositions de nouvelles données arrivent à la même équipe.',
     'contact.05': 'Une seule adresse atteint l’équipe données. Dites-nous sur quelle culture, quel pays, quelle pratique ou quel résultat vous travaillez et nous vous indiquerons les enregistrements utiles, ou nous vous dirons franchement qu’il n’y en a pas encore.',
     'contact.06': 'Coordonnées',
     'contact.07': 'Courriel',
