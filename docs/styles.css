@@ -36,19 +36,11 @@ a:hover{color:var(--accent);border-bottom-color:var(--accent)}
 
 /* masthead */
 .masthead{position:sticky;top:0;z-index:600;background:var(--paper)}
-.mh-1{display:flex;align-items:center;gap:16px;max-width:1240px;margin:0 auto;padding:7px 26px;
-  font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink-3);text-transform:uppercase}
-.mh-1 .org{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mh-1 .stamp{margin-left:auto;display:flex;gap:14px;align-items:center;flex:none}
 .mh-2{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--panel)}
 .mh-2-in{display:flex;align-items:stretch;gap:26px;max-width:1240px;margin:0 auto;padding:0 26px}
-.mark{display:flex;align-items:center;gap:11px;padding:12px 0;border:0}
+.mark{display:flex;align-items:center;padding:12px 0;border:0}
 .mark:hover{color:inherit}
-.mark-glyph{display:flex;gap:2px;align-items:flex-end;height:15px}
-.mark-glyph i{width:3px;display:block}
 .mark-t{font-family:var(--display);font-size:23px;line-height:1.05}
-.mark-s{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--ink-3);margin-top:1px}
 nav.main{display:flex;margin-left:auto;align-items:stretch;overflow-x:auto;scrollbar-width:none}
 nav.main::-webkit-scrollbar{display:none}
 nav.main a{display:flex;align-items:center;white-space:nowrap;padding:0 12px;font-size:13px;color:var(--ink-2);border:0;position:relative}
@@ -93,18 +85,6 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 /* drop a photograph in with data-photo="img/about.jpg"; see docs/img/README.md */
 .hero-art.photo{background-size:cover;background-position:center}
 .hero-art.photo canvas{display:none}
-.hero-art figcaption{position:absolute;left:0;right:0;bottom:0;padding:11px 16px;
-  background:var(--panel);border-top:1px solid var(--line);
-  font-family:var(--mono);font-size:10px;line-height:1.5;letter-spacing:.04em;color:var(--ink-2)}
-
-/* the six headline counts */
-.figs{border-bottom:1px solid var(--rule);background:var(--paper)}
-.figs-in{max-width:1240px;margin:0 auto;padding:0 26px;display:grid;
-  grid-template-columns:repeat(6,1fr)}
-.figs-in > div{padding:20px 18px;border-left:1px solid var(--line)}
-.figs-in > div:first-child{border-left:0;padding-left:0}
-.figs-in b{display:block;font-family:var(--display);font-size:36px;line-height:1;
-  font-weight:400;margin-top:7px}
 
 /* document pages */
 .doc{max-width:1240px;margin:0 auto;padding:46px 26px 0;display:grid;
@@ -146,6 +126,17 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
   display:flex;gap:20px;
   flex-wrap:wrap;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 
+/* partner marks, centred at the foot of a page */
+.partners{max-width:1240px;margin:64px auto 0;padding:34px 26px 6px;
+  border-top:1px solid var(--line);text-align:center}
+.partners .lbl{display:block;margin-bottom:20px}
+.partners hr{border:0;border-top:1px solid var(--line);width:180px;margin:34px auto}
+.logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:22px 44px}
+.logo{border:0;display:inline-flex;align-items:center;font-family:var(--display);
+  font-size:19px;line-height:1.25;color:var(--ink);max-width:30ch}
+.logo:hover{color:var(--accent)}
+.logo img{height:38px;width:auto;display:block}
+
 .stub{border:1px solid var(--line-2);border-left:2px solid var(--line-2);background:var(--wash);
   padding:16px 18px}
 .doc-main .stub{max-width:56ch}
@@ -170,8 +161,6 @@ footer .f-in{max-width:1240px;margin:0 auto;padding:0 26px;display:flex;gap:20px
 @media (max-width:1040px){
   .doc{grid-template-columns:minmax(0,1fr);gap:0}
   .doc-rail{position:static;margin-top:8px}
-  .figs-in{grid-template-columns:repeat(3,1fr)}
-  .figs-in > div:nth-child(4){border-left:0;padding-left:0}
 }
 @media (max-width:860px){
   .hero-in{grid-template-columns:minmax(0,1fr)}
@@ -186,9 +175,6 @@ footer .f-in{max-width:1240px;margin:0 auto;padding:0 26px;display:flex;gap:20px
   .doc-foot{margin-top:40px;padding-left:22px;padding-right:22px}
   .hero-in{padding:0 22px}
   .hero-art{margin:0 -22px;min-width:calc(100% + 44px)}
-  .figs-in{grid-template-columns:repeat(2,1fr);padding:0 22px}
-  .figs-in > div:nth-child(odd){border-left:0;padding-left:0}
-  .figs-in b{font-size:30px}
   /* keep the wordmark on one line so the nav keeps its room */
   .mark-t{font-size:17px;white-space:nowrap}
   .mh-2-in{padding:0 22px;gap:14px}

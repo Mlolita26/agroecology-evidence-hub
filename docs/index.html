@@ -47,20 +47,9 @@
           </div>
           <figure class="hero-art" data-photo="img/home.jpg">
             <canvas></canvas>
-            <figcaption data-t="home.06">Market gardening on smallholder plots. Photo: Olivier Asselin / FAO.</figcaption>
           </figure>
       </div>
     </header>
-    <div class="figs">
-      <div class="figs-in">
-        <div><span class="lbl" data-t="home.07">Comparisons</span><b id="h-obs">0</b></div>
-        <div><span class="lbl" data-t="home.08">Countries</span><b id="h-cty">0</b></div>
-        <div><span class="lbl" data-t="home.09">Crops</span><b id="h-crop">0</b></div>
-        <div><span class="lbl" data-t="home.10">Practices</span><b id="h-prac">0</b></div>
-        <div><span class="lbl" data-t="home.11">Outcomes</span><b id="h-out">0</b></div>
-        <div><span class="lbl" data-t="home.12">Source syntheses</span><b id="h-syn">0</b></div>
-      </div>
-    </div>
     <div class="doc">
       <div class="doc-main">
         <div class="copy">
@@ -75,6 +64,17 @@
         </div>
       </div>
       <aside class="doc-rail">
+        <div class="doc-sec">
+          <span class="lbl" data-t="home.28">What is loaded today</span>
+          <table class="meta-t">
+            <tr><td data-t="home.07">Comparisons</td><td id="h-obs">0</td></tr>
+            <tr><td data-t="home.08">Countries</td><td id="h-cty">0</td></tr>
+            <tr><td data-t="home.09">Crops</td><td id="h-crop">0</td></tr>
+            <tr><td data-t="home.10">Practices</td><td id="h-prac">0</td></tr>
+            <tr><td data-t="home.11">Outcomes</td><td id="h-out">0</td></tr>
+            <tr><td data-t="home.12">Source syntheses</td><td id="h-syn">0</td></tr>
+          </table>
+        </div>
         <div class="doc-sec">
           <span class="lbl" data-t="home.17">Coverage</span>
           <div class="stub">
@@ -181,7 +181,6 @@
       </div>
       <figure class="hero-art" data-photo="img/about.webp">
         <canvas></canvas>
-        <figcaption data-t="about.04">Harvesting greens under a diverse canopy, one of the systems the evidence covers.</figcaption>
       </figure>
   </div>
 </header>
@@ -209,17 +208,6 @@
   </div>
   <aside class="doc-rail">
     <div class="doc-sec">
-      <span class="lbl" data-t="about.19">Partners</span>
-      <table class="meta-t">
-        <tr><td data-t="about.20">Lead</td><td data-t="about.21">Alliance of Bioversity International &amp; CIAT</td></tr>
-        <tr><td data-t="about.22">Programme</td><td data-t="about.23">CGIAR Multifunctional Landscapes, AoW05</td></tr>
-        <tr><td data-t="about.24">Synthesis</td><td data-t="about.25">CIRAD</td></tr>
-        <tr><td data-t="about.26">Second order library</td><td data-t="about.27">European Commission Joint Research Centre</td></tr>
-        <tr><td data-t="about.28">Platform and stats</td><td data-t="about.29">Stats4SD</td></tr>
-        <tr><td data-t="about.30">Also</td><td data-t="about.31">WorldFish and regional partners</td></tr>
-      </table>
-    </div>
-    <div class="doc-sec">
       <span class="lbl" data-t="about.32">Governance</span>
       <div class="stub">
         <b data-t="about.33">To be filled</b>
@@ -228,6 +216,23 @@
     </div>
   </aside>
 </div>
+<!-- Partner marks. Swap a <span> for <img src="img/logos/name.svg" alt="Name">
+     once a logo file exists; see docs/img/README.md. -->
+<section class="partners">
+  <span class="lbl" data-t="about.19">Developed by</span>
+  <div class="logos">
+    <a class="logo" href="https://alliancebioversityciat.org" target="_blank" rel="noopener"><span>Alliance of Bioversity International &amp; CIAT</span></a>
+    <a class="logo" href="https://www.cgiar.org" target="_blank" rel="noopener"><span>CGIAR Multifunctional Landscapes</span></a>
+  </div>
+  <hr>
+  <span class="lbl" data-t="about.20">With partners</span>
+  <div class="logos">
+    <a class="logo" href="https://www.cirad.fr" target="_blank" rel="noopener"><span>CIRAD</span></a>
+    <a class="logo" href="https://joint-research-centre.ec.europa.eu" target="_blank" rel="noopener"><span>European Commission Joint Research Centre</span></a>
+    <a class="logo" href="https://stats4sd.org" target="_blank" rel="noopener"><span>Stats4SD</span></a>
+    <a class="logo" href="https://worldfishcenter.org" target="_blank" rel="noopener"><span>WorldFish</span></a>
+  </div>
+</section>
 <div class="doc-foot"><span data-t="about.35">Reporting standard: ROSES</span><span data-t="about.36">FAIR metadata</span><span data-t="about.37">CC BY 4.0</span></div>
 </main>
 <!-- ============ METHODOLOGY ============ -->
@@ -241,7 +246,6 @@
       </div>
       <figure class="hero-art" data-photo="img/methodology.jpg">
         <canvas></canvas>
-        <figcaption data-t="methodology.04">Carrying rice seedlings to a terraced field.</figcaption>
       </figure>
   </div>
 </header>
@@ -310,7 +314,6 @@
       </div>
       <figure class="hero-art" data-art="country">
         <canvas></canvas>
-      <figcaption data-t="involved.04">Banded by country, largest first. The bands are uneven because coverage follows the sources.</figcaption>
     </figure>
   </div>
 </header>
@@ -351,7 +354,6 @@
       </div>
       <figure class="hero-art" data-art="synthesis">
         <canvas></canvas>
-      <figcaption data-t="contact.04">Banded by source synthesis. Two are loaded today; each new one adds a band.</figcaption>
     </figure>
   </div>
 </header>
@@ -387,6 +389,7 @@
     <span data-t="footer.01">Agroecology Evidence Hub, draft 0.4</span>
     <span data-t="footer.02">Data CC BY 4.0</span>
     <span data-t="footer.03">Boundaries: Natural Earth, geoBoundaries</span>
+    <span data-t="footer.06">Photographs: Olivier Asselin / FAO</span>
     <a data-t="footer.04" href="#methodology" style="margin-left:auto">Methodology</a>
     <a data-t="footer.05" href="#contact">Contact</a>
   </div>

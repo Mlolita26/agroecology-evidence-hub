@@ -27,6 +27,26 @@ them a photograph, drop the file here and name it on that page's header in
 
 Remove `data-photo` to go back to the artwork. Each page is independent.
 
+## Partner logos are still text
+
+The partner band at the foot of the About page currently sets each partner's
+name in type, because no logo files were supplied. To use a real logo, put the
+file in `img/logos/` and swap the `<span>` for an `<img>` in `index.html`:
+
+```html
+<a class="logo" href="https://www.cirad.fr" target="_blank" rel="noopener">
+  <img src="img/logos/cirad.svg" alt="CIRAD">
+</a>
+```
+
+SVG is best, or PNG at about 200 pixels tall on a transparent background. Logos
+are drawn at 38 pixels tall. Most partner logos are dark on transparent and will
+disappear in dark mode, so either use a version that works on both, or ask for
+one and add a rule in `styles.css`.
+
+The partner links were written from the organisations' usual addresses. Check
+each one before the site is promoted.
+
 ## Practical notes
 
 - About 1600 by 1100 pixels is plenty. The box is roughly half the page width
