@@ -33,6 +33,13 @@
   const english = new Map();
   document.querySelectorAll('[data-t]').forEach(el => english.set(el, el.innerHTML));
 
+  /* A data value as the reader should see it. Records keep their English
+     values, so filtering and the CSV download are unaffected. */
+  function term(value) {
+    const table = (window.KH_VOCAB && window.KH_VOCAB[lang]) || {};
+    return table[value] || value;
+  }
+
   function t(key, vars) {
     const table = (window.KH_UI && window.KH_UI[lang]) || {};
     let s = key in table ? table[key] : window.KH_UI.en[key];
@@ -149,11 +156,12 @@
       '</span><span class="dl-val">' + t('all') + '</span><span class="car">▾</span></button>' +
       '<div class="pop"><input class="search" type="text" placeholder="' + t('search') + '"><div class="list"></div></div>';
     const list = dd.querySelector('.list');
-    uniq(d.key).forEach(v => {
+    uniq(d.key).sort((a, b) => term(a).localeCompare(term(b))).forEach(v => {
       const l = document.createElement('label');
       l.className = 'opt';
       l.dataset.k = d.key; l.dataset.v = v;
-      l.innerHTML = '<input type="checkbox"><span>' + v + '</span><span class="c">0</span>';
+      l.dataset.label = term(v);
+      l.innerHTML = '<input type="checkbox"><span>' + term(v) + '</span><span class="c">0</span>';
       l.querySelector('input').addEventListener('change', e => {
         if (e.target.checked) sel[d.key].add(v); else sel[d.key].delete(v);
         render();
@@ -170,7 +178,7 @@
     dd.querySelector('.search').addEventListener('input', e => {
       const q = e.target.value.toLowerCase();
       list.querySelectorAll('.opt').forEach(l => {
-        l.style.display = l.dataset.v.toLowerCase().includes(q) ? '' : 'none';
+        l.style.display = l.dataset.label.toLowerCase().includes(q) ? '' : 'none';
       });
     });
     groups.appendChild(dd);
@@ -183,7 +191,7 @@
     groups.querySelectorAll('.dd').forEach(dd => {
       const s = sel[dd.dataset.key];
       dd.querySelector('.dl-val').textContent =
-        s.size === 0 ? t('all') : s.size === 1 ? [...s][0] : t('nSelected', { n: s.size });
+        s.size === 0 ? t('all') : s.size === 1 ? term([...s][0]) : t('nSelected', { n: s.size });
     });
   }
   function syncBoxes() {
@@ -305,7 +313,7 @@
           const n = f.properties && f.properties.name;
           if (!n) return;
           const country = NAME2C[n];
-          l.bindTooltip(country ? t('clickToSelect', { name: n }) : n, { className: 'tip', sticky: true });
+          l.bindTooltip(country ? t('clickToSelect', { name: term(country) }) : n, { className: 'tip', sticky: true });
           l.on('mouseover', () => l.setStyle(country
             ? { weight: 1.2, color: cssVar('--ink-2'), fillColor: cssVar('--geo-hover') }
             : { weight: .8, color: cssVar('--geo-line') }));
@@ -424,30 +432,56 @@
     const x = (lon) => (lon + 180) / 360 * w;
     const y = (lat) => (TOP - lat) / (TOP - BOTTOM) * h;
 
+    /* a repeatable scatter of dots, used to fill the land like a pen sketch */
+    const stipple = (ink, size, dots) => {
+      const tile = document.createElement('canvas');
+      tile.width = tile.height = size;
+      const t = tile.getContext('2d');
+      t.fillStyle = ink;
+      dots.forEach(([dx, dy, r]) => {
+        t.beginPath(); t.arc(dx, dy, r || .8, 0, Math.PI * 2); t.fill();
+      });
+      return ctx.createPattern(tile, 'repeat');
+    };
+    /* nudge each point off the true line, so the outline reads as drawn by hand */
+    const wobble = (seed) => (Math.sin(seed * 12.9898) * 43758.5453 % 1) * 2.4;
+
     loadWorld().then(world => {
       if (!world) return;
+      const ink = cssVar('--ink-3');
+      const dense = stipple(cssVar('--ink-2'), 11,
+        [[2, 2], [7, 1, 1], [4, 6], [9, 5], [1, 9], [8, 9, 1], [10, 10], [5, 10]]);
+      const sparse = stipple(ink, 17, [[3, 4], [11, 2], [7, 12], [14, 9]]);
       const withData = new Set(uniq('country').map(wname));
-      const drawRings = (rings) => rings.forEach(ring => {
-        ctx.beginPath();
-        ring.forEach((p, i) => (i ? ctx.lineTo(x(p[0]), y(p[1])) : ctx.moveTo(x(p[0]), y(p[1]))));
+
+      const trace = (rings) => rings.forEach(ring => {
+        ring.forEach((p, i) => {
+          const px = x(p[0]) + wobble(p[0] + i);
+          const py = y(p[1]) + wobble(p[1] * 3 + i);
+          if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+        });
         ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
       });
 
-      ctx.lineWidth = 0.6;
+      ctx.lineJoin = 'round';
       world.features.forEach(f => {
-        const has = withData.has(f.properties && f.properties.name);
-        ctx.fillStyle = cssVar(has ? '--geo-fill' : '--geo-fill-dim');
-        ctx.strokeStyle = cssVar(has ? '--geo-line' : '--geo-line-dim');
         const g = f.geometry;
         if (!g) return;
-        if (g.type === 'Polygon') drawRings(g.coordinates);
-        else if (g.type === 'MultiPolygon') g.coordinates.forEach(drawRings);
+        const has = withData.has(f.properties && f.properties.name);
+        ctx.beginPath();
+        if (g.type === 'Polygon') trace(g.coordinates);
+        else if (g.type === 'MultiPolygon') g.coordinates.forEach(trace);
+        ctx.globalAlpha = has ? 1 : .45;
+        ctx.fillStyle = has ? dense : sparse;
+        ctx.fill();
+        ctx.strokeStyle = has ? cssVar('--ink-2') : ink;
+        ctx.lineWidth = has ? 1.1 : .6;
+        ctx.stroke();
       });
+      ctx.globalAlpha = 1;
 
-      ctx.strokeStyle = cssVar('--panel');
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = cssVar('--wash');
+      ctx.lineWidth = 1.5;
       D.forEach(r => {
         ctx.beginPath();
         ctx.arc(x(r.lon), y(r.lat), 4, 0, Math.PI * 2);
@@ -488,7 +522,7 @@
       borders.bringToBack();
       if (feats.length) fitTo(borders.getBounds());
       if (note) note.textContent = feats.length
-        ? t('countryView', { names: [...sel.country].join(', ') })
+        ? t('countryView', { names: [...sel.country].map(term).join(', ') })
         : t('noBoundary');
       if (regions) regions.bringToFront();
       if (layer) layer.eachLayer(m => m.bringToFront());
@@ -540,9 +574,9 @@
         weight: isSel ? 2 : 1
       });
       m.bindTooltip(
-        '<div class="tv">' + sgn(r.value) + ', ' + r.outcome + '</div>' +
-        '<div>' + t('tipVs', { practice: r.practice, comparator: r.comparator }) + '</div>' +
-        '<div class="tm">' + r.crop + ', ' + r.country + (r.tN ? ', n=' + r.tN : '') + '</div>',
+        '<div class="tv">' + sgn(r.value) + ', ' + term(r.outcome) + '</div>' +
+        '<div>' + t('tipVs', { practice: term(r.practice), comparator: term(r.comparator) }) + '</div>' +
+        '<div class="tm">' + term(r.crop) + ', ' + term(r.country) + (r.tN ? ', n=' + r.tN : '') + '</div>',
         { className: 'tip', direction: 'top', offset: [0, -3] }
       );
       m.on('click', () => showDetail(r));
@@ -566,7 +600,7 @@
     const med = median(rows.map(r => r.value));
     const pos = rows.filter(r => r.value > 0).length;
     const scope = DIMS.filter(d => sel[d.key].size)
-      .map(d => [...sel[d.key]].slice(0, 3).join(', ') +
+      .map(d => [...sel[d.key]].slice(0, 3).map(term).join(', ') +
         (sel[d.key].size > 3 ? t('andMore', { n: sel[d.key].size - 3 }) : ''));
     const where = scope.length ? scope.join(', ') : t('wholeDataset');
     const byP = {};
@@ -577,7 +611,7 @@
       n: rows.length, scope: where, median: sgn(med),
       percent: Math.round(pos / rows.length * 100)
     }) + (best ? t('readoutBest', {
-      practice: best[0], median: sgn(median(best[1])), n: best[1].length
+      practice: term(best[0]), median: sgn(median(best[1])), n: best[1].length
     }) : '') + '.';
     const ns = rows.map(r => r.tN).filter(Boolean);
     put(html, [
@@ -604,11 +638,11 @@
     const outcomes = Object.keys(oCount).sort((a, b) => oCount[b] - oCount[a]);
     let html = '<div class="heat"><table><thead><tr><th class="rowh"><span>' + t('heatPractice') + '</span></th>';
     outcomes.forEach(o => {
-      html += '<th data-o="' + o + '" title="' + t('heatCount', { name: o, n: oCount[o] }) + '"><span>' + o + '</span></th>';
+      html += '<th data-o="' + o + '" title="' + t('heatCount', { name: term(o), n: oCount[o] }) + '"><span>' + term(o) + '</span></th>';
     });
     html += '</tr></thead><tbody>';
     practices.forEach(p => {
-      html += '<tr><td class="rowh" data-p="' + p + '" title="' + t('heatCount', { name: p, n: pCount[p] }) + '">' + p + '</td>';
+      html += '<tr><td class="rowh" data-p="' + p + '" title="' + t('heatCount', { name: term(p), n: pCount[p] }) + '">' + term(p) + '</td>';
       outcomes.forEach(o => {
         const v = cells[p + '||' + o];
         if (!v) { html += '<td class="cell empty">·</td>'; return; }
@@ -616,7 +650,7 @@
         const lab = Math.abs(m) >= 100 ? Math.round(m) : Math.round(m * 10) / 10;
         html += '<td class="cell" data-p="' + p + '" data-o="' + o + '"' +
           ' style="background:' + color(m) + ';color:' + inkOn(m) + '"' +
-          ' title="' + t('heatCell', { practice: p, outcome: o, median: sgn(m), n: v.length }) + '">' +
+          ' title="' + t('heatCell', { practice: term(p), outcome: term(o), median: sgn(m), n: v.length }) + '">' +
           (m > 0 ? '+' : '') + lab + '%<span class="cn">n ' + v.length + '</span></td>';
       });
       html += '</tr>';
@@ -657,12 +691,14 @@
   }
 
   const MAXROWS = 300;
+  /* columns holding a controlled-vocabulary value, shown in the reader's language */
+  const WORDS = ['country', 'crop', 'practice', 'comparator', 'outcome'];
   const fmt = (c, r) => {
     const v = r[c.k];
     if (v === null || v === undefined || v === '') return '—';
     if (c.k === 'value') return sgn(v);
     if (c.k === 'lnRR' || c.k === 'lnRR_SE') return v.toFixed(2);
-    return v;
+    return WORDS.includes(c.k) ? term(v) : v;
   };
   function table(rows) {
     const s = [...rows].sort((a, b) => {
@@ -692,7 +728,7 @@
       DIMS.forEach(d => sel[d.key].forEach(v => {
         const c = document.createElement('span');
         c.className = 'chip';
-        c.innerHTML = '<span>' + v + '</span><button title="' + t('remove') + '">✕</button>';
+        c.innerHTML = '<span>' + term(v) + '</span><button title="' + t('remove') + '">✕</button>';
         c.querySelector('button').addEventListener('click', () => { sel[d.key].delete(v); syncBoxes(); render(); });
         box.appendChild(c);
       }));
@@ -713,9 +749,9 @@
     if (!r) return;
     const num = (v, dp) => (v === null || v === undefined || v === '') ? '—' : (typeof v === 'number' ? v.toFixed(dp) : v);
     const rows = [
-      [t('dlOutcome'), r.outcome], [t('dlMeasured'), r.subOutcome || '—'], [t('dlUnit'), r.unit || '—'],
-      [t('dlPractice'), r.practiceDetail || r.practice], [t('dlComparator'), r.comparator],
-      [t('dlCrop'), r.cropFull], [t('dlCountry'), r.country], [t('dlRegion'), r.region],
+      [t('dlOutcome'), term(r.outcome)], [t('dlMeasured'), term(r.subOutcome) || '—'], [t('dlUnit'), r.unit || '—'],
+      [t('dlPractice'), r.practiceDetail || term(r.practice)], [t('dlComparator'), term(r.comparator)],
+      [t('dlCrop'), r.cropFull], [t('dlCountry'), term(r.country)], [t('dlRegion'), term(r.region)],
       [t('dlSite'), r.site || '—'], [t('dlCoords'), r.lat + ', ' + r.lon],
       [t('dlControlMean'), num(r.cMean, 2) + (r.cSD !== null ? ' ± ' + num(r.cSD, 2) : '')],
       [t('dlTreatmentMean'), num(r.tMean, 2) + (r.tSD !== null ? ' ± ' + num(r.tSD, 2) : '')],
@@ -728,13 +764,13 @@
     ];
     $('#detail-body').innerHTML =
       '<span class="lbl">' + r.id + '</span>' +
-      '<h3>' + r.practice + '</h3>' +
-      '<div style="font-size:13px;color:var(--ink-2)">' + r.crop + ', ' + r.country + '</div>' +
+      '<h3>' + term(r.practice) + '</h3>' +
+      '<div style="font-size:13px;color:var(--ink-2)">' + term(r.crop) + ', ' + term(r.country) + '</div>' +
       '<div class="big" style="color:' + color(r.value) + '">' + sgn(r.value) + '</div>' +
-      '<div class="lbl">' + t('detailChange', { outcome: r.outcome }) + '</div>' +
+      '<div class="lbl">' + t('detailChange', { outcome: term(r.outcome) }) + '</div>' +
       '<dl class="dl">' + rows.map(p => '<dt>' + p[0] + '</dt><dd>' + p[1] + '</dd>').join('') + '</dl>' +
       '<div style="display:flex;gap:7px;margin-top:16px;flex-wrap:wrap">' +
-      '<button class="btn sm ghost" data-f="country">' + t('onlyCountry', { country: r.country }) + '</button>' +
+      '<button class="btn sm ghost" data-f="country">' + t('onlyCountry', { country: term(r.country) }) + '</button>' +
       '<button class="btn sm ghost" data-f="practice">' + t('onlyPractice') + '</button></div>';
     $('#detail-body').querySelectorAll('[data-f]').forEach(b =>
       b.addEventListener('click', () => toggle(b.dataset.f, r[b.dataset.f], true)));
@@ -744,7 +780,7 @@
     const badge = $('#sel-badge');
     if (badge) {
       badge.classList.add('on');
-      badge.querySelector('span').textContent = t('oneHighlighted', { country: r.country, practice: r.practice });
+      badge.querySelector('span').textContent = t('oneHighlighted', { country: term(r.country), practice: term(r.practice) });
     }
     if (map) {
       drawPoints(D.filter(match));
@@ -777,7 +813,7 @@
     const body = [keys.join(','), ...rows.map(r => keys.map(k => esc(r[k])).join(','))].join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([body], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'agroecology-evidence-hub-' + rows.length + '-comparisons.csv';
+    a.download = 'agroecology-knowledge-hub-' + rows.length + '-comparisons.csv';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
