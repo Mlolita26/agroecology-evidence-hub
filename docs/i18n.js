@@ -168,7 +168,7 @@ window.KH_TEXT = {
     'footer.03': 'Límites: Natural Earth, geoBoundaries',
     'footer.04': 'Metodología',
     'footer.05': 'Contacto',
-    'footer.06': 'Fotografías: Olivier Asselin / FAO'
+    'footer.06': 'Fotografías: Olivier Asselin / FAO; faltan otros créditos'
   },
 
   fr: {
@@ -317,7 +317,7 @@ window.KH_TEXT = {
     'footer.03': 'Limites : Natural Earth, geoBoundaries',
     'footer.04': 'Méthode',
     'footer.05': 'Contact',
-    'footer.06': 'Photographies : Olivier Asselin / FAO'
+    'footer.06': 'Photographies : Olivier Asselin / FAO ; autres crédits à venir'
   }
 };
 
