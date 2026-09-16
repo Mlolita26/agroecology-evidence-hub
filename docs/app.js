@@ -260,7 +260,15 @@
     if (worldPending) return worldPending;
     worldPending = fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
       .then(r => r.json())
-      .then(topo => { world = fixAntimeridian(topojson.feature(topo, topo.objects.countries)); return world; })
+      .then(topo => {
+        world = fixAntimeridian(topojson.feature(topo, topo.objects.countries));
+        /* the same countries dissolved into one landmass, with the shared
+           borders removed, for the coastline-only drawing on the home page.
+           Left unshifted: that drawing is flat, and splits the rings that
+           cross the antimeridian itself. */
+        world.land = topojson.merge(topo, topo.objects.countries.geometries);
+        return world;
+      })
       .catch(err => { console.warn('Country geometry failed to load:', err); return null; });
     return worldPending;
   }
@@ -411,13 +419,17 @@
   heroes.forEach(box => watch.observe(box));
 
   /* ---------- landing-page map preview ----------
-     The same countries and the same records as the explore map, drawn flat on
-     a canvas. It is a picture of the real data, not an illustration. */
+     A DECORATIVE sketch, not a chart. The coastlines are real, drawn as one
+     dissolved landmass so that no country borders show, but the scattered
+     points are invented and spread over every continent. They are there to
+     invite people into the explorer, which is why the caption promises
+     nothing about coverage. The real, and far sparser, distribution of
+     records is on the explore map. */
   const preview = $('#map-preview');
   function paintMapPreview() {
     if (!preview) return;
     const canvas = preview.querySelector('canvas');
-    const w = preview.clientWidth, h = canvas.clientHeight;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
     if (!w || !h) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -433,59 +445,68 @@
     const y = (lat) => (TOP - lat) / (TOP - BOTTOM) * h;
 
     /* a repeatable scatter of dots, used to fill the land like a pen sketch */
-    const stipple = (ink, size, dots) => {
+    const stipple = (ink) => {
       const tile = document.createElement('canvas');
-      tile.width = tile.height = size;
+      tile.width = tile.height = 11;
       const t = tile.getContext('2d');
       t.fillStyle = ink;
-      dots.forEach(([dx, dy, r]) => {
-        t.beginPath(); t.arc(dx, dy, r || .8, 0, Math.PI * 2); t.fill();
-      });
+      [[2, 2], [7, 1], [4, 6], [9, 5], [1, 9], [8, 9], [10, 10], [5, 10]]
+        .forEach(([dx, dy]) => { t.beginPath(); t.arc(dx, dy, .8, 0, Math.PI * 2); t.fill(); });
       return ctx.createPattern(tile, 'repeat');
     };
-    /* nudge each point off the true line, so the outline reads as drawn by hand */
-    const wobble = (seed) => (Math.sin(seed * 12.9898) * 43758.5453 % 1) * 2.4;
+    /* nudge each point off the true line, so the coast reads as drawn by hand */
+    const wobble = (seed) => (Math.sin(seed * 12.9898) * 43758.5453 % 1) * 2.2;
+    /* one fixed sequence, so the scatter is identical on every redraw */
+    let seed = 7;
+    const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
 
     loadWorld().then(world => {
-      if (!world) return;
-      const ink = cssVar('--ink-3');
-      const dense = stipple(cssVar('--ink-2'), 11,
-        [[2, 2], [7, 1, 1], [4, 6], [9, 5], [1, 9], [8, 9, 1], [10, 10], [5, 10]]);
-      const sparse = stipple(ink, 17, [[3, 4], [11, 2], [7, 12], [14, 9]]);
-      const withData = new Set(uniq('country').map(wname));
+      if (!world || !world.land) return;
 
+      ctx.beginPath();
       const trace = (rings) => rings.forEach(ring => {
-        ring.forEach((p, i) => {
-          const px = x(p[0]) + wobble(p[0] + i);
-          const py = y(p[1]) + wobble(p[1] * 3 + i);
-          if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+        let last = null;
+        ring.forEach(p => {
+          const px = x(p[0]) + wobble(p[0] + ring.length);
+          const py = y(p[1]) + wobble(p[1] * 3 + ring.length);
+          /* a jump most of the way across means the ring crosses the
+             antimeridian; start a new line instead of drawing a streak */
+          if (last === null || Math.abs(px - last) > w / 8) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+          last = px;
         });
-        ctx.closePath();
       });
+      const g = world.land;
+      if (g.type === 'Polygon') trace(g.coordinates);
+      else g.coordinates.forEach(trace);
 
-      ctx.lineJoin = 'round';
-      world.features.forEach(f => {
-        const g = f.geometry;
-        if (!g) return;
-        const has = withData.has(f.properties && f.properties.name);
-        ctx.beginPath();
-        if (g.type === 'Polygon') trace(g.coordinates);
-        else if (g.type === 'MultiPolygon') g.coordinates.forEach(trace);
-        ctx.globalAlpha = has ? 1 : .45;
-        ctx.fillStyle = has ? dense : sparse;
-        ctx.fill();
-        ctx.strokeStyle = has ? cssVar('--ink-2') : ink;
-        ctx.lineWidth = has ? 1.1 : .6;
-        ctx.stroke();
-      });
+      ctx.globalAlpha = .55;
+      ctx.fillStyle = stipple(cssVar('--ink-3'));
+      ctx.fill();
       ctx.globalAlpha = 1;
+      ctx.strokeStyle = cssVar('--ink-3');
+      ctx.lineWidth = .8;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
 
+      /* keep only the invented points that fall on farmed land: on the
+         drawing, and south of roughly 60 degrees north */
+      const spots = [];
+      const northEdge = y(60);
+      while (spots.length < 115) {
+        const px = rnd() * w, py = northEdge + rnd() * (h - northEdge);
+        if (ctx.isPointInPath(px, py)) spots.push([px, py, rnd()]);
+      }
+
+      /* the pale middle of the scale disappears against the paper, so the
+         points use the six that read: three teal, three pink */
+      const stops = ramp().filter((c, i) => i !== 3);
       ctx.strokeStyle = cssVar('--wash');
-      ctx.lineWidth = 1.5;
-      D.forEach(r => {
+      ctx.lineWidth = 1.4;
+      spots.forEach(([px, py, r]) => {
         ctx.beginPath();
-        ctx.arc(x(r.lon), y(r.lat), 4, 0, Math.PI * 2);
-        ctx.fillStyle = color(r.value);
+        ctx.arc(px, py, 2.6 + r * 2, 0, Math.PI * 2);
+        ctx.fillStyle = stops[Math.floor(r * stops.length)];
         ctx.fill();
         ctx.stroke();
       });

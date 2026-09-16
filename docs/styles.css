@@ -86,16 +86,11 @@ nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:0;
 .hero-art.photo{background-size:cover;background-position:center}
 .hero-art.photo canvas{display:none}
 
-/* landing-page map preview, the whole thing a link to the explorer */
-.mapcard{display:block;position:relative;border:0;border-bottom:1px solid var(--rule);
-  background:var(--wash);overflow:hidden}
-.mapcard canvas{display:block;width:100%;height:clamp(240px,30vw,400px)}
-/* keeps the caption on the same left edge as the rest of the page */
-.mapcard-in{position:absolute;inset:0;max-width:1240px;margin:0 auto;padding:0 26px;
-  display:block;pointer-events:none}
-.mapcard-cap{position:absolute;left:26px;bottom:0;display:flex;flex-direction:column;gap:4px;
-  padding:14px 18px;background:var(--panel);border:1px solid var(--rule);border-bottom:0;
-  max-width:min(460px,86%)}
+/* landing-page map preview: a drawing on the page, no panel behind it */
+.mapcard{display:block;border:0;max-width:1240px;margin:0 auto;padding:34px 26px 0}
+.mapcard canvas{display:block;width:100%;height:clamp(190px,23vw,320px)}
+.mapcard-cap{display:flex;flex-direction:column;gap:3px;margin-top:14px;
+  padding-top:13px;border-top:1px solid var(--line)}
 .mapcard-cap b{font-family:var(--display);font-size:19px;font-weight:400;line-height:1.2;color:var(--ink)}
 .mapcard-cap span{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;
   text-transform:uppercase;color:var(--ink-3)}
