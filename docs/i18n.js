@@ -31,7 +31,7 @@ window.KH_TEXT = {
     'nav.06': 'Contacto',
 
     'home.02': '¿Qué tan bien funcionan las prácticas agroecológicas, y dónde?',
-    'home.03': 'Reunimos los ensayos de campo que otros estudios ya midieron y los ponemos en un mapa, para que vea qué cambió cada práctica.',
+    'home.03': 'Unimos los datos de los estudios de campo publicados y mostramos qué cambia realmente cada práctica.',
     'home.04': 'Explorar datos',
     'home.05': 'Cómo se construyen los datos',
     'home.13': 'Cada registro compara una parcela de control con una de tratamiento, para un resultado. Tiene un lugar, un cultivo, una práctica y la diferencia medida. Filtre los registros, mírelos en el mapa y descargue lo que elija.',
@@ -180,7 +180,7 @@ window.KH_TEXT = {
     'nav.06': 'Contact',
 
     'home.02': 'Les pratiques agroécologiques, ça marche à quel point, et où ?',
-    'home.03': 'Nous rassemblons les essais de terrain que d’autres études ont déjà mesurés et nous les mettons sur une carte, pour voir ce que chaque pratique a changé.',
+    'home.03': 'Nous réunissons les données des études de terrain publiées et montrons ce que chaque pratique change vraiment.',
     'home.04': 'Explorer les données',
     'home.05': 'Comment les données sont faites',
     'home.13': 'Chaque enregistrement compare une parcelle témoin et une parcelle traitée, pour un résultat. Il y a un lieu, une culture, une pratique et la différence mesurée. Filtrez les enregistrements, regardez-les sur la carte et téléchargez ce que vous avez choisi.',
