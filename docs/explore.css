@@ -86,6 +86,20 @@
   border:1px solid var(--rule);padding:7px 10px;font-family:var(--mono);font-size:10.5px;
   letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
 .selbadge.on{display:flex}
+
+/* colour key: sits in the corner of the map in every view */
+.maplegend{position:absolute;right:12px;bottom:12px;z-index:460;
+  background:var(--glass);backdrop-filter:blur(5px);border:1px solid var(--rule);padding:9px 12px 8px}
+.maplegend .lbl{display:block;font-size:9.5px;margin-bottom:7px;color:var(--ink-2)}
+.maplegend .ramp{width:168px}
+.maplegend .ramp i{height:8px}
+.maplegend .ramp-lab{margin-top:4px;font-size:9.5px}
+.maplegend .mapleg-n{margin:7px 0 0;color:var(--ink-3)}
+/* the record drawer covers this corner and the badge sits along the
+   bottom, so the key steps aside and lifts rather than being hidden */
+.maplegend{transition:right .2s,bottom .2s}
+body:has(#detail.on) .maplegend{right:364px}
+body:has(#sel-badge.on) .maplegend{bottom:56px}
 .selbadge button{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-transform:uppercase}
 
 /* ---- summary view ---- */
@@ -163,6 +177,10 @@ td.sw i{display:block;width:3px;height:31px}
 @media (max-width:860px){
   .toolbar{position:static}
   .readstrip{position:static;width:auto;border:0;border-bottom:1px solid var(--line);backdrop-filter:none;background:var(--wash)}
+  /* the record badge takes the bottom middle, so the key moves left */
+  .maplegend{right:auto;left:10px;bottom:10px;padding:7px 10px 6px}
+  .maplegend .ramp{width:132px}
+  .maplegend .mapleg-n{display:none}
   .opentab{justify-content:center}
   #map{height:56vh}
   .dd > button{min-width:0}

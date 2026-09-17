@@ -59,6 +59,8 @@ window.KH_TEXT = {
     'explore.16': 'Puede hacer clic en las filas y en los encabezados',
     'explore.17': 'Descargar la selección',
     'explore.18': 'comparaciones',
+    'explore.19': 'Cambio frente al control',
+    'explore.20': 'El tamaño del punto es el tamaño de muestra',
 
     'about.01': 'El Hub',
     'about.02': 'Los metaanálisis agroecológicos, reunidos en una base de datos viva.',
@@ -247,6 +249,8 @@ window.KH_TEXT = {
     'explore.16': 'Vous pouvez cliquer sur les lignes et sur les en-têtes',
     'explore.17': 'Télécharger la sélection',
     'explore.18': 'comparaisons',
+    'explore.19': 'Variation par rapport au témoin',
+    'explore.20': 'La taille du point correspond à l’effectif',
 
     'about.01': 'Le Hub',
     'about.02': 'Les méta-analyses agroécologiques, réunies dans une base de données vivante.',
