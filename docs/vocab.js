@@ -13,15 +13,25 @@
    Mucuna pruriens) and index names (Shannon, Simpson, Chao1) are the same in
    every language and are left alone.
 
-   These are working translations and have not been checked by an agronomist.
-   Terminology is the review team's call: correct a term here and it changes
-   everywhere it appears. */
+   Spanish uses the Latin American register, not Spain's: costos not costes,
+   mani not cacahuete, papa not patata. That follows where the Hub's Spanish
+   readers and its host institution are.
+
+   Terms were chosen against what the data actually holds, not word by word.
+   Intercropping is 'cultivos asociados' because the records are mixed stands,
+   not only row intercropping. Tillage is 'travail du sol', not 'labour',
+   which would mean ploughing specifically. Land Equivalent Ratio keeps its
+   LER acronym in both languages, because that is what people search for.
+
+   Still worth an agronomist's eye before the site is promoted. Terminology is
+   the review team's call: correct a term here and it changes everywhere it
+   appears. */
 
 window.KH_VOCAB = {
 
   es: {
     /* countries */
-    'Ethiopia': 'Etiopía', 'India': 'India', 'Kenya': 'Kenia', 'Malawi': 'Malaui',
+    'Ethiopia': 'Etiopía', 'India': 'India', 'Kenya': 'Kenia', 'Malawi': 'Malawi',
     'Mexico': 'México', 'Peru': 'Perú', 'South Africa': 'Sudáfrica',
     'Tunisia': 'Túnez', 'Zambia': 'Zambia',
 
@@ -44,7 +54,7 @@ window.KH_VOCAB = {
     'Oceania': 'Oceanía',
 
     /* outcomes */
-    'Abundance': 'Abundancia', 'Costs': 'Costes', 'Diversity Index': 'Índice de diversidad',
+    'Abundance': 'Abundancia', 'Costs': 'Costos', 'Diversity Index': 'Índice de diversidad',
     'Dominance index': 'Índice de dominancia', 'Economic Performance': 'Resultados económicos',
     'Efficiency': 'Eficiencia', 'Evenness Index': 'Índice de equidad', 'Income': 'Ingresos',
     'Organism Biomass': 'Biomasa de organismos', 'Pest & Pathogen': 'Plagas y patógenos',
@@ -55,9 +65,9 @@ window.KH_VOCAB = {
     'Agroforestry': 'Agroforestería', 'Bare Fallow': 'Barbecho desnudo',
     'Conventional Tillage': 'Labranza convencional', 'Crop rotation': 'Rotación de cultivos',
     'Improved Fallow': 'Barbecho mejorado', 'Insects control': 'Control de insectos',
-    'Intercropping': 'Cultivo intercalado', 'Monoculture': 'Monocultivo',
-    'No Fertilizers Applied': 'Sin fertilizantes', 'Reduced Tillage': 'Labranza reducida',
-    'Semi-natural habitat': 'Hábitat seminatural', 'Simple intercropping': 'Cultivo intercalado simple',
+    'Intercropping': 'Cultivos asociados', 'Monoculture': 'Monocultivo',
+    'No Fertilizers Applied': 'Sin aplicación de fertilizantes', 'Reduced Tillage': 'Labranza reducida',
+    'Semi-natural habitat': 'Hábitat seminatural', 'Simple intercropping': 'Asociación simple de cultivos',
     'External input dependency': 'Dependencia de insumos externos', 'Inoculants': 'Inoculantes',
     'Natural habitat': 'Hábitat natural', 'Timber plantation': 'Plantación maderera',
     'Zero Tillage': 'Siembra directa',
@@ -65,7 +75,7 @@ window.KH_VOCAB = {
     /* crops */
     'Baby Corn': 'Maíz baby', 'Cassava': 'Yuca', 'Castor': 'Ricino', 'Cauliflower': 'Coliflor',
     'Cocoa': 'Cacao', 'Coffee': 'Café', 'Common Bean': 'Frijol común', 'Cowpea': 'Caupí',
-    'Fava Bean': 'Haba', 'Groundnut': 'Cacahuete', 'Jack Bean/Maize': 'Frijol jack/Maíz',
+    'Fava Bean': 'Haba', 'Groundnut': 'Maní', 'Jack Bean/Maize': 'Canavalia/Maíz',
     'Maize': 'Maíz',
     'Maize/Grass Unspecified/Native legumes': 'Maíz/Gramínea sin especificar/Leguminosas nativas',
     'Maize/Pigeon Pea': 'Maíz/Gandul', 'Maize/Sesbania sesban': 'Maíz/Sesbania sesban',
@@ -77,17 +87,17 @@ window.KH_VOCAB = {
     'Unspecified Tree': 'Árbol sin especificar',
 
     /* sub-indicators, shown in the record panel */
-    'Benefit Cost Ratio (GRTC)': 'Relación beneficio-coste (GRTC)',
-    'Benefit Cost Ratio (NRTC)': 'Relación beneficio-coste (NRTC)',
-    'Benefit Cost Ratio (Unspecified)': 'Relación beneficio-coste (sin especificar)',
+    'Benefit Cost Ratio (GRTC)': 'Relación beneficio-costo (GRTC)',
+    'Benefit Cost Ratio (NRTC)': 'Relación beneficio-costo (NRTC)',
+    'Benefit Cost Ratio (Unspecified)': 'Relación beneficio-costo (sin especificar)',
     'Berger-Parker dominance (d)': 'Dominancia de Berger-Parker (d)',
     'Biomass Yield': 'Rendimiento de biomasa', 'Chao1 Index': 'Índice Chao1',
     'Colonisation percent': 'Porcentaje de colonización', 'Crop Yield': 'Rendimiento del cultivo',
     'Damage caused by pest': 'Daño causado por plagas',
-    'Energy Use Efficiency': 'Eficiencia en el uso de energía', 'Erosion': 'Erosión',
+    'Energy Use Efficiency': 'Eficiencia energética', 'Erosion': 'Erosión',
     'Fisher Alpha': 'Alfa de Fisher', 'Gross Return': 'Ingreso bruto',
     'Jack-knife Species Richness': 'Riqueza de especies (jack-knife)',
-    'Land Equivalent Ratio': 'Relación equivalente de tierra',
+    'Land Equivalent Ratio': 'Índice equivalente de tierra (LER)',
     'Microbial biomass': 'Biomasa microbiana', 'Net Present Value': 'Valor actual neto',
     'Net Return': 'Ingreso neto', 'Rarefied Species Richness': 'Riqueza de especies rarificada',
     'Runoff': 'Escorrentía', 'Shannon Index': 'Índice de Shannon',
@@ -97,7 +107,7 @@ window.KH_VOCAB = {
     'Soil Available Potassium': 'Potasio disponible en el suelo',
     'Soil Moisture': 'Humedad del suelo', 'Soil Organic Carbon': 'Carbono orgánico del suelo',
     'Species Evenness': 'Equidad de especies', 'Species Richness': 'Riqueza de especies',
-    'Total Cost': 'Coste total', 'Water Use Efficiency': 'Eficiencia en el uso del agua'
+    'Total Cost': 'Costo total', 'Water Use Efficiency': 'Eficiencia en el uso del agua'
   },
 
   fr: {
@@ -134,10 +144,10 @@ window.KH_VOCAB = {
 
     /* practices and comparators */
     'Agroforestry': 'Agroforesterie', 'Bare Fallow': 'Jachère nue',
-    'Conventional Tillage': 'Labour conventionnel', 'Crop rotation': 'Rotation des cultures',
+    'Conventional Tillage': 'Travail du sol conventionnel', 'Crop rotation': 'Rotation des cultures',
     'Improved Fallow': 'Jachère améliorée', 'Insects control': 'Lutte contre les insectes',
     'Intercropping': 'Cultures associées', 'Monoculture': 'Monoculture',
-    'No Fertilizers Applied': 'Sans engrais', 'Reduced Tillage': 'Labour réduit',
+    'No Fertilizers Applied': 'Sans apport d’engrais', 'Reduced Tillage': 'Travail du sol réduit',
     'Semi-natural habitat': 'Habitat semi-naturel',
     'Simple intercropping': 'Cultures associées simples',
     'External input dependency': 'Dépendance aux intrants externes', 'Inoculants': 'Inoculants',
@@ -169,7 +179,7 @@ window.KH_VOCAB = {
     'Energy Use Efficiency': 'Efficience énergétique', 'Erosion': 'Érosion',
     'Fisher Alpha': 'Alpha de Fisher', 'Gross Return': 'Produit brut',
     'Jack-knife Species Richness': 'Richesse spécifique (jack-knife)',
-    'Land Equivalent Ratio': 'Coefficient de surface équivalente',
+    'Land Equivalent Ratio': 'Rapport de surface équivalente (LER)',
     'Microbial biomass': 'Biomasse microbienne', 'Net Present Value': 'Valeur actuelle nette',
     'Net Return': 'Produit net', 'Rarefied Species Richness': 'Richesse spécifique raréfiée',
     'Runoff': 'Ruissellement', 'Shannon Index': 'Indice de Shannon',
