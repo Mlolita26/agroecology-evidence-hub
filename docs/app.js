@@ -734,7 +734,7 @@
     const body = [keys.join(','), ...rows.map(r => keys.map(k => esc(r[k])).join(','))].join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([body], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'agroecology-knowledge-hub-' + rows.length + '-comparisons.csv';
+    a.download = 'agroecology-evidence-hub-' + rows.length + '-comparisons.csv';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }

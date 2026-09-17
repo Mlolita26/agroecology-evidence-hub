@@ -1,4 +1,4 @@
-# Agroecology Knowledge Hub, website
+# Agroecology Evidence Hub, website
 
 **Live site: https://mlolita26.github.io/agroecology-evidence-hub/**
 
