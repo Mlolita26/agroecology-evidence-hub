@@ -30,6 +30,18 @@ ADM1_DIR = os.path.join(OUT_DIR, "vendor", "adm1")
 # a bigger file, and writing it anyway would ship a page nobody can open.
 MAX_DATA_MB = 20
 
+# Syntheses the website does not publish yet, and why. Everything in the source
+# folder is published unless it is named here, so leaving a synthesis out is a
+# decision somebody wrote down rather than something that happened quietly.
+# Delete an entry to publish it; build.py will tell you if it no longer fits.
+SKIP_SOURCES = {
+    "MD_Rosen_24_Effec_Sc":
+        "ERA, 87,796 records. Two separate reasons. It is 65 MB as one file, "
+        "which is more than the browser can load, so it needs a real data "
+        "format first. And the effect sizes come from a script with an open "
+        "bug: see knowledge/_meta/log/2026-09-28-02-lnrr-cv-imputation-bug.md.",
+}
+
 # The source has no region column, and the vocabulary is small enough to list.
 REGIONS = {
     "Colombia": "South America",
@@ -359,8 +371,16 @@ def main():
     if not sources:
         raise SystemExit(f"No source CSVs found in {SOURCE_DIR}")
 
+    skipped = [p for p in sources if synthesis_name(p) in SKIP_SOURCES]
+    sources = [p for p in sources if synthesis_name(p) not in SKIP_SOURCES]
+
     print(f"Reading {len(sources)} source syntheses:")
     records = [r for path in sources for r in read_source(path)]
+
+    for path in skipped:
+        name = synthesis_name(path)
+        print(f"\nNot published: {name}")
+        print("  " + SKIP_SOURCES[name])
     countries = {r["country"] for r in records}
     print(f"\n{len(records)} records, {len(countries)} countries")
 

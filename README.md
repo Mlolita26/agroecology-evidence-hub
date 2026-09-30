@@ -138,12 +138,25 @@ python tools/fetch_boundaries.py BRA NGA
 
 Then commit the regenerated files and push; GitHub Pages redeploys on its own.
 
+### Which syntheses are published
+
+Every CSV in that folder is published unless it is named in `SKIP_SOURCES` at
+the top of `build.py`, with the reason written next to it. Leaving a synthesis
+out is meant to be a decision someone recorded, not something that happened
+quietly. Delete the entry to publish it.
+
+ERA is skipped at the moment, for two unrelated reasons that are both in the
+comment: it is far too large to send to a browser as one file, and its effect
+sizes come from a script with an open bug. The build prints the reason every
+time it runs, so nobody has to go looking for it.
+
 ### When the build stops
 
 The whole dataset is sent to the browser as one file, so its size is the page's
-load time. If the sources grow past what that can carry, `build.py` writes
-nothing, says so, and leaves the last dataset that fit in place. The site keeps
-working, and no one accidentally publishes a page that takes a minute to open.
+load time. If what is published grows past what that can carry, `build.py`
+writes nothing, says so, and leaves the last dataset that fit in place. The site
+keeps working, and no one accidentally publishes a page that takes a minute to
+open.
 
 That is not a limit to raise. It means the data has outgrown a single file and
 needs a real format behind it, which is a piece of work to plan, not a number
