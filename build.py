@@ -25,9 +25,10 @@ SOURCE_DIR = os.path.expanduser(
 OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
 ADM1_DIR = os.path.join(OUT_DIR, "vendor", "adm1")
 
-# The whole dataset goes to the browser as one JavaScript file, so its size is
-# the page's load time. Past this the site needs a real data format instead of
-# a bigger file, and writing it anyway would ship a page nobody can open.
+# The whole dataset goes to the browser as one JavaScript file. The server
+# compresses it in transit, so the download is not the issue; parsing it and
+# holding it in memory is, and so is drawing a point per record. Past this the
+# data needs a different shape, not a bigger file. See knowledge/website.md.
 MAX_DATA_MB = 20
 
 # Syntheses the website does not publish yet, and why. Everything in the source
@@ -36,10 +37,12 @@ MAX_DATA_MB = 20
 # Delete an entry to publish it; build.py will tell you if it no longer fits.
 SKIP_SOURCES = {
     "MD_Rosen_24_Effec_Sc":
-        "ERA, 87,796 records. Two separate reasons. It is 65 MB as one file, "
-        "which is more than the browser can load, so it needs a real data "
-        "format first. And the effect sizes come from a script with an open "
-        "bug: see knowledge/_meta/log/2026-09-28-02-lnrr-cv-imputation-bug.md.",
+        "ERA, 87,796 records. Two separate reasons. At 65 MB it is past the "
+        "limit above, and the map would need the canvas renderer to stay "
+        "usable at that many points. And the effect sizes come from a script "
+        "with an open bug: see "
+        "knowledge/_meta/log/2026-09-28-02-lnrr-cv-imputation-bug.md. "
+        "Measured costs: knowledge/_status/website.md.",
 }
 
 # The source has no region column, and the vocabulary is small enough to list.
@@ -286,9 +289,11 @@ def write_outputs(records):
     if megabytes > MAX_DATA_MB:
         print(f"\nSTOPPED. data.js would be {megabytes:.0f} MB, over the "
               f"{MAX_DATA_MB} MB limit, so nothing was written.")
-        print(f"  {len(records)} records is more than one file can carry: every "
-              "visitor would")
-        print("  download and parse all of it before the map drew anything.")
+        print(f"  {len(records)} records is more than one file should carry. The "
+              "server compresses")
+        print("  it, so the download is smaller than this, but every visitor still "
+              "parses all")
+        print("  of it and holds it in memory before the map draws.")
         print("  The site still has the last dataset that fit.")
         return None, None
 
