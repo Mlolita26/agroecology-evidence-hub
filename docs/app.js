@@ -217,19 +217,14 @@
   const HOME_VIEW = [[14, 12], 2];
   const ALIAS = { 'Viet Nam': 'Vietnam' };
   const wname = (c) => ALIAS[c] || c;
-  const ISO3 = {
-    Kenya: 'KEN', Ethiopia: 'ETH', Tanzania: 'TZA', Uganda: 'UGA', Rwanda: 'RWA',
-    Malawi: 'MWI', Zambia: 'ZMB', Zimbabwe: 'ZWE', Mozambique: 'MOZ', 'South Africa': 'ZAF',
-    Ghana: 'GHA', Nigeria: 'NGA', Mali: 'MLI', 'Burkina Faso': 'BFA', Niger: 'NER',
-    Senegal: 'SEN', Benin: 'BEN', Cameroon: 'CMR', Tunisia: 'TUN', Morocco: 'MAR',
-    India: 'IND', Bangladesh: 'BGD', Nepal: 'NPL', Pakistan: 'PAK',
-    Vietnam: 'VNM', 'Viet Nam': 'VNM', Indonesia: 'IDN', Philippines: 'PHL', China: 'CHN',
-    Brazil: 'BRA', Peru: 'PER', Colombia: 'COL', Bolivia: 'BOL', Mexico: 'MEX', Guatemala: 'GTM'
-  };
+  /* country -> ISO3, generated as iso3.js by build.py, so the codes here
+     and the files in vendor/adm1/ can never disagree */
+  const ISO3 = window.KH_ISO3 || {};
 
   const admCache = {};
-  const ADM_URL = (iso) => 'https://media.githubusercontent.com/media/wmgeolab/geoBoundaries/main/releaseData/gbOpen/' +
-    iso + '/ADM1/geoBoundaries-' + iso + '-ADM1_simplified.geojson';
+  /* Vendored by tools/fetch_boundaries.py. This used to hit geoBoundaries
+     on every country click, which broke silently when they moved a file. */
+  const ADM_URL = (iso) => 'vendor/adm1/' + iso + '.json';
   function loadAdm1(iso) {
     if (!iso) return Promise.resolve(null);
     if (!admCache[iso]) admCache[iso] = fetch(ADM_URL(iso)).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -258,7 +253,7 @@
   function loadWorld() {
     if (world) return Promise.resolve(world);
     if (worldPending) return worldPending;
-    worldPending = fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    worldPending = fetch('vendor/countries-110m.json')
       .then(r => r.json())
       .then(topo => {
         world = fixAntimeridian(topojson.feature(topo, topo.objects.countries));

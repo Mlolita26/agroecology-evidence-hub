@@ -1,0 +1,16 @@
+# Git rewrites line endings in files it thinks are text. In a font or an image
+# that is not a formatting change, it is corruption, and it shows up as missing
+# glyphs on somebody else's machine rather than as an error here. Say plainly
+# which files are binary so no one's local setting can touch them.
+*.woff2 binary
+*.woff  binary
+*.ttf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+
+# The boundary and geometry files are one very long line of JSON. Nothing needs
+# to rewrite them either, and leaving them alone keeps their size honest.
+docs/vendor/adm1/*.json      -text
+docs/vendor/countries-110m.json -text

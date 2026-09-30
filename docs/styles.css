@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap');
+/* fonts come from vendor/fonts.css, linked in index.html */
 
 :root{
   --r1:#23256B; --r2:#56347E; --r3:#8B3A80; --r4:#C03B7C; --r5:#F63E7E;

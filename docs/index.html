@@ -5,8 +5,10 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width,initial-scale=1" name="viewport"/>
     <title>Agroecology Evidence Hub</title>
-    <link crossorigin="anonymous" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" rel="stylesheet"/>
-    <link href="styles.css?v=1b8b1ca3" rel="stylesheet"/>
+    <!-- everything the page needs is in this repository; see vendor/README.md -->
+    <link href="vendor/leaflet.css" rel="stylesheet"/>
+    <link href="vendor/fonts.css" rel="stylesheet"/>
+    <link href="styles.css?v=6dc7134f" rel="stylesheet"/>
     <link href="explore.css?v=05083ea9" rel="stylesheet"/>
   </head>
   <body>
@@ -478,11 +480,12 @@
     <a data-t="footer.05" href="#contact">Contact</a>
   </div>
 </footer>
-<script crossorigin="anonymous" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
 <script src="data.js?v=57b74182"></script>
+<script src="iso3.js?v=fbe9a473"></script>
 <script src="i18n.js?v=996a35ee"></script>
 <script src="vocab.js?v=f1377d97"></script>
-<script src="app.js?v=e88e814a"></script>
+<script src="app.js?v=1b2165f1"></script>
 </body>
 </html>
