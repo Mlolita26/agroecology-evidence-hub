@@ -75,8 +75,10 @@ been checked by a native speaker, and the vocabulary has not been checked by an
 agronomist. Terminology is the review team's call. Read both before the site is
 promoted.
 
-The dataset is committed, so the live site works for anyone who opens it and
-the Download button returns the current selection. It is a draft and not yet
+The dataset is committed, so the live site works for anyone who opens it. Two
+buttons by the Comparisons heading download it: the complete dataset, always,
+and the current selection once a filter is set. Both are built in the browser
+from the loaded records, so nothing is fetched. It is a draft and not yet
 citable; treat it as something to give feedback on, not to cite.
 
 ## The contact form

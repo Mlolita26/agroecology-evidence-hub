@@ -148,7 +148,7 @@ body:has(#sel-badge.on) .maplegend{bottom:56px}
 .section-h h2{font-family:var(--display);font-size:22px;font-weight:400}
 /* the downloads: big, bold, coloured, next to the title */
 .downloads{display:flex;gap:8px;flex-wrap:wrap}
-.downloads .btn{font-size:14px;font-weight:600;padding:11px 18px;background:var(--accent);border-color:var(--accent);color:#fff}
+.downloads .btn{gap:6px;font-size:14px;font-weight:600;padding:11px 18px;background:var(--accent);border-color:var(--accent);color:#fff}
 .downloads .btn:hover{background:var(--ink);border-color:var(--ink)}
 .downloads .btn b{font-weight:600;opacity:.85}
 .downloads .btn[hidden]{display:none}
