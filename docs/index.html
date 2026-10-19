@@ -95,7 +95,7 @@
           <!-- colour key, always on the map whatever the view. app.js fills the
                swatches and labels from the same breakpoints it colours with. -->
           <div class="maplegend">
-            <span class="lbl" data-t="explore.19">Effect size, lnRR</span>
+            <span class="lbl" data-t="explore.19">Effect size (log response ratio)</span>
             <div class="ramp" id="legend-ramp"></div>
             <div class="ramp-lab" id="legend-lab"></div>
             <div class="ramp-lab ratio" id="legend-ratio"></div>
@@ -111,8 +111,8 @@
           <div class="sum-sec">
             <h2 data-t="explore.09">Median effect size by practice and outcome</h2>
             <div class="chart" id="chart"></div>
-            <p class="sum-caption" data-t="explore.21">Each cell is the median lnRR of the comparisons for that agroecological practice and that outcome; n is how many comparisons are behind it. It is computed from the same rows as the table below. Click a cell to keep that pair, a row or column heading to keep one of them.</p>
-            <p class="sum-note" data-t="explore.14">Pink is a decrease against the less agroecological alternative, teal an increase, pale sand is near zero. lnRR is ln(treatment ÷ comparator). The scale is cut at ±1, which is about 0.37 to 2.7 times the comparator.</p>
+            <p class="sum-caption" data-t="explore.21">Each cell is the median effect size of the comparisons for that agroecological practice and that outcome; n is how many comparisons are behind it. It is computed from the same rows as the table below. Click a cell to keep that pair, a row or column heading to keep one of them.</p>
+            <p class="sum-note" data-t="explore.14">Pink is a decrease against the less agroecological alternative, teal an increase, pale sand is near zero. The effect size is the log response ratio, ln(treatment ÷ comparator). The scale is cut at ±1, which is about 0.37 to 2.7 times the comparator.</p>
           </div>
         </aside>
       </div>
@@ -456,8 +456,8 @@
 <script src="vendor/topojson-client.min.js"></script>
 <script src="data.js?v=e53136dd"></script>
 <script src="iso3.js?v=fbe9a473"></script>
-<script src="i18n.js?v=faabf03e"></script>
+<script src="i18n.js?v=b5874b48"></script>
 <script src="vocab.js?v=9bd9520a"></script>
-<script src="app.js?v=017d9a67"></script>
+<script src="app.js?v=afc77276"></script>
 </body>
 </html>

@@ -319,6 +319,8 @@
       .then(r => r.json())
       .then(topo => {
         world = fixAntimeridian(topojson.feature(topo, topo.objects.countries));
+        /* no field trials there, and it takes a third of the map */
+        world.features = world.features.filter(f => f.properties.name !== 'Antarctica');
         return world;
       })
       .catch(err => { console.warn('Country geometry failed to load:', err); return null; });
@@ -563,7 +565,7 @@
         weight: isSel ? 2 : 1
       });
       m.bindTooltip(
-        '<div class="tv">lnRR ' + es(r.lnRR) + ' (' + ratio(r.lnRR) + '), ' + termKey(r.outcomeKey) + '</div>' +
+        '<div class="tv">' + t('tipES', { es: es(r.lnRR), ratio: ratio(r.lnRR) }) + ', ' + termKey(r.outcomeKey) + '</div>' +
         '<div>' + t('tipVs', { practice: term(r.practice), comparator: term(r.comparator) }) + '</div>' +
         '<div class="tm">' + term(r.crop) + ', ' + term(r.country) + (r.tN ? ', ' + t('tipN', { n: r.tN }) : '') + '</div>',
         { className: 'tip', direction: 'top', offset: [0, -3] }
@@ -589,14 +591,24 @@
     const filtered = DIMS.some(d => sel[d.key].size);
     const med = median(rows.map(r => r.lnRR));
     const pos = rows.filter(r => r.lnRR > 0).length;
-    const scope = DIMS.filter(d => sel[d.key].size)
+    /* where: every filter except the outcome, which gets its own clause */
+    const scope = DIMS.filter(d => d.key !== 'outcomeKey' && sel[d.key].size)
       .map(d => [...sel[d.key]].slice(0, 3).map(termKey).join(', ') +
         (sel[d.key].size > 3 ? t('andMore', { n: sel[d.key].size - 3 }) : ''));
+    /* which outcomes: the groups present, in plain words, or the outcomes picked */
+    const listWords = (a) => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' ' + t('and') + ' ' + a[a.length - 1];
+    const plain = (s) => { const k = 'group' + s.replace(/\W/g, ''); return k in window.KH_UI.en ? t(k) : term(s); };
+    const subs = SUB_ORDER.filter(s => rows.some(r => r.subPillar === s));
+    const outcomes = sel.outcomeKey.size ? t('onOutcomes', { list: listWords([...sel.outcomeKey].map(termKey)) })
+      : subs.length === 1 ? t('onGroup', { group: plain(subs[0]) })
+      : t('acrossAll', { groups: listWords(subs.map(plain)) });
+    /* the typical difference, as a percentage the reader can picture */
+    const pct = med === null ? null : Math.round((Math.exp(med) - 1) * 100);
+    const diff = pct === null ? '—' : pct > 0 ? t('moreBy', { p: pct }) : pct < 0 ? t('lessBy', { p: -pct }) : t('sameAs');
     let html = t('readout', {
       count: plural(rows.length, 'comparison', 'comparisons'),
-      scope: filtered ? t('inScope', { scope: scope.join(', ') }) : '',
-      percent: Math.round(pos / rows.length * 100),
-      median: es(med), ratio: times(med)
+      scope: scope.length ? t('inScope', { scope: scope.join(', ') }) : '',
+      outcomes, percent: Math.round(pos / rows.length * 100), diff
     });
     /* which practice leads is only said once the reader has narrowed things
        down; across the whole dataset it would set unlike against unlike */
@@ -706,7 +718,7 @@
     { k: 'tMean', label: 'colTMean', h: 'helpTMean', num: 1 },
     { k: 'tSD', label: 'colTSD', h: 'helpTSD', num: 1 },
     { k: 'tN', label: 'colTN', h: 'helpTN', num: 1 },
-    { k: 'lnRR', plain: 'lnRR', h: 'helpLnRR', num: 1 },
+    { k: 'lnRR', label: 'colES', h: 'helpLnRR', num: 1 },
     { k: 'lnRR_SE', label: 'colSE', h: 'helpSE', num: 1 },
     { k: 'years', label: 'colYears', h: 'helpYears', num: 1 },
     { k: 'synthesis', label: 'colSynthesis', h: 'helpSynthesis' },
