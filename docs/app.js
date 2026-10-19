@@ -1110,7 +1110,8 @@
     const badge = $('#sel-badge');
     if (badge) badge.classList.remove('on');
     document.querySelectorAll('#tbody tr').forEach(tr => tr.classList.remove('sel'));
-    if (map) drawPoints(D.filter(match));
+    /* back to the view for the current filters, not the spot the point zoomed to */
+    if (map) { drawPoints(D.filter(match)); applyMapMode(); }
   }
   $('#sel-clear').addEventListener('click', clearSel);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') clearSel(); });
