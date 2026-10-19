@@ -61,8 +61,18 @@ window.KH_VOCAB = {
     'Product Yield': 'Rendimiento', 'Richness': 'Riqueza',
     'Richness Estimator': 'Estimador de riqueza', 'Soil Quality': 'Calidad del suelo',
 
+    /* pillars and sub-pillars, the two levels above the outcome */
+    'Productivity': 'Productividad', 'Resilience': 'Resiliencia', 'Mitigation': 'Mitigación',
+    'Other': 'Otro', 'Yield': 'Rendimiento', 'Economics': 'Economía', 'Physical': 'Físico',
+    'Biodiversity': 'Biodiversidad', 'Social': 'Social',
+
+    /* organism groups, for the biodiversity outcomes */
+    'Pests': 'Plagas', 'Weeds': 'Malezas', 'Natural enemies of pests': 'Enemigos naturales de las plagas',
+    'Parasitoids of pests': 'Parasitoides de las plagas', 'Detritivores': 'Detritívoros',
+    'Migrant': 'Migratorios', 'Resident': 'Residentes',
+
     /* practices and comparators */
-    'Agroforestry': 'Agroforestería', 'Bare Fallow': 'Barbecho desnudo',
+    'Agroforestry': 'Agroforestería', 'Bare Fallow': 'Barbecho desnudo', 'Natural Fallow': 'Barbecho natural',
     'Conventional Tillage': 'Labranza convencional', 'Crop rotation': 'Rotación de cultivos',
     'Improved Fallow': 'Barbecho mejorado', 'Insects control': 'Control de insectos',
     'Intercropping': 'Cultivos asociados', 'Monoculture': 'Monocultivo',
@@ -73,21 +83,24 @@ window.KH_VOCAB = {
     'Zero Tillage': 'Siembra directa',
 
     /* crops */
-    'Baby Corn': 'Maíz baby', 'Cassava': 'Yuca', 'Castor': 'Ricino', 'Cauliflower': 'Coliflor',
+    'Baby Corn': 'Maíz baby', 'Cardamom': 'Cardamomo', 'Cassava': 'Yuca', 'Castor': 'Ricino', 'Cauliflower': 'Coliflor',
     'Cocoa': 'Cacao', 'Coffee': 'Café', 'Common Bean': 'Frijol común', 'Cowpea': 'Caupí',
     'Fava Bean': 'Haba', 'Groundnut': 'Maní', 'Jack Bean/Maize': 'Canavalia/Maíz',
     'Maize': 'Maíz',
     'Maize/Grass Unspecified/Native legumes': 'Maíz/Gramínea sin especificar/Leguminosas nativas',
     'Maize/Pigeon Pea': 'Maíz/Gandul', 'Maize/Sesbania sesban': 'Maíz/Sesbania sesban',
+    'Maize/Tephrosia candida': 'Maíz/Tephrosia candida',
     'Maize/Tephrosia vogelii': 'Maíz/Tephrosia vogelii', 'Mandarin Orange': 'Mandarina',
     'Mango': 'Mango', 'Mucuna pruriens/Maize': 'Mucuna pruriens/Maíz', 'Onion': 'Cebolla',
     'Pearl Millet': 'Mijo perla', 'Pigeon Pea': 'Gandul', 'Pineapple': 'Piña', 'Potato': 'Papa',
     'Rice/Maize/Rice': 'Arroz/Maíz/Arroz', 'Rice/Mung Bean/Maize': 'Arroz/Frijol mungo/Maíz',
-    'Rice/Mung Bean/Rice': 'Arroz/Frijol mungo/Arroz', 'Sorghum': 'Sorgo', 'Tomato': 'Tomate',
+    'Rice/Mung Bean/Rice': 'Arroz/Frijol mungo/Arroz', 'Sorghum': 'Sorgo', 'Tea': 'Té', 'Tomato': 'Tomate',
     'Unspecified Tree': 'Árbol sin especificar',
 
-    /* sub-indicators, shown in the record panel */
+    /* sub-indicators, the "measured as" column of the table */
+    'Area Time Equivalent Ratio': 'Índice equivalente de área y tiempo (ATER)',
     'Benefit Cost Ratio (GRTC)': 'Relación beneficio-costo (GRTC)',
+    'Benefit Cost Ratio (GRVC)': 'Relación beneficio-costo (GRVC)',
     'Benefit Cost Ratio (NRTC)': 'Relación beneficio-costo (NRTC)',
     'Benefit Cost Ratio (Unspecified)': 'Relación beneficio-costo (sin especificar)',
     'Berger-Parker dominance (d)': 'Dominancia de Berger-Parker (d)',
@@ -95,7 +108,7 @@ window.KH_VOCAB = {
     'Colonisation percent': 'Porcentaje de colonización', 'Crop Yield': 'Rendimiento del cultivo',
     'Damage caused by pest': 'Daño causado por plagas',
     'Energy Use Efficiency': 'Eficiencia energética', 'Erosion': 'Erosión',
-    'Fisher Alpha': 'Alfa de Fisher', 'Gross Return': 'Ingreso bruto',
+    'Fisher Alpha': 'Alfa de Fisher', 'Gross Margin': 'Margen bruto', 'Gross Return': 'Ingreso bruto',
     'Jack-knife Species Richness': 'Riqueza de especies (jack-knife)',
     'Land Equivalent Ratio': 'Índice equivalente de tierra (LER)',
     'Microbial biomass': 'Biomasa microbiana', 'Net Present Value': 'Valor actual neto',
@@ -107,7 +120,8 @@ window.KH_VOCAB = {
     'Soil Available Potassium': 'Potasio disponible en el suelo',
     'Soil Moisture': 'Humedad del suelo', 'Soil Organic Carbon': 'Carbono orgánico del suelo',
     'Species Evenness': 'Equidad de especies', 'Species Richness': 'Riqueza de especies',
-    'Total Cost': 'Costo total', 'Water Use Efficiency': 'Eficiencia en el uso del agua'
+    'Total Cost': 'Costo total', 'Variable Cost': 'Costo variable',
+    'Water Use Efficiency': 'Eficiencia en el uso del agua'
   },
 
   fr: {
@@ -142,8 +156,18 @@ window.KH_VOCAB = {
     'Product Yield': 'Rendement', 'Richness': 'Richesse',
     'Richness Estimator': 'Estimateur de richesse', 'Soil Quality': 'Qualité du sol',
 
+    /* pillars and sub-pillars, the two levels above the outcome */
+    'Productivity': 'Productivité', 'Resilience': 'Résilience', 'Mitigation': 'Atténuation',
+    'Other': 'Autre', 'Yield': 'Rendement', 'Economics': 'Économie', 'Physical': 'Physique',
+    'Biodiversity': 'Biodiversité', 'Social': 'Social',
+
+    /* organism groups, for the biodiversity outcomes */
+    'Pests': 'Ravageurs', 'Weeds': 'Adventices', 'Natural enemies of pests': 'Ennemis naturels des ravageurs',
+    'Parasitoids of pests': 'Parasitoïdes des ravageurs', 'Detritivores': 'Détritivores',
+    'Migrant': 'Migrateurs', 'Resident': 'Résidents',
+
     /* practices and comparators */
-    'Agroforestry': 'Agroforesterie', 'Bare Fallow': 'Jachère nue',
+    'Agroforestry': 'Agroforesterie', 'Bare Fallow': 'Jachère nue', 'Natural Fallow': 'Jachère naturelle',
     'Conventional Tillage': 'Travail du sol conventionnel', 'Crop rotation': 'Rotation des cultures',
     'Improved Fallow': 'Jachère améliorée', 'Insects control': 'Lutte contre les insectes',
     'Intercropping': 'Cultures associées', 'Monoculture': 'Monoculture',
@@ -155,21 +179,24 @@ window.KH_VOCAB = {
     'Zero Tillage': 'Semis direct',
 
     /* crops */
-    'Baby Corn': 'Maïs miniature', 'Cassava': 'Manioc', 'Castor': 'Ricin',
+    'Baby Corn': 'Maïs miniature', 'Cardamom': 'Cardamome', 'Cassava': 'Manioc', 'Castor': 'Ricin',
     'Cauliflower': 'Chou-fleur', 'Cocoa': 'Cacao', 'Coffee': 'Café',
     'Common Bean': 'Haricot commun', 'Cowpea': 'Niébé', 'Fava Bean': 'Fève',
     'Groundnut': 'Arachide', 'Jack Bean/Maize': 'Pois sabre/Maïs', 'Maize': 'Maïs',
     'Maize/Grass Unspecified/Native legumes': 'Maïs/Graminée non précisée/Légumineuses locales',
     'Maize/Pigeon Pea': 'Maïs/Pois d’Angole', 'Maize/Sesbania sesban': 'Maïs/Sesbania sesban',
+    'Maize/Tephrosia candida': 'Maïs/Tephrosia candida',
     'Maize/Tephrosia vogelii': 'Maïs/Tephrosia vogelii', 'Mandarin Orange': 'Mandarine',
     'Mango': 'Mangue', 'Mucuna pruriens/Maize': 'Mucuna pruriens/Maïs', 'Onion': 'Oignon',
     'Pearl Millet': 'Mil à chandelle', 'Pigeon Pea': 'Pois d’Angole', 'Pineapple': 'Ananas',
     'Potato': 'Pomme de terre', 'Rice/Maize/Rice': 'Riz/Maïs/Riz',
     'Rice/Mung Bean/Maize': 'Riz/Haricot mungo/Maïs', 'Rice/Mung Bean/Rice': 'Riz/Haricot mungo/Riz',
-    'Sorghum': 'Sorgho', 'Tomato': 'Tomate', 'Unspecified Tree': 'Arbre non précisé',
+    'Sorghum': 'Sorgho', 'Tea': 'Thé', 'Tomato': 'Tomate', 'Unspecified Tree': 'Arbre non précisé',
 
-    /* sub-indicators, shown in the record panel */
+    /* sub-indicators, the "measured as" column of the table */
+    'Area Time Equivalent Ratio': 'Rapport équivalent surface-temps (ATER)',
     'Benefit Cost Ratio (GRTC)': 'Rapport bénéfice-coût (GRTC)',
+    'Benefit Cost Ratio (GRVC)': 'Rapport bénéfice-coût (GRVC)',
     'Benefit Cost Ratio (NRTC)': 'Rapport bénéfice-coût (NRTC)',
     'Benefit Cost Ratio (Unspecified)': 'Rapport bénéfice-coût (non précisé)',
     'Berger-Parker dominance (d)': 'Dominance de Berger-Parker (d)',
@@ -177,7 +204,7 @@ window.KH_VOCAB = {
     'Colonisation percent': 'Pourcentage de colonisation', 'Crop Yield': 'Rendement de la culture',
     'Damage caused by pest': 'Dégâts causés par les ravageurs',
     'Energy Use Efficiency': 'Efficience énergétique', 'Erosion': 'Érosion',
-    'Fisher Alpha': 'Alpha de Fisher', 'Gross Return': 'Produit brut',
+    'Fisher Alpha': 'Alpha de Fisher', 'Gross Margin': 'Marge brute', 'Gross Return': 'Produit brut',
     'Jack-knife Species Richness': 'Richesse spécifique (jack-knife)',
     'Land Equivalent Ratio': 'Rapport de surface équivalente (LER)',
     'Microbial biomass': 'Biomasse microbienne', 'Net Present Value': 'Valeur actuelle nette',
@@ -189,6 +216,7 @@ window.KH_VOCAB = {
     'Soil Available Potassium': 'Potassium disponible du sol',
     'Soil Moisture': 'Humidité du sol', 'Soil Organic Carbon': 'Carbone organique du sol',
     'Species Evenness': 'Équitabilité spécifique', 'Species Richness': 'Richesse spécifique',
-    'Total Cost': 'Coût total', 'Water Use Efficiency': 'Efficience d’utilisation de l’eau'
+    'Total Cost': 'Coût total', 'Variable Cost': 'Coût variable',
+    'Water Use Efficiency': 'Efficience d’utilisation de l’eau'
   }
 };

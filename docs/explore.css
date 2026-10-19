@@ -11,18 +11,16 @@
   white-space:nowrap;color:var(--ink-2);cursor:pointer}
 .linkish:hover{color:var(--accent);border-bottom-color:var(--accent)}
 
-.mode-map #to-map{display:none}
-.mode-sum #to-sum{display:none}
-.mode-map .summary{display:none}
-.mode-sum .mapstage{display:none}
-
 /* ---- dropdowns ---- */
 .dd{position:relative}
-.dd > button{display:flex;align-items:center;gap:6px;min-width:118px;max-width:190px;padding:6px 9px;
+.dd > button{display:flex;align-items:center;gap:6px;min-width:118px;max-width:250px;padding:6px 9px;
   font:inherit;font-size:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:0;
   color:var(--ink);cursor:pointer;text-align:left}
 .dd > button:hover{border-color:var(--ink-2)}
 .dd.open > button{border-color:var(--rule);box-shadow:0 0 0 2px var(--accent-soft)}
+/* a filter that is doing something looks different from one that is not */
+.dd.active > button{border-color:var(--accent);background:var(--accent-soft)}
+.dd.active > button .dl-val{font-weight:600;color:var(--ink)}
 .dd > button .dl-name{font-family:var(--mono);color:var(--ink-3);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
 .dd > button .dl-val{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dd > button .car{color:var(--ink-3);font-size:9px}
@@ -39,10 +37,16 @@
   background:var(--panel);flex:none;cursor:pointer}
 .opt input:checked{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--panel)}
 .opt .c{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+/* region headings inside the country list */
+.dd .grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);padding:9px 4px 3px;border-top:1px solid var(--line);pointer-events:none}
+.dd .grp:first-child{border-top:0;padding-top:4px}
 
-/* ---- map ---- */
-.mapstage{position:relative}
-#map{height:clamp(520px,calc(100vh - var(--mh,98px) - 128px),760px);background:var(--wash);z-index:1}
+/* ---- stage: the map on the left, the findings on the right ---- */
+.stage{--stage-h:clamp(520px,calc(100vh - var(--mh,98px) - 128px),760px);
+  display:grid;grid-template-columns:minmax(0,58fr) minmax(0,42fr)}
+.mapstage{position:relative;min-width:0}
+#map{height:var(--stage-h);background:var(--wash);z-index:1}
 #map.plain{background:var(--wash)}
 .leaflet-container{font-family:var(--sans);background:var(--wash)}
 .leaflet-bar a{border-radius:0!important;color:var(--ink)!important;border-color:var(--line-2)!important;
@@ -60,26 +64,22 @@
   padding:8px 11px;cursor:pointer;white-space:nowrap}
 .mapctl button:hover{border-color:var(--accent);color:var(--accent)}
 
-.readstrip{position:absolute;left:12px;top:12px;z-index:455;width:min(340px,calc(100% - 150px));
-  max-height:calc(100% - 24px);overflow:auto;
-  background:var(--glass);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  border:1px solid var(--rule);padding:13px 14px}
-.readstrip p{margin:0;font-family:var(--display);font-size:15.5px;line-height:1.32;color:var(--ink);text-wrap:pretty}
-.readstrip p b{font-weight:400;color:var(--accent)}
-.rs-meta{margin-top:7px;font-family:var(--mono);font-size:10px;line-height:1.55;letter-spacing:.03em;color:var(--ink-3)}
-.chips{display:flex;gap:5px;flex-wrap:wrap}
-.readstrip .chips{margin-top:9px}
-.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
-  padding:2px 6px;border:1px solid var(--line-2);color:var(--ink-2);background:var(--wash)}
-.chip button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink-3);font-size:11px;line-height:1}
+/* ---- findings panel ---- */
+.findings{max-height:var(--stage-h);overflow:auto;min-width:0;background:var(--panel);
+  border-left:1px solid var(--rule);padding:18px 22px 26px}
+.findings p[data-readout]{margin:8px 0 0;font-family:var(--display);font-size:19px;line-height:1.35;
+  color:var(--ink);text-wrap:pretty}
+/* the highlight is ink, not accent: accent pink is now the colour of a decrease */
+.findings p[data-readout] b{font-weight:500;color:var(--ink)}
+.rs-meta{margin-top:9px;font-family:var(--mono);font-size:10px;line-height:1.55;letter-spacing:.03em;color:var(--ink-3)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips:empty{display:none}
+.chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+  padding:3px 8px;border:1px solid var(--accent);color:var(--ink);background:var(--accent-soft)}
+.chip button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink-2);font-size:11px;line-height:1}
 .chip button:hover{color:var(--accent)}
-.mapnote{font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--ink-3);margin-top:8px}
+.mapnote{font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--ink-3);margin-top:10px}
 .mapnote:empty{display:none}
-
-.opentab{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-top:13px;
-  background:var(--ink);color:var(--panel);border:1px solid var(--ink);font-family:var(--mono);
-  font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:9px 12px;cursor:pointer}
-.opentab:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 
 .selbadge{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:470;display:none;
   align-items:center;gap:9px;background:var(--glass);backdrop-filter:blur(5px);
@@ -95,23 +95,15 @@
 .maplegend .ramp i{height:8px}
 .maplegend .ramp-lab{margin-top:4px;font-size:9.5px}
 .maplegend .mapleg-n{margin:7px 0 0;color:var(--ink-3)}
-/* the record drawer covers this corner and the badge sits along the
-   bottom, so the key steps aside and lifts rather than being hidden */
-.maplegend{transition:right .2s,bottom .2s}
-body:has(#detail.on) .maplegend{right:364px}
+.maplegend .ramp-lab.ratio{margin-top:1px;font-size:9px;color:var(--ink-3)}
+/* the badge sits along the bottom, so the key lifts rather than being hidden */
+.maplegend{transition:bottom .2s}
 body:has(#sel-badge.on) .maplegend{bottom:56px}
 .selbadge button{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-transform:uppercase}
 
-/* ---- summary view ---- */
-.summary{background:var(--panel)}
-.sumin{max-width:1180px;margin:0 auto;padding:30px 26px 40px}
-.sum-head p[data-readout]{margin:10px 0 0;font-family:var(--display);
-  font-size:clamp(21px,2.4vw,30px);line-height:1.28;color:var(--ink);max-width:56ch;text-wrap:pretty}
-.sum-head p[data-readout] b{font-weight:400;color:var(--accent)}
-.sum-head .chips{margin-top:12px}
-.sum-sec{margin-top:34px;padding-top:16px;border-top:1px solid var(--line)}
-.sum-sec h2{font-family:var(--display);font-size:24px;font-weight:400;margin:0 0 6px}
-.sum-hint{margin:0 0 16px;font-size:13px;color:var(--ink-3);max-width:70ch}
+.sum-sec{margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.sum-sec h2{font-family:var(--display);font-size:20px;font-weight:400;margin:0 0 10px}
+.sum-caption,.sum-note{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-3);max-width:62ch}
 
 /* ---- heatmap ---- */
 .heat{overflow:auto;border:1px solid var(--line)}
@@ -120,70 +112,72 @@ body:has(#sel-badge.on) .maplegend{bottom:56px}
   letter-spacing:.03em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--rule);
   padding:7px 6px;text-align:center;white-space:nowrap;cursor:pointer}
 .heat th:hover{color:var(--accent)}
-.heat th.rowh{left:0;z-index:4;text-align:left;min-width:180px;color:var(--ink-3);
+.heat th.rowh{left:0;z-index:5;text-align:left;min-width:150px;color:var(--ink-3);
   border-right:1px solid var(--rule);cursor:default}
+/* two header rows: the outcome group, then the outcome. The second row needs
+   its own sticky offset, or it scrolls under the first. */
+.heat thead tr:first-child th{height:24px;padding:4px 6px}
+.heat thead tr:nth-child(2) th{top:24px}
+.heat th.grp{border-left:1px solid var(--line);font-size:9px;color:var(--ink-3);cursor:default}
+.heat th.grp:hover{color:var(--ink-3)}
 .heat td.rowh{position:sticky;left:0;z-index:2;background:var(--panel);font-size:11px;color:var(--ink-2);
-  padding:0 10px;border-right:1px solid var(--rule);white-space:nowrap;min-width:180px;cursor:pointer}
+  padding:0 10px;border-right:1px solid var(--rule);white-space:nowrap;min-width:150px;cursor:pointer}
 .heat td.rowh:hover{color:var(--accent)}
-.heat td.cell{height:30px;min-width:78px;text-align:center;font-size:11.5px;padding:0 6px;cursor:pointer;
+.heat td.cell{height:30px;min-width:72px;text-align:center;font-size:11.5px;padding:0 6px;cursor:pointer;
   border:0;border-bottom:1px solid var(--panel);border-right:1px solid var(--panel)}
 .heat td.cell.empty{background:var(--wash);color:var(--ink-3);cursor:default}
 .heat td.cell:hover{outline:2px solid var(--ink);outline-offset:-2px}
 .heat td.cell .cn{display:block;font-size:8.5px;opacity:.72;margin-top:-2px}
 
-.legend{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
 .ramp{display:flex;align-items:center;gap:0;width:240px}
 .ramp i{flex:1;height:10px;display:block}
 .ramp-lab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
   color:var(--ink-3);margin-top:4px}
-.legend .lbl{line-height:1.5;text-transform:none;letter-spacing:.01em;flex:1;min-width:240px;max-width:62ch}
 
 /* ---- table ---- */
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:20px 22px 10px;flex-wrap:wrap}
 .section-h h2{font-family:var(--display);font-size:22px;font-weight:400}
 .section-h .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
-.tablewrap{overflow:auto;max-height:540px;border-top:1px solid var(--rule)}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-thead th{position:sticky;top:0;background:var(--panel);text-align:left;padding:8px 13px;
+.tablewrap{overflow:auto;max-height:560px;border-top:1px solid var(--rule)}
+/* 28 columns: the table is as wide as it needs to be and scrolls sideways */
+table{width:max-content;min-width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{position:sticky;top:0;z-index:2;background:var(--panel);text-align:left;padding:8px 12px;
   border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:10px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-3);cursor:pointer;white-space:nowrap;font-weight:400}
 thead th:hover{color:var(--ink)}
 thead th .ar{color:var(--accent)}
-tbody td{padding:8px 13px;border-bottom:1px dotted var(--line);color:var(--ink-2)}
+tbody td{padding:8px 12px;border-bottom:1px dotted var(--line);color:var(--ink-2);white-space:nowrap}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--wash);color:var(--ink)}
-tbody tr.sel td{background:var(--accent-soft);color:var(--ink)}
+/* opaque, because the first column is sticky and a translucent fill would show
+   the scrolled cells through it */
+tbody tr.sel td{background:color-mix(in srgb,var(--accent) 16%,var(--panel));color:var(--ink)}
 td.v{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-td.sw{width:3px;padding:0}
-td.sw i{display:block;width:3px;height:31px}
+/* the study stays put while the rest scrolls, and its left edge carries the
+   record's colour, where the swatch column used to be */
+thead th:first-child,tbody td:first-child{position:sticky;left:0;background:var(--panel);
+  box-shadow:inset 3px 0 0 var(--sw,transparent),1px 0 0 var(--rule)}
+thead th:first-child{z-index:3}
+tbody td:first-child{z-index:1;color:var(--ink)}
+tbody tr:hover td:first-child{background:var(--wash)}
+tbody tr.sel td:first-child{background:color-mix(in srgb,var(--accent) 16%,var(--panel))}
+tbody td a{color:var(--ink);border-bottom:1px solid var(--line-2);text-decoration:none}
+tbody td a:hover{border-bottom-color:var(--accent)}
 .tfoot{padding:12px 22px;display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;
   letter-spacing:.03em;color:var(--ink-3);flex-wrap:wrap}
 
-/* ---- record panel ---- */
-.detail{position:fixed;right:0;top:0;bottom:0;width:352px;background:var(--panel);
-  border-left:1px solid var(--rule);z-index:900;padding:22px;overflow:auto;transform:translateX(100%);
-  transition:transform .2s ease}
-.detail.on{transform:none}
-.detail .x{position:absolute;right:15px;top:15px;background:none;border:0;font-size:16px;
-  color:var(--ink-3);cursor:pointer;line-height:1}
-.detail .x:hover{color:var(--accent)}
-.detail h3{font-family:var(--display);font-size:25px;margin:5px 0 2px;line-height:1.15;font-weight:400}
-.detail .big{font-family:var(--mono);font-size:33px;font-weight:500;margin:16px 0 2px;letter-spacing:-.02em}
-.dl{display:grid;grid-template-columns:104px 1fr;gap:0;margin-top:16px;border-top:1px solid var(--rule)}
-.dl dt,.dl dd{padding:7px 0;border-bottom:1px dotted var(--line);margin:0;font-size:12.5px}
-.dl dt{color:var(--ink-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase}
-.dl dd{color:var(--ink);font-family:var(--mono);font-size:12px;word-break:break-word}
-
+@media (max-width:999px){
+  /* one column: the map, then the findings, then the table */
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .findings{max-height:none;border-left:0;border-top:1px solid var(--rule)}
+  #map{height:56vh}
+}
 @media (max-width:860px){
   .toolbar{position:static}
-  .readstrip{position:static;width:auto;border:0;border-bottom:1px solid var(--line);backdrop-filter:none;background:var(--wash)}
   /* the record badge takes the bottom middle, so the key moves left */
   .maplegend{right:auto;left:10px;bottom:10px;padding:7px 10px 6px}
   .maplegend .ramp{width:132px}
   .maplegend .mapleg-n{display:none}
-  .opentab{justify-content:center}
-  #map{height:56vh}
   .dd > button{min-width:0}
-  .detail{width:100%}
   .heat td.rowh,.heat th.rowh{min-width:132px}
 }

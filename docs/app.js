@@ -12,14 +12,22 @@
   }
   const uniq = (k) => [...new Set(D.map(r => r[k]).filter(v => v !== '' && v != null))].sort();
 
+  /* One outcome vocabulary for the filter, the heatmap columns and the tooltips:
+     the indicator, plus the organism group where the source names one, so the
+     abundance of weeds and of natural enemies never end up pooled in one cell. */
+  const SEP = ' · ';
+  D.forEach(r => { r.outcomeKey = r.outcome + (r.group ? SEP + r.group : ''); });
+
   const DIMS = [
+    { key: 'region', label: 'dimRegion' },
     { key: 'country', label: 'dimCountry' },
     { key: 'crop', label: 'dimCrop' },
-    { key: 'outcome', label: 'dimOutcome' },
+    { key: 'outcomeKey', label: 'dimOutcome' },
     { key: 'practice', label: 'dimPractice' }
   ];
-  const sel = { country: new Set(), crop: new Set(), outcome: new Set(), practice: new Set() };
-  let sort = { key: 'value', dir: -1 };
+  const sel = {};
+  DIMS.forEach(d => { sel[d.key] = new Set(); });
+  let sort = { key: 'lnRR', dir: -1 };
   let selId = null;
   let map, layer, base, borders, regions, world = null, worldPending = null;
   let started = false;  /* true once the first render has run, so the theme
@@ -39,6 +47,8 @@
     const table = (window.KH_VOCAB && window.KH_VOCAB[lang]) || {};
     return table[value] || value;
   }
+  /* a composite outcome key, each half in the reader's language */
+  const termKey = (value) => String(value).split(SEP).map(term).join(SEP);
 
   function t(key, vars) {
     const table = (window.KH_UI && window.KH_UI[lang]) || {};
@@ -62,7 +72,7 @@
     try { localStorage.setItem('kh-lang', lang); } catch (e) {}
     $('#theme-btn').textContent =
       document.documentElement.getAttribute('data-theme') === 'dark' ? t('themeLight') : t('themeDark');
-    if (started) { buildFilters(); buildHead(); buildTicks(); closeDetail(); render(); }
+    if (started) { buildFilters(); buildHead(); buildLegend(); buildTicks(); clearSel(); render(); }
   }
 
   Object.keys(window.KH_LANGS).forEach(code => {
@@ -96,12 +106,19 @@
   $('#theme-btn').addEventListener('click', () =>
     setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
-  /* ---------- colour scale, clamped for a heavy tailed distribution ---------- */
-  const BREAKS = [-90, -50, -12, 0, 12, 60, 180];
-  const ramp = () => [1, 2, 3, 4, 5, 6, 7].map(i => cssVar('--d' + i));
+  /* ---------- colour scale ----------
+     lnRR, symmetric and cut at ±1, which is about 0.37 to 2.7 times the
+     comparator. Pink is a decrease, teal an increase. The --d tokens run teal
+     to pink, so they are read in reverse here, and this is the only place
+     that knows it: the points, the cells, the legend and the hero artwork all
+     go through color(). */
+  const BREAKS = [-1, -0.5, -0.1, 0, 0.1, 0.5, 1];
+  const RAMP_VARS = ['--d7', '--d6', '--d5', '--d4', '--d3', '--d2', '--d1'];
+  const ramp = () => RAMP_VARS.map(cssVar);
   const hex2 = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
   const rgbOf = (v) => {
     const C = ramp(), last = BREAKS.length - 1;
+    if (v === null || v === undefined || Number.isNaN(v)) return hex2(cssVar('--ink-3'));
     if (!(v > BREAKS[0])) return hex2(C[0]);
     if (v >= BREAKS[last]) return hex2(C[last]);
     for (let i = 1; i <= last; i++) {
@@ -118,12 +135,32 @@
     const [r, g, b] = rgbOf(v);
     return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#15161B' : '#FFFFFF';
   };
-  const sgn = (v) => (v > 0 ? '+' : '') + (Math.abs(v) >= 100 ? Math.round(v) : v.toFixed(1)) + '%';
+  /* an effect size as text, and what it means as a ratio of the two means */
+  const es = (v) => (v === null || v === undefined) ? '—' : (v > 0 ? '+' : '') + v.toFixed(2);
+  const ratio = (v) => (v === null || v === undefined) ? '—' : '×' + Math.exp(v).toFixed(2);
+  const times = (v) => (v === null || v === undefined) ? '—' : Math.exp(v).toFixed(2);   /* for prose */
+  /* the median of the numbers present; null when there are none */
   const median = (a) => {
-    const s = [...a].sort((x, y) => x - y);
+    const s = a.filter(x => x !== null && x !== undefined && !Number.isNaN(x)).sort((x, y) => x - y);
+    if (!s.length) return null;
     const h = Math.floor(s.length / 2);
     return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
   };
+  const plural = (n, one, many) => t(n === 1 ? one : many, { n });
+
+  /* lookups built once from the data */
+  const REGION_OF = {}, SUB_OF = {};
+  D.forEach(r => { REGION_OF[r.country] = r.region; SUB_OF[r.outcome] = r.subPillar; });
+  /* the order the heatmap groups outcomes in, by pillar then sub-pillar;
+     anything the data adds later is appended at the end */
+  const PILLAR_ORDER = {
+    Productivity: ['Yield', 'Economics'],
+    Resilience: ['Physical', 'Efficiency', 'Biodiversity', 'Social'],
+    Mitigation: ['Emissions', 'Carbon Stocks', 'Cookstove'],
+    Other: ['Livestock Diet']
+  };
+  const SUB_ORDER = Object.values(PILLAR_ORDER).flat();
+  uniq('subPillar').forEach(s => { if (!SUB_ORDER.includes(s)) SUB_ORDER.push(s); });
 
   /* ---------- routing ---------- */
   const PAGES = ['home', 'explore', 'about', 'methodology', 'involved', 'contact'];
@@ -133,7 +170,8 @@
     PAGES.forEach(k => $('#page-' + k).classList.toggle('on', k === p));
     document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.hash === '#' + p));
     window.scrollTo(0, 0);
-    if (p === 'explore') { ensureMap(); setTimeout(() => map.invalidateSize(), 80); }
+    /* the map only has a size once its page is shown, so fit it then */
+    if (p === 'explore') { ensureMap(); setTimeout(() => { map.invalidateSize(); applyMapMode(); }, 80); }
   }
   window.addEventListener('hashchange', route);
 
@@ -156,18 +194,32 @@
       '</span><span class="dl-val">' + t('all') + '</span><span class="car">▾</span></button>' +
       '<div class="pop"><input class="search" type="text" placeholder="' + t('search') + '"><div class="list"></div></div>';
     const list = dd.querySelector('.list');
-    uniq(d.key).sort((a, b) => term(a).localeCompare(term(b))).forEach(v => {
+    const byName = (a, b) => termKey(a).localeCompare(termKey(b));
+    const option = (v) => {
       const l = document.createElement('label');
       l.className = 'opt';
       l.dataset.k = d.key; l.dataset.v = v;
-      l.dataset.label = term(v);
-      l.innerHTML = '<input type="checkbox"><span>' + term(v) + '</span><span class="c">0</span>';
+      l.dataset.label = termKey(v);
+      l.innerHTML = '<input type="checkbox"><span>' + termKey(v) + '</span><span class="c">0</span>';
       l.querySelector('input').addEventListener('change', e => {
         if (e.target.checked) sel[d.key].add(v); else sel[d.key].delete(v);
         render();
       });
       list.appendChild(l);
-    });
+    };
+    if (d.key === 'country') {
+      /* countries sit under their UN region, the way FAOSTAT lists them */
+      uniq('region').sort(byName).forEach(region => {
+        const h = document.createElement('div');
+        h.className = 'grp';
+        h.textContent = term(region);
+        list.appendChild(h);
+        uniq('country').filter(c => REGION_OF[c] === region).sort(byName).forEach(option);
+      });
+      uniq('country').filter(c => !REGION_OF[c]).sort(byName).forEach(option);
+    } else {
+      uniq(d.key).sort(byName).forEach(option);
+    }
     dd.querySelector('button').addEventListener('click', e => {
       e.stopPropagation();
       const was = dd.classList.contains('open');
@@ -180,6 +232,12 @@
       list.querySelectorAll('.opt').forEach(l => {
         l.style.display = l.dataset.label.toLowerCase().includes(q) ? '' : 'none';
       });
+      /* a region heading with nothing left under it goes too */
+      list.querySelectorAll('.grp').forEach(h => {
+        let n = h.nextElementSibling, any = false;
+        while (n && !n.classList.contains('grp')) { if (n.style.display !== 'none') any = true; n = n.nextElementSibling; }
+        h.style.display = any ? '' : 'none';
+      });
     });
     groups.appendChild(dd);
   });
@@ -190,8 +248,9 @@
   function ddLabels() {
     groups.querySelectorAll('.dd').forEach(dd => {
       const s = sel[dd.dataset.key];
+      dd.classList.toggle('active', s.size > 0);
       dd.querySelector('.dl-val').textContent =
-        s.size === 0 ? t('all') : s.size === 1 ? term([...s][0]) : t('nSelected', { n: s.size });
+        s.size === 0 ? t('all') : s.size === 1 ? termKey([...s][0]) : t('nSelected', { n: s.size });
     });
   }
   function syncBoxes() {
@@ -206,10 +265,13 @@
       if (only) { syncBoxes(); render(); return; }
     }
     if (sel[key].has(val) && !exclusive) sel[key].delete(val); else sel[key].add(val);
+    /* a country picked on the map wins over a region picked in the dropdown,
+       otherwise the two filters could cancel each other out to an empty map */
+    if (key === 'country' && exclusive && sel.region.size && !sel.region.has(REGION_OF[val])) sel.region.clear();
     syncBoxes(); render();
   }
   $('#clear-all').addEventListener('click', () => {
-    DIMS.forEach(d => sel[d.key].clear()); syncBoxes(); closeDetail(); render();
+    DIMS.forEach(d => sel[d.key].clear()); syncBoxes(); clearSel(); render();
   });
   const match = (r) => DIMS.every(d => sel[d.key].size === 0 || sel[d.key].has(r[d.key]));
 
@@ -265,11 +327,10 @@
 
   function fitTo(bounds) {
     if (!map || !bounds || !bounds.isValid()) return;
-    const strip = document.querySelector('.readstrip');
-    const wide = window.innerWidth > 860 && strip && strip.offsetParent;
-    const left = wide ? Math.round(strip.getBoundingClientRect().width) + 26 : 24;
-    const right = wide ? 130 : 24;
-    map.fitBounds(bounds, { paddingTopLeft: [left, 24], paddingBottomRight: [right, 24] });
+    const size = map.getSize();
+    if (!size.x || !size.y) return;   /* the page is hidden; route() fits it once shown */
+    /* room for the view button at the top right and the colour key at the bottom */
+    map.fitBounds(bounds, { paddingTopLeft: [24, 24], paddingBottomRight: [24, 96] });
   }
   function dataBounds(rows) {
     const pts = (rows && rows.length ? rows : D).map(r => [r.lat, r.lon]);
@@ -287,6 +348,9 @@
     drawBase();
     applyMapMode();
     fitTo(dataBounds(D.filter(match)));
+    /* the map shares its row with the findings panel, so its width follows the
+       window; Leaflet has to be told when that happens */
+    new ResizeObserver(() => map.invalidateSize()).observe(document.getElementById('map'));
   }
   function redrawMap() {
     if (!map) return;
@@ -326,27 +390,10 @@
   $('#reset-view').addEventListener('click', () => {
     if (!map) return;
     DIMS.forEach(d => sel[d.key].clear());
-    syncBoxes(); closeDetail(); render();
+    syncBoxes(); clearSel(); render();
     map.setView(HOME_VIEW[0], HOME_VIEW[1]);
     fitTo(dataBounds(D));
   });
-  /* map view and summary view */
-  const wrap = $('#explore-wrap');
-  function setMode(m) {
-    wrap.classList.toggle('mode-sum', m === 'sum');
-    wrap.classList.toggle('mode-map', m !== 'sum');
-    if (m !== 'sum' && map) setTimeout(() => { map.invalidateSize(); homeView(); }, 60);
-    window.scrollTo(0, 0);
-  }
-  $('#open-sum').addEventListener('click', () => setMode('sum'));
-  $('#to-sum').addEventListener('click', () => setMode('sum'));
-  $('#to-map').addEventListener('click', () => setMode('map'));
-
-  /* the opening view: everything cleared, fitted to all the data */
-  function homeView() {
-    if (!map) return;
-    fitTo(dataBounds(D.filter(match)));
-  }
   function measureHead() {
     const mh = document.querySelector('.masthead');
     if (mh) document.documentElement.style.setProperty('--mh', mh.offsetHeight + 'px');
@@ -372,13 +419,14 @@
     const groupBy = box.dataset.art;
     const byValue = (a, b) => a - b;
     let values;
+    const drawn = D.filter(r => r.lnRR !== null);
     if (groupBy) {
       const bands = {};
-      D.forEach(r => (bands[r[groupBy]] = bands[r[groupBy]] || []).push(r.value));
+      drawn.forEach(r => (bands[r[groupBy]] = bands[r[groupBy]] || []).push(r.lnRR));
       values = Object.values(bands).sort((a, b) => b.length - a.length)
         .flatMap(band => band.sort(byValue));
     } else {
-      values = D.map(r => r.value).sort(byValue);
+      values = drawn.map(r => r.lnRR).sort(byValue);
     }
     if (!values.length) return;
 
@@ -413,8 +461,10 @@
     if (!map) return;
     const picked = [...sel.country];
     const note = $('#map-mode');
-    if (!picked.length) {
-      if (borders) { map.removeLayer(borders); borders = null; }
+    if (borders) { map.removeLayer(borders); borders = null; }
+
+    /* world view: every country, fitted to whatever matches the filters */
+    if (!picked.length && !sel.region.size) {
       if (regions) { map.removeLayer(regions); regions = null; }
       /* Clicking a country removes this layer while the pointer is still over
          it, so its hover style never gets cleared. Reset it on the way back. */
@@ -424,6 +474,29 @@
       fitTo(dataBounds(D.filter(match)));
       return;
     }
+
+    /* region view: the world stays, the region's countries are lifted out of it */
+    if (!picked.length) {
+      if (regions) { map.removeLayer(regions); regions = null; }
+      if (base) { base.resetStyle(); if (!map.hasLayer(base)) { base.addTo(map); base.bringToBack(); } }
+      loadWorld().then(w => {
+        if (!w || sel.country.size || !sel.region.size) return;
+        const inRegion = new Set(Object.keys(NAME2C).filter(n => sel.region.has(REGION_OF[NAME2C[n]])));
+        const feats = w.features.filter(f => inRegion.has(f.properties.name));
+        if (borders) map.removeLayer(borders);
+        borders = L.geoJSON({ type: 'FeatureCollection', features: feats }, {
+          style: { color: cssVar('--ink-2'), weight: 1.1, fillColor: cssVar('--geo-hover'), fillOpacity: 1 },
+          interactive: false
+        }).addTo(map);
+        if (base) base.bringToBack();
+        if (layer) layer.eachLayer(m => m.bringToFront());
+        if (feats.length) fitTo(borders.getBounds());
+        if (note) note.textContent = t('regionView', { names: [...sel.region].map(term).join(', ') });
+      });
+      return;
+    }
+
+    /* country view: only the chosen countries, with their regional boundaries */
     drawRegions(picked);
     loadWorld().then(w => {
       if (!w || !sel.country.size) return;
@@ -484,18 +557,18 @@
       const other = selId && !isSel;
       const m = L.circleMarker([r.lat, r.lon], {
         radius: (3.5 + Math.min(n, 30) / 7) * (isSel ? 1.9 : 1),
-        fillColor: other ? dimmed : color(r.value),
+        fillColor: other ? dimmed : color(r.lnRR),
         fillOpacity: other ? .22 : .9,
         color: isSel ? cssVar('--ink') : stroke,
         weight: isSel ? 2 : 1
       });
       m.bindTooltip(
-        '<div class="tv">' + sgn(r.value) + ', ' + term(r.outcome) + '</div>' +
+        '<div class="tv">lnRR ' + es(r.lnRR) + ' (' + ratio(r.lnRR) + '), ' + termKey(r.outcomeKey) + '</div>' +
         '<div>' + t('tipVs', { practice: term(r.practice), comparator: term(r.comparator) }) + '</div>' +
-        '<div class="tm">' + term(r.crop) + ', ' + term(r.country) + (r.tN ? ', n=' + r.tN : '') + '</div>',
+        '<div class="tm">' + term(r.crop) + ', ' + term(r.country) + (r.tN ? ', ' + t('tipN', { n: r.tN }) : '') + '</div>',
         { className: 'tip', direction: 'top', offset: [0, -3] }
       );
-      m.on('click', () => showDetail(r));
+      m.on('click', () => selectRow(r));
       m.addTo(layer);
       markers[r.id] = m;
     });
@@ -513,27 +586,33 @@
       put(t('noMatch'), t('noMatchHint'));
       return;
     }
-    const med = median(rows.map(r => r.value));
-    const pos = rows.filter(r => r.value > 0).length;
+    const filtered = DIMS.some(d => sel[d.key].size);
+    const med = median(rows.map(r => r.lnRR));
+    const pos = rows.filter(r => r.lnRR > 0).length;
     const scope = DIMS.filter(d => sel[d.key].size)
-      .map(d => [...sel[d.key]].slice(0, 3).map(term).join(', ') +
+      .map(d => [...sel[d.key]].slice(0, 3).map(termKey).join(', ') +
         (sel[d.key].size > 3 ? t('andMore', { n: sel[d.key].size - 3 }) : ''));
-    const where = scope.length ? scope.join(', ') : t('wholeDataset');
-    const byP = {};
-    rows.forEach(r => (byP[r.practice] = byP[r.practice] || []).push(r.value));
-    const best = Object.entries(byP).filter(e => e[1].length >= 5)
-      .sort((a, b) => median(b[1]) - median(a[1]))[0];
-    const html = t('readout', {
-      n: rows.length, scope: where, median: sgn(med),
-      percent: Math.round(pos / rows.length * 100)
-    }) + (best ? t('readoutBest', {
-      practice: term(best[0]), median: sgn(median(best[1])), n: best[1].length
-    }) : '') + '.';
+    let html = t('readout', {
+      count: plural(rows.length, 'comparison', 'comparisons'),
+      scope: filtered ? t('inScope', { scope: scope.join(', ') }) : '',
+      percent: Math.round(pos / rows.length * 100),
+      median: es(med), ratio: times(med)
+    });
+    /* which practice leads is only said once the reader has narrowed things
+       down; across the whole dataset it would set unlike against unlike */
+    if (filtered) {
+      const byP = {};
+      rows.forEach(r => (byP[r.practice] = byP[r.practice] || []).push(r.lnRR));
+      const best = Object.entries(byP).map(e => [e[0], e[1], median(e[1])])
+        .filter(e => e[1].length >= 5 && e[2] !== null)
+        .sort((a, b) => b[2] - a[2])[0];
+      if (best) html += ' ' + t('readoutBest', { practice: term(best[0]), median: es(best[2]), n: best[1].length });
+    }
     const ns = rows.map(r => r.tN).filter(Boolean);
     put(html, [
-      t('metaCountries', { n: new Set(rows.map(r => r.country)).size }),
-      t('metaCrops', { n: new Set(rows.map(r => r.crop)).size }),
-      t('metaStudies', { n: new Set(rows.map(r => r.study)).size }),
+      plural(new Set(rows.map(r => r.country)).size, 'metaCountry', 'metaCountries'),
+      plural(new Set(rows.map(r => r.crop)).size, 'metaCrop', 'metaCrops'),
+      plural(new Set(rows.map(r => r.study)).size, 'metaStudy', 'metaStudies'),
       ns.length ? t('metaMedianN', { n: median(ns) }) : t('metaNoN')
     ].join(' · '));
   }
@@ -545,29 +624,43 @@
     if (!rows.length) { box.innerHTML = '<span class="lbl">' + t('nothingToSummarise') + '</span>'; return; }
     const cells = {}, pCount = {}, oCount = {};
     rows.forEach(r => {
-      const k = r.practice + '||' + r.outcome;
-      (cells[k] = cells[k] || []).push(r.value);
+      const k = r.practice + '||' + r.outcomeKey;
+      (cells[k] = cells[k] || []).push(r.lnRR);
       pCount[r.practice] = (pCount[r.practice] || 0) + 1;
-      oCount[r.outcome] = (oCount[r.outcome] || 0) + 1;
+      oCount[r.outcomeKey] = (oCount[r.outcomeKey] || 0) + 1;
     });
     const practices = Object.keys(pCount).sort((a, b) => pCount[b] - pCount[a]);
-    const outcomes = Object.keys(oCount).sort((a, b) => oCount[b] - oCount[a]);
-    let html = '<div class="heat"><table><thead><tr><th class="rowh"><span>' + t('heatPractice') + '</span></th>';
+    /* columns sit under their sub-pillar in a fixed order, so the biodiversity
+       measures are together, yield and economics together, and so on */
+    const subOf = (k) => SUB_OF[k.split(SEP)[0]] || '';
+    const present = Object.keys(oCount);
+    const subs = SUB_ORDER.filter(s => present.some(k => subOf(k) === s));
+    present.forEach(k => { if (!subs.includes(subOf(k))) subs.push(subOf(k)); });
+    const columns = subs.map(s => ({
+      sub: s,
+      keys: present.filter(k => subOf(k) === s).sort((a, b) => termKey(a).localeCompare(termKey(b)))
+    }));
+    const outcomes = columns.flatMap(c => c.keys);
+
+    let html = '<div class="heat"><table><thead><tr><th class="rowh" rowspan="2"><span>' + t('heatPractice') + '</span></th>';
+    columns.forEach(c => {
+      html += '<th class="grp" colspan="' + c.keys.length + '" title="' + t('heatGroup', { name: term(c.sub) }) + '">' + term(c.sub) + '</th>';
+    });
+    html += '</tr><tr>';
     outcomes.forEach(o => {
-      html += '<th data-o="' + o + '" title="' + t('heatCount', { name: term(o), n: oCount[o] }) + '"><span>' + term(o) + '</span></th>';
+      html += '<th data-o="' + o + '" title="' + t('heatCount', { name: termKey(o), n: oCount[o] }) + '"><span>' + termKey(o) + '</span></th>';
     });
     html += '</tr></thead><tbody>';
     practices.forEach(p => {
       html += '<tr><td class="rowh" data-p="' + p + '" title="' + t('heatCount', { name: term(p), n: pCount[p] }) + '">' + term(p) + '</td>';
       outcomes.forEach(o => {
         const v = cells[p + '||' + o];
-        if (!v) { html += '<td class="cell empty">·</td>'; return; }
-        const m = median(v);
-        const lab = Math.abs(m) >= 100 ? Math.round(m) : Math.round(m * 10) / 10;
+        const m = v ? median(v) : null;
+        if (m === null) { html += '<td class="cell empty">·</td>'; return; }
         html += '<td class="cell" data-p="' + p + '" data-o="' + o + '"' +
           ' style="background:' + color(m) + ';color:' + inkOn(m) + '"' +
-          ' title="' + t('heatCell', { practice: term(p), outcome: term(o), median: sgn(m), n: v.length }) + '">' +
-          (m > 0 ? '+' : '') + lab + '%<span class="cn">n ' + v.length + '</span></td>';
+          ' title="' + t('heatCell', { practice: term(p), outcome: termKey(o), median: es(m), ratio: times(m), n: v.length }) + '">' +
+          es(m) + '<span class="cn">' + t('heatCellN', { n: v.length }) + '</span></td>';
       });
       html += '</tr>';
     });
@@ -575,45 +668,72 @@
     box.innerHTML = html;
 
     box.querySelectorAll('.cell[data-p]').forEach(td => td.addEventListener('click', () => {
-      sel.practice.clear(); sel.outcome.clear();
-      sel.practice.add(td.dataset.p); sel.outcome.add(td.dataset.o);
+      sel.practice.clear(); sel.outcomeKey.clear();
+      sel.practice.add(td.dataset.p); sel.outcomeKey.add(td.dataset.o);
       syncBoxes(); render();
     }));
     box.querySelectorAll('td.rowh[data-p]').forEach(td =>
       td.addEventListener('click', () => toggle('practice', td.dataset.p, true)));
     box.querySelectorAll('th[data-o]').forEach(th =>
-      th.addEventListener('click', () => toggle('outcome', th.dataset.o, true)));
+      th.addEventListener('click', () => toggle('outcomeKey', th.dataset.o, true)));
   }
 
-  /* ---------- table ---------- */
-  /* label is a key into the runtime strings; lnRR and SE are the same everywhere */
+  /* ---------- table ----------
+     Every column a reader needs to understand a row without opening anything
+     else. label is a key into the runtime strings; h names the one-line help
+     shown on hover, which says where the number comes from. */
   const COLS = [
-    { k: 'country', label: 'dimCountry' }, { k: 'crop', label: 'dimCrop' },
-    { k: 'practice', label: 'dimPractice' }, { k: 'comparator', label: 'colComparator' },
-    { k: 'outcome', label: 'dimOutcome' }, { k: 'value', label: 'colChange', num: 1 },
-    { k: 'lnRR', plain: 'lnRR', num: 1 }, { k: 'lnRR_SE', plain: 'SE', num: 1 },
-    { k: 'tN', label: 'colN', num: 1 }, { k: 'lat', label: 'colLat', num: 1 },
-    { k: 'lon', label: 'colLon', num: 1 }, { k: 'study', label: 'colStudy' }
+    { k: 'study', label: 'colStudy', h: 'helpStudy' },
+    { k: 'year', label: 'colYear', h: 'helpYear', num: 1 },
+    { k: 'country', label: 'dimCountry', h: 'helpCountry' },
+    { k: 'lat', label: 'colLat', h: 'helpLat', num: 1 },
+    { k: 'lon', label: 'colLon', h: 'helpLon', num: 1 },
+    { k: 'site', label: 'colSite', h: 'helpSite' },
+    { k: 'crop', label: 'dimCrop', h: 'helpCrop' },
+    { k: 'pillar', label: 'colPillar', h: 'helpPillar' },
+    { k: 'subPillar', label: 'colSubPillar', h: 'helpSubPillar' },
+    { k: 'outcome', label: 'dimOutcome', h: 'helpOutcome' },
+    { k: 'subOutcome', label: 'colSubOutcome', h: 'helpSubOutcome' },
+    { k: 'group', label: 'colGroup', h: 'helpGroup' },
+    { k: 'unit', label: 'colUnit', h: 'helpUnit' },
+    { k: 'practice', label: 'dimPractice', h: 'helpPractice' },
+    { k: 'practiceDetail', label: 'colPracticeDetail', h: 'helpPracticeDetail' },
+    { k: 'comparator', label: 'colComparator', h: 'helpComparator' },
+    { k: 'comparatorDetail', label: 'colComparatorDetail', h: 'helpComparatorDetail' },
+    { k: 'cMean', label: 'colCMean', h: 'helpCMean', num: 1 },
+    { k: 'cSD', label: 'colCSD', h: 'helpCSD', num: 1 },
+    { k: 'cN', label: 'colCN', h: 'helpCN', num: 1 },
+    { k: 'tMean', label: 'colTMean', h: 'helpTMean', num: 1 },
+    { k: 'tSD', label: 'colTSD', h: 'helpTSD', num: 1 },
+    { k: 'tN', label: 'colTN', h: 'helpTN', num: 1 },
+    { k: 'lnRR', plain: 'lnRR', h: 'helpLnRR', num: 1 },
+    { k: 'lnRR_SE', label: 'colSE', h: 'helpSE', num: 1 },
+    { k: 'years', label: 'colYears', h: 'helpYears', num: 1 },
+    { k: 'synthesis', label: 'colSynthesis', h: 'helpSynthesis' },
+    { k: 'doi', label: 'colDoi', h: 'helpDoi' }
   ];
   const thr = $('#thead-row');
   function buildHead() {
-    thr.innerHTML = '<th></th>' + COLS.map(c =>
-      '<th data-k="' + c.k + '">' + (c.plain || t(c.label)) + '<span class="ar"></span></th>').join('');
+    thr.innerHTML = COLS.map(c =>
+      '<th data-k="' + c.k + '" title="' + t(c.h) + '">' + (c.plain || t(c.label)) + '<span class="ar"></span></th>').join('');
     thr.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
       const k = th.dataset.k;
-      sort = { key: k, dir: sort.key === k ? -sort.dir : (['value', 'lnRR', 'lnRR_SE', 'tN'].includes(k) ? -1 : 1) };
+      const numeric = COLS.find(c => c.k === k).num;
+      sort = { key: k, dir: sort.key === k ? -sort.dir : (numeric ? -1 : 1) };
       render();
     }));
   }
 
   const MAXROWS = 300;
   /* columns holding a controlled-vocabulary value, shown in the reader's language */
-  const WORDS = ['country', 'crop', 'practice', 'comparator', 'outcome'];
+  const WORDS = ['country', 'region', 'crop', 'pillar', 'subPillar', 'outcome', 'subOutcome', 'group', 'practice', 'comparator'];
   const fmt = (c, r) => {
     const v = r[c.k];
     if (v === null || v === undefined || v === '') return '—';
-    if (c.k === 'value') return sgn(v);
-    if (c.k === 'lnRR' || c.k === 'lnRR_SE') return v.toFixed(2);
+    if (c.k === 'lnRR') return es(v);
+    if (c.k === 'lnRR_SE') return v.toFixed(3);
+    if (['cMean', 'tMean', 'cSD', 'tSD'].includes(c.k)) return Number.isInteger(v) ? String(v) : v.toFixed(2);
+    if (c.k === 'doi') return '<a href="https://doi.org/' + v + '" target="_blank" rel="noopener">' + v + '</a>';
     return WORDS.includes(c.k) ? term(v) : v;
   };
   function table(rows) {
@@ -626,12 +746,17 @@
     thr.querySelectorAll('th[data-k]').forEach(th => {
       th.querySelector('.ar').textContent = th.dataset.k === sort.key ? (sort.dir > 0 ? ' ↑' : ' ↓') : '';
     });
+    /* the first cell carries the record's colour on its left edge */
     $('#tbody').innerHTML = s.slice(0, MAXROWS).map(r =>
-      '<tr data-id="' + r.id + '"><td class="sw"><i style="background:' + color(r.value) + '"></i></td>' +
-      COLS.map(c => '<td class="' + (c.num ? 'v' : '') + '">' + fmt(c, r) + '</td>').join('') + '</tr>'
+      '<tr data-id="' + r.id + '">' +
+      COLS.map((c, i) => '<td class="' + (c.num ? 'v' : '') + '"' +
+        (i === 0 ? ' style="--sw:' + color(r.lnRR) + '"' : '') + '>' + fmt(c, r) + '</td>').join('') + '</tr>'
     ).join('');
     $('#tbody').querySelectorAll('tr').forEach(tr => {
-      tr.addEventListener('click', () => showDetail(rows.find(r => r.id === tr.dataset.id)));
+      tr.addEventListener('click', e => {
+        if (e.target.closest('a')) return;   /* the DOI link is a link */
+        selectRow(rows.find(r => r.id === tr.dataset.id));
+      });
     });
     $('#t-note').textContent = rows.length > MAXROWS
       ? t('rowsTruncated', { shown: MAXROWS, total: rows.length })
@@ -644,7 +769,7 @@
       DIMS.forEach(d => sel[d.key].forEach(v => {
         const c = document.createElement('span');
         c.className = 'chip';
-        c.innerHTML = '<span>' + term(v) + '</span><button title="' + t('remove') + '">✕</button>';
+        c.innerHTML = '<span>' + t(d.label) + ': ' + termKey(v) + '</span><button title="' + t('remove') + '">✕</button>';
         c.querySelector('button').addEventListener('click', () => { sel[d.key].delete(v); syncBoxes(); render(); });
         box.appendChild(c);
       }));
@@ -660,39 +785,19 @@
     });
   }
 
-  /* ---------- record panel ---------- */
-  function showDetail(r) {
+  /* ---------- one record picked out ----------
+     From a table row or a map point: the point grows, the others dim, the row
+     is marked and scrolled into view inside the table. Everything about the
+     record is already in its row, so there is no separate panel. */
+  function selectRow(r) {
     if (!r) return;
-    const num = (v, dp) => (v === null || v === undefined || v === '') ? '—' : (typeof v === 'number' ? v.toFixed(dp) : v);
-    const rows = [
-      [t('dlOutcome'), term(r.outcome)], [t('dlMeasured'), term(r.subOutcome) || '—'], [t('dlUnit'), r.unit || '—'],
-      [t('dlPractice'), r.practiceDetail || term(r.practice)], [t('dlComparator'), term(r.comparator)],
-      [t('dlCrop'), r.cropFull], [t('dlCountry'), term(r.country)], [t('dlRegion'), term(r.region)],
-      [t('dlSite'), r.site || '—'], [t('dlCoords'), r.lat + ', ' + r.lon],
-      [t('dlControlMean'), num(r.cMean, 2) + (r.cSD !== null ? ' ± ' + num(r.cSD, 2) : '')],
-      [t('dlTreatmentMean'), num(r.tMean, 2) + (r.tSD !== null ? ' ± ' + num(r.tSD, 2) : '')],
-      [t('dlSample'), (r.cN || '—') + ' / ' + (r.tN || '—')],
-      [t('dlLnRR'), num(r.lnRR, 3) + (r.lnRR_SE !== null ? ' (SE ' + num(r.lnRR_SE, 3) + ')' : '')],
-      [t('dlDuration'), r.years ? t(r.years === 1 ? 'season' : 'seasons', { n: r.years }) : '—'],
-      [t('dlStudy'), r.study], [t('dlJournal'), r.journal || '—'],
-      [t('dlDoi'), r.doi ? '<a href="https://doi.org/' + r.doi + '" target="_blank" rel="noopener">' + r.doi + '</a>' : '—'],
-      [t('dlSynthesis'), r.synthesis]
-    ];
-    $('#detail-body').innerHTML =
-      '<span class="lbl">' + r.id + '</span>' +
-      '<h3>' + term(r.practice) + '</h3>' +
-      '<div style="font-size:13px;color:var(--ink-2)">' + term(r.crop) + ', ' + term(r.country) + '</div>' +
-      '<div class="big" style="color:' + color(r.value) + '">' + sgn(r.value) + '</div>' +
-      '<div class="lbl">' + t('detailChange', { outcome: term(r.outcome) }) + '</div>' +
-      '<dl class="dl">' + rows.map(p => '<dt>' + p[0] + '</dt><dd>' + p[1] + '</dd>').join('') + '</dl>' +
-      '<div style="display:flex;gap:7px;margin-top:16px;flex-wrap:wrap">' +
-      '<button class="btn sm ghost" data-f="country">' + t('onlyCountry', { country: term(r.country) }) + '</button>' +
-      '<button class="btn sm ghost" data-f="practice">' + t('onlyPractice') + '</button></div>';
-    $('#detail-body').querySelectorAll('[data-f]').forEach(b =>
-      b.addEventListener('click', () => toggle(b.dataset.f, r[b.dataset.f], true)));
-    $('#detail').classList.add('on');
-    document.querySelectorAll('#tbody tr').forEach(tr => tr.classList.toggle('sel', tr.dataset.id === r.id));
     selId = r.id;
+    const wrap = $('.tablewrap');
+    document.querySelectorAll('#tbody tr').forEach(tr => {
+      const on = tr.dataset.id === r.id;
+      tr.classList.toggle('sel', on);
+      if (on && wrap) wrap.scrollTop = Math.max(0, tr.offsetTop - wrap.clientHeight / 2);
+    });
     const badge = $('#sel-badge');
     if (badge) {
       badge.classList.add('on');
@@ -704,26 +809,22 @@
       if (markers[r.id]) setTimeout(() => markers[r.id] && markers[r.id].openTooltip(), 750);
     }
   }
-  function closeDetail() {
-    $('#detail').classList.remove('on');
-    if (selId) {
-      selId = null;
-      const badge = $('#sel-badge');
-      if (badge) badge.classList.remove('on');
-      document.querySelectorAll('#tbody tr').forEach(tr => tr.classList.remove('sel'));
-      if (map) drawPoints(D.filter(match));
-    }
+  function clearSel() {
+    if (!selId) return;
+    selId = null;
+    const badge = $('#sel-badge');
+    if (badge) badge.classList.remove('on');
+    document.querySelectorAll('#tbody tr').forEach(tr => tr.classList.remove('sel'));
+    if (map) drawPoints(D.filter(match));
   }
-  $('#detail-x').addEventListener('click', closeDetail);
-  $('#sel-clear').addEventListener('click', closeDetail);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+  $('#sel-clear').addEventListener('click', clearSel);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') clearSel(); });
 
   /* ---------- CSV of the current selection ---------- */
   function csv() {
     const rows = D.filter(match);
-    const keys = ['id', 'study_id', 'synthesis', 'study', 'year', 'doi', 'country', 'region', 'site',
-      'lat', 'lon', 'crop', 'cropFull', 'outcome', 'subOutcome', 'unit', 'practice', 'practiceDetail',
-      'comparator', 'cMean', 'cSD', 'cN', 'tMean', 'tSD', 'tN', 'lnRR', 'lnRR_SE', 'value', 'years'];
+    /* the same columns, in the same order, as data.csv; build.py writes the list */
+    const keys = window.KH_COLUMNS || Object.keys(rows[0] || {}).filter(k => k !== 'outcomeKey');
     const esc = (v) => v === null || v === undefined ? '' :
       /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v;
     const body = [keys.join(','), ...rows.map(r => keys.map(k => esc(r[k])).join(','))].join('\n');
@@ -735,6 +836,20 @@
   }
   $('#dl-csv').addEventListener('click', csv);
   $('#dl-csv-2').addEventListener('click', csv);
+
+  /* ---------- colour key ----------
+     Built from BREAKS and RAMP_VARS, so it cannot drift from the colours the
+     points and cells actually use. The swatches reference the CSS variables,
+     so a theme switch recolours them with no redraw. */
+  function buildLegend() {
+    const swatches = $('#legend-ramp'), labels = $('#legend-lab'), ratios = $('#legend-ratio');
+    if (!swatches) return;
+    const tick = (v) => (v > 0 ? '+' : '') + v;
+    const lo = BREAKS[0], hi = BREAKS[BREAKS.length - 1];
+    swatches.innerHTML = RAMP_VARS.map(v => '<i style="background:var(' + v + ')"></i>').join('');
+    labels.innerHTML = '<span>' + tick(lo) + '</span><span>0</span><span>' + tick(hi) + '</span>';
+    ratios.innerHTML = '<span>' + ratio(lo) + '</span><span>×1</span><span>' + ratio(hi) + '</span>';
+  }
 
   function render() {
     const rows = D.filter(match);
@@ -826,6 +941,7 @@
   setLang(savedLang || (navigator.language || 'en').slice(0, 2));
   buildFilters();
   buildHead();
+  buildLegend();
   buildTicks();
   started = true;
   render();

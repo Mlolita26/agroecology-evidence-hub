@@ -3,7 +3,8 @@
 Reads every CSV in the clean effect-size folder, turns each control-vs-treatment
 comparison into one website record, and writes docs/data.js.
 
-    python build.py
+    python build.py             # build, and stamp the asset links in index.html
+    python build.py --dry-run   # read and report, write nothing
 
 Set SOURCE_DIR below if your copy of the Hub lives somewhere else.
 """
@@ -15,6 +16,8 @@ import json
 import math
 import os
 import re
+import sys
+from collections import Counter
 
 # The folder on disk is named "Knowledge Hub"; that is the real OneDrive path
 # and has nothing to do with what the website calls itself. Do not rename it.
@@ -45,21 +48,54 @@ SKIP_SOURCES = {
         "Measured costs: knowledge/_status/website.md.",
 }
 
-# The source has no region column, and the vocabulary is small enough to list.
+# The source has no region column. These are the UN M49 sub-regions, which is
+# why Malawi, Zambia and Zimbabwe sit in Eastern Africa: that is where the UN
+# puts them. Every country in ISO3 below has an entry, so a new country in the
+# data is never left without a region to filter on.
 REGIONS = {
-    "Colombia": "South America",
-    "Ethiopia": "Eastern Africa",
-    "Guatemala": "Central America",
-    "India": "Southern Asia",
-    "Kenya": "Eastern Africa",
-    "Malawi": "Southern Africa",
-    "Mexico": "Central America",
-    "Peru": "South America",
-    "South Africa": "Southern Africa",
-    "Tunisia": "Northern Africa",
-    "Vietnam": "South-eastern Asia",
-    "Zambia": "Southern Africa",
+    "Bangladesh": "Southern Asia", "Benin": "Western Africa", "Bolivia": "South America",
+    "Brazil": "South America", "Burkina Faso": "Western Africa", "Cameroon": "Middle Africa",
+    "China": "Eastern Asia", "Colombia": "South America", "Ethiopia": "Eastern Africa",
+    "Ghana": "Western Africa", "Guatemala": "Central America", "India": "Southern Asia",
+    "Indonesia": "South-eastern Asia", "Kenya": "Eastern Africa", "Malawi": "Eastern Africa",
+    "Mali": "Western Africa", "Mexico": "Central America", "Morocco": "Northern Africa",
+    "Mozambique": "Eastern Africa", "Nepal": "Southern Asia", "Niger": "Western Africa",
+    "Nigeria": "Western Africa", "Pakistan": "Southern Asia", "Peru": "South America",
+    "Philippines": "South-eastern Asia", "Rwanda": "Eastern Africa", "Senegal": "Western Africa",
+    "South Africa": "Southern Africa", "Tanzania": "Eastern Africa", "Tunisia": "Northern Africa",
+    "Uganda": "Eastern Africa", "Vietnam": "South-eastern Asia", "Zambia": "Eastern Africa",
+    "Zimbabwe": "Eastern Africa",
 }
+
+# Terms that mark the conventional side of a comparison. The website always shows
+# the agroecological arm as the practice, so when the source put one of these on
+# its treatment side the two arms are swapped before anything is computed. When
+# both arms carry one (no fertiliser against mineral fertiliser, say) neither is
+# agroecological and the row is set aside rather than published.
+#
+# The list follows knowledge/control_treatment_scoring.md, Gliessman level 0,
+# including its rule that the mere absence of an input is not agroecology. That
+# document is a draft for Andrea to ratify; the build prints every swap and
+# every row set aside so the list can be checked against the data.
+COMPARATOR_TERMS = frozenset([
+    # diversification
+    "Monoculture",
+    # tillage
+    "Conventional Tillage",
+    # nutrients: synthetic inputs, and no inputs at all
+    "Inorganic Fertilizer", "External input dependency", "No Fertilizers Applied",
+    # pests
+    "Synthetic pesticide",
+    # biomass
+    "Plastic mulch", "No mulch",
+    # water: irrigation on its own is not a practice choice on the gradient
+    "Irrigation", "Full irrigation", "No irrigation",
+    # other absences
+    "Unimproved variety", "No Inoculation", "No liming",
+])
+# Left out on purpose: "Natural Fallow" (a rest period, the temporal arm in
+# Jones), "Timber plantation" (the comparator of Paut's agroforestry pairs),
+# "No Chemical Applied" (its pairs carry Inoculants on the same side).
 
 # Country -> ISO3, for the regional boundary files in docs/vendor/adm1/.
 # This is the only copy: tools/fetch_boundaries.py imports it to know what to
@@ -120,6 +156,12 @@ def first(text):
     return str(text).split("..")[0].strip()
 
 
+def clean(text):
+    """A cell as text, with the schema's two ways of saying 'nothing' removed."""
+    text = (text or "").strip()
+    return "" if text in ("NA", "Unspecified") else text
+
+
 def split_sides(cell):
     """'C: Monoculture_vs_T: Agroforestry' -> ('Monoculture', 'Agroforestry')."""
     if not cell or "_vs_" not in cell:
@@ -128,24 +170,49 @@ def split_sides(cell):
     return re.sub(r"^C:\s*", "", control), re.sub(r"^T:\s*", "", treatment)
 
 
-def contrast(row):
-    """The practice, the comparator it was compared against, and the detail.
+def terms(label):
+    """'Intercropping + Mulching' -> {'Intercropping', 'Mulching'}."""
+    return {t.strip() for t in label.split(" + ") if t.strip()}
 
-    Labels are the first term of a '+' joined list; the detail keeps the
-    full treatment-side description from the matching *_practice column.
+
+def contrast(row):
+    """The two arms of the comparison, as the source labelled them.
+
+    Works through THEMES and takes the first one whose two sides differ. Each
+    arm gets a label (the first term of a '+' joined list), the full detail
+    from the matching *_practice column, and the set of every term seen on
+    that side in either column, which is what orient() reads.
     """
     for theme in THEMES:
         sides = split_sides(row.get(theme + "_theme"))
         if not sides or sides[0] == sides[1]:
             continue
         control, treatment = sides
-        detail = split_sides(row.get(theme + "_practice"))
+        detail = split_sides(row.get(theme + "_practice")) or (control, treatment)
         return {
-            "practice": treatment.split(" + ")[0],
-            "comparator": control.split(" + ")[0],
-            "practiceDetail": detail[1] if detail else treatment,
+            "C": {"label": control.split(" + ")[0], "detail": detail[0],
+                  "terms": terms(control) | terms(detail[0])},
+            "T": {"label": treatment.split(" + ")[0], "detail": detail[1],
+                  "terms": terms(treatment) | terms(detail[1])},
         }
     return None
+
+
+def orient(sides):
+    """Which way round to publish the arms: 'keep', 'swap' or 'lateral'.
+
+    The practice is always the agroecological arm. If only the source's
+    treatment carries a conventional term, the arms are the wrong way round
+    for us and are swapped. If both do, neither arm is agroecological: the
+    comparison is lateral, set aside and not published.
+    """
+    c_conv = bool(sides["C"]["terms"] & COMPARATOR_TERMS)
+    t_conv = bool(sides["T"]["terms"] & COMPARATOR_TERMS)
+    if t_conv and c_conv:
+        return "lateral"
+    if t_conv:
+        return "swap"
+    return "keep"
 
 
 def std_dev(row, side):
@@ -188,24 +255,39 @@ def study_label(authors, year):
 
 
 def make_record(row, synthesis, serial):
-    """One website record, or None if the row cannot be shown on the map."""
-    lat, lon = number(row.get("T_site_latitude")), number(row.get("T_site_longitude"))
-    c_mean, t_mean = number(row.get("C_out_value")), number(row.get("T_out_value"))
+    """One website record and how it was oriented, or why there is none.
+
+    Returns (status, record). The status is 'kept' or 'swapped' when there is
+    a record, and 'no contrast', 'incomplete' or 'lateral' when there is not.
+    """
     sides = contrast(row)
-
-    # A record needs a place, a positive control to divide by, and a contrast.
-    if lat is None or lon is None or not c_mean or c_mean <= 0 or t_mean is None:
-        return None
     if sides is None:
-        return None
+        return "no contrast", None
+    decision = orient(sides)
 
-    c_sd, t_sd = std_dev(row, "C"), std_dev(row, "T")
-    c_n, t_n = number(row.get("C_out_sample_size")), number(row.get("T_out_sample_size"))
+    # Read the arms through these prefixes, so a swapped comparison is computed
+    # the right way round from the start instead of being corrected afterwards.
+    c, t = ("T", "C") if decision == "swap" else ("C", "T")
+    arm = lambda side, column: row.get(side + column)  # noqa: E731
+    either = lambda column: clean(arm(t, column)) or clean(arm(c, column))  # noqa: E731
+
+    lat, lon = number(either("_site_latitude")), number(either("_site_longitude"))
+    c_mean, t_mean = number(arm(c, "_out_value")), number(arm(t, "_out_value"))
+    # A record needs a place, a positive control to divide by, and a treatment.
+    if lat is None or lon is None or not c_mean or c_mean <= 0 or t_mean is None:
+        return "incomplete", None
+    if decision == "lateral":
+        return "lateral", None
+
+    c_sd, t_sd = std_dev(row, c), std_dev(row, t)
+    c_n, t_n = number(arm(c, "_out_sample_size")), number(arm(t, "_out_sample_size"))
     ln_rr = math.log(t_mean / c_mean) if t_mean > 0 else None
-    crop_full = row.get("T_crop_tree_diversity") or ""
-    country = first(row.get("T_country"))
+    crop_full = either("_crop_tree_diversity")
+    country = first(either("_country"))
+    practice, comparator = (sides["C"], sides["T"]) if decision == "swap" else (sides["T"], sides["C"])
+    status = "swapped" if decision == "swap" else "kept"
 
-    return {
+    return status, {
         "id": f"{synthesis}_{serial}",
         "study_id": row.get("study_id"),
         "synthesis": synthesis,
@@ -216,17 +298,21 @@ def make_record(row, synthesis, serial):
         "title": row.get("title") or None,
         "country": country,
         "region": REGIONS.get(country, ""),
-        "site": row.get("T_site_id") or None,
+        "site": either("_site_id") or None,
         "lat": round(lat, 4),
         "lon": round(lon, 4),
         "crop": crop_full.split("-")[0],
         "cropFull": crop_full,
-        "outcome": row.get("out_indicator") or "",
-        "subOutcome": row.get("out_subindicator") or None,
-        "unit": row.get("T_out_subindicator_unit") or None,
-        "practice": sides["practice"],
-        "practiceDetail": sides["practiceDetail"],
-        "comparator": sides["comparator"],
+        "pillar": clean(row.get("out_pillar")),
+        "subPillar": clean(row.get("out_subpillar")),
+        "outcome": clean(row.get("out_indicator")),
+        "subOutcome": clean(row.get("out_subindicator")) or None,
+        "group": clean(first(row.get("bio_func_group"))),
+        "unit": either("_out_subindicator_unit") or None,
+        "practice": practice["label"],
+        "practiceDetail": practice["detail"],
+        "comparator": comparator["label"],
+        "comparatorDetail": comparator["detail"],
         "cMean": c_mean,
         "cSD": c_sd,
         "cN": c_n,
@@ -237,6 +323,7 @@ def make_record(row, synthesis, serial):
         "lnRR_SE": _round(log_ratio_se(c_mean, c_sd, c_n, t_mean, t_sd, t_n), 4),
         "value": round((t_mean - c_mean) / c_mean * 100, 1),
         "years": number(row.get("exp_duration")),
+        "swapped": decision == "swap",
     }
 
 
@@ -250,29 +337,51 @@ def synthesis_name(path):
 
 
 def read_source(path):
-    """Every record we can build from one source synthesis."""
+    """Every record we can build from one source synthesis.
+
+    Prints what happened to the rows as it goes: how many were swapped and
+    how many set aside, and which pairs of arms those were, so the
+    COMPARATOR_TERMS list can be checked against the data every time.
+    """
     synthesis = synthesis_name(path)
-    records = []
+    records, tally = [], Counter()
+    pairs = {"swapped": Counter(), "lateral": Counter()}
     with open(path, newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
-            record = make_record(row, synthesis, len(records) + 1)
+            status, record = make_record(row, synthesis, len(records) + 1)
+            tally[status] += 1
             if record:
                 records.append(record)
-    print(f"  {synthesis}: {len(records)} records")
+            if status in pairs:
+                sides = contrast(row)
+                pairs[status][(sides["C"]["label"], sides["T"]["label"])] += 1
+
+    print(f"  {synthesis}: {len(records)} records "
+          f"({tally['kept']} as the source had them, {tally['swapped']} swapped); "
+          f"{tally['lateral']} set aside as lateral; "
+          f"{tally['incomplete'] + tally['no contrast']} unusable")
+    for status, note in (("swapped", "swapped"), ("lateral", "set aside")):
+        for (control, treatment), n in pairs[status].most_common():
+            print(f"      {n:4d} {note}: source control '{control}' vs treatment '{treatment}'")
     return records
 
 
 HEADER = """/* Agroecology Evidence Hub, website dataset. Generated by build.py, do not edit.
-   One record = one control-vs-treatment comparison for one outcome.
-   value = percentage change of the treatment mean against the control mean (display only)
-   lnRR  = log response ratio, ln(T/C); lnRR_SE is null where no dispersion was reported. */
+   One record = one comparison between an agroecological practice (T) and a less
+   agroecological alternative (C), for one outcome. practice is always the
+   agroecological arm; swapped is true where the source had the arms the other
+   way round and build.py turned them.
+   lnRR  = log response ratio, ln(T/C); lnRR_SE is null where no dispersion was reported.
+   value = percentage change of T against C, kept for the download only. */
 window.KH_DATA = """
 
 CSV_COLUMNS = [
     "id", "study_id", "synthesis", "study", "year", "doi", "journal", "title",
     "country", "region", "site", "lat", "lon", "crop", "cropFull",
-    "outcome", "subOutcome", "unit", "practice", "practiceDetail", "comparator",
+    "pillar", "subPillar", "outcome", "subOutcome", "group", "unit",
+    "practice", "practiceDetail", "comparator", "comparatorDetail",
     "cMean", "cSD", "cN", "tMean", "tSD", "tN", "lnRR", "lnRR_SE", "value", "years",
+    "swapped",
 ]
 
 
@@ -283,7 +392,9 @@ def write_outputs(records):
     working while somebody deals with the size.
     """
     os.makedirs(OUT_DIR, exist_ok=True)
-    body = HEADER + json.dumps(records, separators=(",", ":")) + ";\n"
+    body = (HEADER + json.dumps(records, separators=(",", ":")) + ";\n"
+            "/* column order of the download, the same as data.csv */\n"
+            "window.KH_COLUMNS = " + json.dumps(CSV_COLUMNS) + ";\n")
 
     megabytes = len(body.encode("utf-8")) / 1e6
     if megabytes > MAX_DATA_MB:
@@ -372,6 +483,7 @@ def stamp_assets():
 
 
 def main():
+    dry_run = "--dry-run" in sys.argv[1:]
     sources = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.csv")))
     if not sources:
         raise SystemExit(f"No source CSVs found in {SOURCE_DIR}")
@@ -389,13 +501,22 @@ def main():
     countries = {r["country"] for r in records}
     print(f"\n{len(records)} records, {len(countries)} countries")
 
+    no_region = sorted(c for c in countries if c not in REGIONS)
+    if no_region:
+        print(f"\n{len(no_region)} countries have no entry in REGIONS, so the region "
+              "filter cannot reach them:")
+        print("  " + ", ".join(no_region))
+    check_boundaries(records)
+
+    if dry_run:
+        print("\nDry run: nothing written.")
+        return
+
     js_path, csv_path = write_outputs(records)
     if js_path:
         print(f"Wrote {js_path}")
         print(f"Wrote {csv_path}")
     print(f"Wrote {write_iso3()}")
-
-    check_boundaries(records)
     stamp_assets()
     if not js_path:
         raise SystemExit(1)

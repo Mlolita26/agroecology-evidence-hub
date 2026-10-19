@@ -12,10 +12,12 @@ Every page header now uses a photograph.
 
 ## Credits are still missing
 
-Only the FAO image has a known photographer. The footer says "Olivier Asselin /
-FAO; other credits to follow", which is honest but temporary. Fill in the rest
-and update `footer.06` in `../i18n.js` in all three languages. Check too that
-the project may publish each one: this repository is public.
+Only the FAO image has a known photographer. The footer lists the pages one by
+one ("Home: Olivier Asselin / FAO. About, Methodology, Get involved, Contact:
+credits to follow"), which is honest but temporary. When a credit arrives, put
+it in this table and in `footer.06`: the English in `index.html`, the Spanish
+and French in `../i18n.js`. Check too that the project may publish each one:
+this repository is public.
 
 If a photograph cannot be cleared, delete the file and remove `data-photo` from
 that page in `index.html`. The generated artwork comes back on its own, so the

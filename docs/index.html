@@ -5,11 +5,13 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width,initial-scale=1" name="viewport"/>
     <title>Agroecology Evidence Hub</title>
+    <!-- no icon yet; an empty one stops the browser asking for favicon.ico -->
+    <link href="data:," rel="icon"/>
     <!-- everything the page needs is in this repository; see vendor/README.md -->
     <link href="vendor/leaflet.css" rel="stylesheet"/>
     <link href="vendor/fonts.css" rel="stylesheet"/>
     <link href="styles.css?v=6dc7134f" rel="stylesheet"/>
-    <link href="explore.css?v=05083ea9" rel="stylesheet"/>
+    <link href="explore.css?v=8ff23aff" rel="stylesheet"/>
   </head>
   <body>
     <header class="masthead">
@@ -72,91 +74,64 @@
   </main>
   <!-- ============ EXPLORE ============ -->
   <main class="page" id="page-explore">
-    <div class="explore mode-map" id="explore-wrap">
+    <div class="explore" id="explore-wrap">
       <div class="toolbar">
         <div class="dds" id="filter-groups"></div>
         <button class="linkish" data-t="explore.01" id="clear-all">Clear all</button>
         <span class="tb-n"><b id="m-shown">0</b> / <span id="m-total">0</span> <span data-t="explore.18">comparisons</span></span>
-        <button class="btn sm ghost" data-t="explore.02" id="to-map">Return to the map</button>
-        <button class="btn sm ghost" data-t="explore.03" id="to-sum">Summary and charts</button>
         <button class="btn sm" data-t="explore.04" id="dl-csv">Download</button>
       </div>
-      <div class="mapstage">
-        <div id="map"></div>
-        <div class="mapctl">
-          <button data-t="explore.05" id="reset-view" type="button">World view</button>
+      <!-- the map and the findings sit side by side, so nothing is behind a click -->
+      <div class="stage">
+        <div class="mapstage">
+          <div id="map"></div>
+          <div class="mapctl">
+            <button data-t="explore.05" id="reset-view" type="button">World view</button>
+          </div>
+          <div class="selbadge" id="sel-badge">
+            <span></span>
+            <button data-t="explore.07" id="sel-clear" type="button">Show all points</button>
+          </div>
+          <!-- colour key, always on the map whatever the view. app.js fills the
+               swatches and labels from the same breakpoints it colours with. -->
+          <div class="maplegend">
+            <span class="lbl" data-t="explore.19">Effect size, lnRR</span>
+            <div class="ramp" id="legend-ramp"></div>
+            <div class="ramp-lab" id="legend-lab"></div>
+            <div class="ramp-lab ratio" id="legend-ratio"></div>
+            <span class="lbl mapleg-n" data-t="explore.20">Point size is the treatment sample size</span>
+          </div>
         </div>
-        <div class="readstrip">
-          <p data-readout=""> </p>
+        <aside class="findings" id="findings">
+          <span class="kicker" data-t="explore.08">What the selection shows</span>
+          <p data-readout=""> </p>
           <div class="rs-meta" data-readmeta=""></div>
           <div class="chips" data-chips=""></div>
           <div class="mapnote" id="map-mode"></div>
-          <button class="opentab" id="open-sum" title="Open the summary">
-            <span data-t="explore.06">Summary and charts</span> ›
-          </button>
-        </div>
-        <div class="selbadge" id="sel-badge">
-          <span></span>
-          <button data-t="explore.07" id="sel-clear" type="button">Show all points</button>
-        </div>
-
-        <!-- colour key, always on the map whatever the view -->
-        <div class="maplegend">
-          <span class="lbl" data-t="explore.19">Change against the control</span>
-          <div class="ramp">
-            <i style="background:var(--d1)"></i><i style="background:var(--d2)"></i><i style="background:var(--d3)"></i><i style="background:var(--d4)"></i><i style="background:var(--d5)"></i><i style="background:var(--d6)"></i><i style="background:var(--d7)"></i>
-          </div>
-          <div class="ramp-lab"><span data-t="explore.12">−90%</span><span>0</span><span data-t="explore.13">+180%</span></div>
-          <span class="lbl mapleg-n" data-t="explore.20">Point size is the sample size</span>
-        </div>
-      </div>
-      <section class="summary" id="summary">
-        <div class="sumin">
-          <div class="sum-head">
-            <span class="kicker" data-t="explore.08">Selection summary</span>
-            <p data-readout=""> </p>
-            <div class="rs-meta" data-readmeta=""></div>
-            <div class="chips" data-chips=""></div>
-          </div>
           <div class="sum-sec">
-            <h2 data-t="explore.09">Median change by practice and outcome</h2>
-            <p class="sum-hint" data-t="explore.10">Each cell is the median percentage change of the treatment against its control, for that practice and that outcome. Click a cell to keep that pair, a row or column label to keep one of them.</p>
+            <h2 data-t="explore.09">Median effect size by practice and outcome</h2>
             <div class="chart" id="chart"></div>
+            <p class="sum-caption" data-t="explore.21">Each cell is the median lnRR of the comparisons for that agroecological practice and that outcome; n is how many comparisons are behind it. It is computed from the same rows as the table below. Click a cell to keep that pair, a row or column heading to keep one of them.</p>
+            <p class="sum-note" data-t="explore.14">Pink is a decrease against the less agroecological alternative, teal an increase, pale sand is near zero. lnRR is ln(treatment ÷ comparator). The scale is cut at ±1, which is about 0.37 to 2.7 times the comparator.</p>
           </div>
-          <div class="sum-sec">
-            <h2 data-t="explore.11">Reading the colours</h2>
-            <div class="legend">
-              <div>
-                <div class="ramp">
-                  <i style="background:var(--d1)"></i><i style="background:var(--d2)"></i><i style="background:var(--d3)"></i><i style="background:var(--d4)"></i><i style="background:var(--d5)"></i><i style="background:var(--d6)"></i><i style="background:var(--d7)"></i>
-  </div>
-  <div class="ramp-lab"><span data-t="explore.12">−90%</span><span>0</span><span data-t="explore.13">+180%</span></div>
-</div>
-<span class="lbl" data-t="explore.14">Teal is a decrease against the control, pink an increase, pale sand is near zero. The scale is clamped at the ends. On the map, point size is the treatment sample size.</span>
-</div>
-</div>
-</div>
-</section>
-<div class="section-h">
-  <h2 data-t="explore.15">Comparisons</h2>
-  <span class="hint" data-t="explore.16">Rows and headers are clickable</span>
-</div>
-<div class="tablewrap">
-  <table>
-    <thead><tr id="thead-row"></tr></thead>
-    <tbody id="tbody"></tbody>
-  </table>
-</div>
-<div class="tfoot">
-  <span id="t-note"></span>
-  <button class="btn sm ghost" data-t="explore.17" id="dl-csv-2" style="margin-left:auto">Download selection</button>
-</div>
-</div>
-</main>
-<aside class="detail" id="detail">
-  <button class="x" id="detail-x">✕</button>
-  <div id="detail-body"></div>
-</aside>
+        </aside>
+      </div>
+      <div class="section-h">
+        <h2 data-t="explore.15">Comparisons</h2>
+        <span class="hint" data-t="explore.16">Click a row to find it on the map, a heading to sort</span>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr id="thead-row"></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="tfoot">
+        <span id="t-note"></span>
+        <button class="btn sm ghost" data-t="explore.17" id="dl-csv-2" style="margin-left:auto">Download selection</button>
+      </div>
+    </div>
+  </main>
 <!-- ============ ABOUT ============ -->
 <main class="page" id="page-about">
   <header class="hero">
@@ -214,9 +189,6 @@
   <span class="lbl" data-t="about.20">With partners</span>
   <div class="logos">
     <a class="logo" href="https://www.cirad.fr" target="_blank" rel="noopener"><span>CIRAD</span></a>
-    <a class="logo" href="https://joint-research-centre.ec.europa.eu" target="_blank" rel="noopener"><span>European Commission Joint Research Centre</span></a>
-    <a class="logo" href="https://stats4sd.org" target="_blank" rel="noopener"><span>Stats4SD</span></a>
-    <a class="logo" href="https://worldfishcenter.org" target="_blank" rel="noopener"><span>WorldFish</span></a>
   </div>
 </section>
 <div class="doc-foot"><span data-t="about.35">Reporting standard: ROSES</span><span data-t="about.36">FAIR metadata</span><span data-t="about.37">CC BY 4.0</span></div>
@@ -245,8 +217,8 @@
       <h2><span class="step" data-t="methodology.10">Step three</span>One row, one comparison</h2>
       <p data-t="methodology.11">A row in the template is one control against treatment comparison for one outcome. Most fields come in control and treatment pairs, with study, site and outcome attributes shared. That is the unit a meta-analytic effect size needs.</p>
       <h2><span class="step" data-t="methodology.12">Step four</span>Effect sizes</h2>
-      <p data-t="methodology.13">The analysis uses log response ratios and standardised mean differences, assigned per outcome by the vocabulary. For readability this site also shows the plain percentage change of the treatment mean against the control mean. Both travel with the reported means, dispersion and sample sizes, so you can recompute anything yourself.</p>
-      <div class="pull">Percentages are for reading. The log response ratio and its standard error are for analysis.</div>
+      <p data-t="methodology.13">The analysis uses log response ratios and standardised mean differences, assigned per outcome by the vocabulary. This site shows the log response ratio, lnRR, and its standard error for every comparison, computed from the reported means, dispersion and sample sizes, which travel with each record so you can recompute anything yourself. The download also carries the plain percentage change, as a reading aid.</p>
+      <div class="pull">The log response ratio and its standard error are the numbers to use. The percentage in the download is for reading only.</div>
       <h2 data-t="methodology.14">Standards</h2>
       <ul>
         <li data-t="methodology.15">Reporting follows ROSES, the standard for systematic evidence syntheses in environmental management, not PRISMA.</li>
@@ -260,7 +232,7 @@
         <li data-t="methodology.21">Positive results are more likely to be published than null results.</li>
         <li data-t="methodology.22">Sites cluster around long running research stations.</li>
         <li data-t="methodology.23">Dispersion is not reported by every source, so standard errors are available for a subset of records.</li>
-        <li data-t="methodology.24">Treatment does not automatically mean agroecological. Read the comparator field before pooling.</li>
+        <li data-t="methodology.24">Which arm counts as agroecological is decided by a written rule, not inherited from the source. Comparisons where neither arm is agroecological are left out. Read the comparator field before pooling.</li>
       </ul>
     </div>
   </div>
@@ -268,12 +240,12 @@
     <div class="doc-sec">
       <span class="lbl" data-t="methodology.25">Fields published on this site</span>
       <table class="meta-t">
-        <tr><td data-t="methodology.26">Location</td><td data-t="methodology.27">country, region, site, latitude, longitude</td></tr>
+        <tr><td data-t="methodology.26">Location</td><td data-t="methodology.27">country, UN region, site, latitude, longitude</td></tr>
         <tr><td data-t="methodology.28">System</td><td data-t="methodology.29">crop, full crop or tree list</td></tr>
-        <tr><td data-t="methodology.30">Intervention</td><td data-t="methodology.31">practice, practice detail, comparator</td></tr>
-        <tr><td data-t="methodology.32">Outcome</td><td data-t="methodology.33">outcome, sub-indicator, unit</td></tr>
+        <tr><td data-t="methodology.30">Intervention</td><td data-t="methodology.31">agroecological practice and its detail, comparator and its detail</td></tr>
+        <tr><td data-t="methodology.32">Outcome</td><td data-t="methodology.33">pillar, sub-pillar, outcome, sub-indicator, organism group, unit</td></tr>
         <tr><td data-t="methodology.34">Values</td><td data-t="methodology.35">control and treatment mean, SD, sample size</td></tr>
-        <tr><td data-t="methodology.36">Effect size</td><td data-t="methodology.37">lnRR, standard error, percentage change</td></tr>
+        <tr><td data-t="methodology.36">Effect size</td><td data-t="methodology.37">lnRR and its standard error; percentage change in the download only</td></tr>
         <tr><td data-t="methodology.38">Provenance</td><td data-t="methodology.39">study, year, journal, DOI, source synthesis</td></tr>
       </table>
     </div>
@@ -475,17 +447,17 @@
     <span data-t="footer.01">Agroecology Evidence Hub, draft 0.4</span>
     <span data-t="footer.02">Data CC BY 4.0</span>
     <span data-t="footer.03">Boundaries: Natural Earth, geoBoundaries</span>
-    <span data-t="footer.06">Photographs: Olivier Asselin / FAO; other credits to follow</span>
+    <span data-t="footer.06">Photographs. Home: Olivier Asselin / FAO. About, Methodology, Get involved, Contact: credits to follow</span>
     <a data-t="footer.04" href="#methodology" style="margin-left:auto">Methodology</a>
     <a data-t="footer.05" href="#contact">Contact</a>
   </div>
 </footer>
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/topojson-client.min.js"></script>
-<script src="data.js?v=b96f753d"></script>
+<script src="data.js?v=e53136dd"></script>
 <script src="iso3.js?v=fbe9a473"></script>
-<script src="i18n.js?v=996a35ee"></script>
-<script src="vocab.js?v=f1377d97"></script>
-<script src="app.js?v=1b2165f1"></script>
+<script src="i18n.js?v=faabf03e"></script>
+<script src="vocab.js?v=9bd9520a"></script>
+<script src="app.js?v=017d9a67"></script>
 </body>
 </html>
