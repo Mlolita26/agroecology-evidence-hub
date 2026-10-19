@@ -405,6 +405,7 @@ window.KH_UI = {
   en: {
     themeDark: 'Dark', themeLight: 'Light',
     search: 'Search…', all: 'All', nSelected: '{n} selected', remove: 'Remove',
+    sortByName: 'Sort by name', sortByCount: 'Sort by number of comparisons',
     dimRegion: 'Region', dimCountry: 'Country', dimCrop: 'Crop', dimOutcome: 'Outcome',
     dimPractice: 'Agroecological practice',
     /* table headings */
@@ -495,6 +496,7 @@ window.KH_UI = {
   es: {
     themeDark: 'Oscuro', themeLight: 'Claro',
     search: 'Buscar…', all: 'Todo', nSelected: '{n} elegidos', remove: 'Quitar',
+    sortByName: 'Ordenar por nombre', sortByCount: 'Ordenar por número de comparaciones',
     dimRegion: 'Región', dimCountry: 'País', dimCrop: 'Cultivo', dimOutcome: 'Resultado',
     dimPractice: 'Práctica agroecológica',
     colStudy: 'Estudio', colYear: 'Año', colLat: 'Lat', colLon: 'Lon', colSite: 'Sitio',
@@ -582,6 +584,7 @@ window.KH_UI = {
   fr: {
     themeDark: 'Sombre', themeLight: 'Clair',
     search: 'Rechercher…', all: 'Tout', nSelected: '{n} choisis', remove: 'Retirer',
+    sortByName: 'Trier par nom', sortByCount: 'Trier par nombre de comparaisons',
     dimRegion: 'Région', dimCountry: 'Pays', dimCrop: 'Culture', dimOutcome: 'Résultat',
     dimPractice: 'Pratique agroécologique',
     colStudy: 'Étude', colYear: 'Année', colLat: 'Lat', colLon: 'Lon', colSite: 'Site',

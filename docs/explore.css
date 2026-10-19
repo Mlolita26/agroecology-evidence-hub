@@ -32,6 +32,12 @@
 .dd .pop input.search{width:100%;padding:6px 8px;font:inherit;font-size:12.5px;border:1px solid var(--line);
   background:var(--wash);color:var(--ink);margin-bottom:6px;border-radius:0}
 .dd .pop input.search:focus{outline:none;border-color:var(--ink-2)}
+/* sort the options by name or by count */
+.dd .sorts{display:flex;gap:4px;margin:0 0 6px}
+.dd .sorts button{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid var(--line-2);border-radius:0;padding:3px 8px;color:var(--ink-3);cursor:pointer}
+.dd .sorts button:hover{color:var(--ink);border-color:var(--ink-3)}
+.dd .sorts button.on{color:var(--accent);border-color:var(--accent);font-weight:600}
 .opt{display:flex;align-items:center;gap:8px;padding:4px;font-size:13px;color:var(--ink-2);cursor:pointer}
 .opt:hover{color:var(--ink);background:var(--wash)}
 .opt input{appearance:none;width:12px;height:12px;border:1px solid var(--line-2);border-radius:0;

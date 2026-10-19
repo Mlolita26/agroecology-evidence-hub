@@ -199,8 +199,19 @@
     dd.dataset.key = d.key;
     dd.innerHTML = '<button type="button"><span class="dl-name">' + t(d.label) +
       '</span><span class="dl-val">' + t('all') + '</span><span class="car">▾</span></button>' +
-      '<div class="pop"><input class="search" type="text" placeholder="' + t('search') + '"><div class="list"></div></div>';
+      '<div class="pop"><input class="search" type="text" placeholder="' + t('search') + '">' +
+      '<div class="sorts"><button type="button" data-sort="name" title="' + t('sortByName') + '"></button>' +
+      '<button type="button" data-sort="count" title="' + t('sortByCount') + '"></button></div>' +
+      '<div class="list"></div></div>';
     const list = dd.querySelector('.list');
+    /* sort the options by name or by count; a second click on the same
+       button turns the order round. Counts come first high to low. */
+    dd.querySelectorAll('.sorts button').forEach(b => b.addEventListener('click', () => {
+      const same = (dd.dataset.sort || 'name') === b.dataset.sort;
+      dd.dataset.dir = same ? -(+dd.dataset.dir || 1) : (b.dataset.sort === 'count' ? -1 : 1);
+      dd.dataset.sort = b.dataset.sort;
+      sortOptions(dd);
+    }));
     const byName = (a, b) => termKey(a).localeCompare(termKey(b));
     const option = (v) => {
       const l = document.createElement('label');
@@ -251,6 +262,32 @@
   syncBoxes();
   }
   document.addEventListener('click', () => document.querySelectorAll('.dd.open').forEach(o => o.classList.remove('open')));
+
+  /* Reorder one dropdown's options in place, so their listeners survive. The
+     country list is in runs of a region heading followed by its countries;
+     each run is sorted on its own and the headings stay where they are. */
+  function sortOptions(dd) {
+    const list = dd.querySelector('.list');
+    const by = dd.dataset.sort || 'name', dir = +(dd.dataset.dir || 1);
+    const count = (el) => +el.querySelector('.c').textContent;
+    const cmp = (a, b) => by === 'count'
+      ? (count(a) - count(b)) * dir || a.dataset.label.localeCompare(b.dataset.label)
+      : a.dataset.label.localeCompare(b.dataset.label) * dir;
+    const runs = [{ head: null, opts: [] }];
+    [...list.children].forEach(el => {
+      if (el.classList.contains('grp')) runs.push({ head: el, opts: [] });
+      else runs[runs.length - 1].opts.push(el);
+    });
+    runs.forEach(run => {
+      if (run.head) list.appendChild(run.head);
+      run.opts.sort(cmp).forEach(el => list.appendChild(el));
+    });
+    dd.querySelectorAll('.sorts button').forEach(b => {
+      const on = b.dataset.sort === by;
+      b.classList.toggle('on', on);
+      b.textContent = b.dataset.sort === 'name' ? (on && dir < 0 ? 'Z–A' : 'A–Z') : (on && dir > 0 ? 'n ↑' : 'n ↓');
+    });
+  }
 
   function ddLabels() {
     groups.querySelectorAll('.dd').forEach(dd => {
@@ -845,6 +882,8 @@
       l.querySelector('.c').textContent = n;
       l.style.opacity = n === 0 ? .38 : 1;
     });
+    /* the counts just changed, so a list sorted by count has to follow */
+    groups.querySelectorAll('.dd').forEach(sortOptions);
   }
 
   /* ---------- one record picked out ----------
