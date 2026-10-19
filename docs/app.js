@@ -16,7 +16,12 @@
      the indicator, plus the organism group where the source names one, so the
      abundance of weeds and of natural enemies never end up pooled in one cell. */
   const SEP = ' · ';
-  D.forEach(r => { r.outcomeKey = r.outcome + (r.group ? SEP + r.group : ''); });
+  D.forEach(r => {
+    /* an outcome named only after its sub-pillar (Efficiency) is told apart by
+       its measure instead, so the reader sees efficiency of what */
+    const byMeasure = r.outcome === r.subPillar && r.subOutcome;
+    r.outcomeKey = r.outcome + (r.group ? SEP + r.group : byMeasure ? SEP + r.subOutcome : '');
+  });
 
   const DIMS = [
     { key: 'region', label: 'dimRegion' },
@@ -333,8 +338,11 @@
     if (!map || !bounds || !bounds.isValid()) return;
     const size = map.getSize();
     if (!size.x || !size.y) return;   /* the page is hidden; route() fits it once shown */
-    /* room for the view button at the top right and the colour key at the bottom */
-    map.fitBounds(bounds, { paddingTopLeft: [24, 24], paddingBottomRight: [24, 96] });
+    /* room for the view button at the top right and the colour key at the bottom.
+       maxZoom matters: a selection whose points all share one site has bounds
+       with no area, and without a ceiling Leaflet zooms in without limit and
+       the map goes blank. */
+    map.fitBounds(bounds, { paddingTopLeft: [24, 24], paddingBottomRight: [24, 96], maxZoom: 8 });
   }
   function dataBounds(rows) {
     const pts = (rows && rows.length ? rows : D).map(r => [r.lat, r.lon]);
@@ -343,7 +351,7 @@
 
   function ensureMap() {
     if (map) return;
-    map = L.map('map', { worldCopyJump: false, minZoom: 1.5, scrollWheelZoom: true, attributionControl: false })
+    map = L.map('map', { worldCopyJump: false, minZoom: 1.5, maxZoom: 12, scrollWheelZoom: true, attributionControl: false })
       .setView(HOME_VIEW[0], HOME_VIEW[1]);
     document.getElementById('map').classList.add('plain');
     window.KH_MAP = map;
@@ -630,16 +638,12 @@
         .sort((a, b) => b[2] - a[2])[0];
       if (best) html += ' ' + t('readoutBest', { practice: term(best[0]), median: es(best[2]), n: best[1].length });
     }
-    const ns = rows.map(r => r.tN).filter(Boolean);
-    const meta = [
+    /* how wide the selection is, in things people count */
+    put(html, [
       plural(new Set(rows.map(r => r.country)).size, 'metaCountry', 'metaCountries'),
       plural(new Set(rows.map(r => r.crop)).size, 'metaCrop', 'metaCrops'),
-      plural(new Set(rows.map(r => r.study)).size, 'metaStudy', 'metaStudies'),
-      ns.length ? t('metaMedianN', { n: median(ns) }) : t('metaNoN')
-    ];
-    /* no effect size: the good direction is unknown, or a mean was zero */
-    if (known.length < rows.length) meta.push(t('metaNoEffect', { n: rows.length - known.length }));
-    put(html, meta.join(' · '));
+      plural(new Set(rows.map(r => r.study)).size, 'metaStudy', 'metaStudies')
+    ].join(' · '));
   }
 
   /* ---------- practice x outcome heatmap ---------- */
@@ -647,33 +651,55 @@
     const box = $('#chart');
     box.innerHTML = '';
     if (!rows.length) { box.innerHTML = '<span class="lbl">' + t('nothingToSummarise') + '</span>'; return; }
-    const cells = {}, pCount = {}, oCount = {};
+    /* One column per outcome, under its sub-pillar, under its pillar: three
+       header rows. The organisms behind a biodiversity outcome are pooled in
+       one column, which is sound now that yi is turned so positive is better
+       for weeds and natural enemies alike; the heading lists them, and the
+       outcome filter can still pick one on its own. An outcome named only
+       after its sub-pillar (Efficiency) is split by its measure instead. */
+    const col = (r) => (r.outcome === r.subPillar && r.subOutcome) ? r.outcome + SEP + r.subOutcome : r.outcome;
+    const label = (c) => c.includes(SEP) ? term(c.split(SEP)[1]) : term(c);
+    const cells = {}, pCount = {}, oCount = {}, oGroups = {}, subOfCol = {};
     rows.forEach(r => {
-      const k = r.practice + '||' + r.outcomeKey;
+      const c = col(r), k = r.practice + '||' + c;
       (cells[k] = cells[k] || []).push(r.yi);
       pCount[r.practice] = (pCount[r.practice] || 0) + 1;
-      oCount[r.outcomeKey] = (oCount[r.outcomeKey] || 0) + 1;
+      oCount[c] = (oCount[c] || 0) + 1;
+      subOfCol[c] = r.subPillar;
+      if (r.group) { const g = oGroups[c] = oGroups[c] || {}; g[r.group] = (g[r.group] || 0) + 1; }
     });
     const practices = Object.keys(pCount).sort((a, b) => pCount[b] - pCount[a]);
     /* columns sit under their sub-pillar in a fixed order, so the biodiversity
        measures are together, yield and economics together, and so on */
-    const subOf = (k) => SUB_OF[k.split(SEP)[0]] || '';
     const present = Object.keys(oCount);
-    const subs = SUB_ORDER.filter(s => present.some(k => subOf(k) === s));
-    present.forEach(k => { if (!subs.includes(subOf(k))) subs.push(subOf(k)); });
+    const subs = SUB_ORDER.filter(s => present.some(c => subOfCol[c] === s));
+    present.forEach(c => { if (!subs.includes(subOfCol[c])) subs.push(subOfCol[c]); });
     const columns = subs.map(s => ({
-      sub: s,
-      keys: present.filter(k => subOf(k) === s).sort((a, b) => termKey(a).localeCompare(termKey(b)))
+      sub: s, pillar: PILLAR_OF[s],
+      keys: present.filter(c => subOfCol[c] === s).sort((a, b) => label(a).localeCompare(label(b)))
     }));
     const outcomes = columns.flatMap(c => c.keys);
+    /* the pillars, each spanning the sub-pillars under it */
+    const pillars = [];
+    columns.forEach(c => {
+      const last = pillars[pillars.length - 1];
+      if (last && last.name === c.pillar) last.span += c.keys.length; else pillars.push({ name: c.pillar, span: c.keys.length });
+    });
+    const organisms = (c) => oGroups[c]
+      ? t('heatOf', { list: Object.entries(oGroups[c]).sort((a, b) => b[1] - a[1]).map(e => term(e[0]) + ' ' + e[1]).join(', ') })
+      : '';
+    /* every filter key behind a column: an outcome and its organism splits, or one measure */
+    const keysOf = (c) => uniq('outcomeKey').filter(k => k === c || (!c.includes(SEP) && k.split(SEP)[0] === c));
 
-    let html = '<div class="heat"><table><thead><tr><th class="rowh" rowspan="2"><span>' + t('heatPractice') + '</span></th>';
+    let html = '<div class="heat"><table><thead><tr><th class="rowh" rowspan="3"><span>' + t('heatPractice') + '</span></th>';
+    pillars.forEach(p => { html += '<th class="grp pillar" colspan="' + p.span + '">' + term(p.name) + '</th>'; });
+    html += '</tr><tr>';
     columns.forEach(c => {
       html += '<th class="grp" colspan="' + c.keys.length + '" title="' + t('heatGroup', { name: term(c.sub) }) + '">' + term(c.sub) + '</th>';
     });
     html += '</tr><tr>';
-    outcomes.forEach(o => {
-      html += '<th data-o="' + o + '" title="' + t('heatCount', { name: termKey(o), n: oCount[o] }) + '"><span>' + termKey(o) + '</span></th>';
+    outcomes.forEach(c => {
+      html += '<th data-o="' + c + '" title="' + t('heatCount', { name: label(c), n: oCount[c] }) + organisms(c) + '"><span>' + label(c) + '</span></th>';
     });
     html += '</tr></thead><tbody>';
     practices.forEach(p => {
@@ -684,7 +710,7 @@
         if (m === null) { html += '<td class="cell empty">·</td>'; return; }
         html += '<td class="cell" data-p="' + p + '" data-o="' + o + '"' +
           ' style="background:' + color(m) + ';color:' + inkOn(m) + '"' +
-          ' title="' + t('heatCell', { practice: term(p), outcome: termKey(o), median: es(m), ratio: times(m), n: v.length }) + '">' +
+          ' title="' + t('heatCell', { practice: term(p), outcome: label(o), median: es(m), ratio: times(m), n: v.length }) + '">' +
           es(m) + '<span class="cn">' + t('heatCellN', { n: v.length }) + '</span></td>';
       });
       html += '</tr>';
@@ -692,15 +718,22 @@
     html += '</tbody></table></div>';
     box.innerHTML = html;
 
+    /* a column stands for every filter key of its outcome; clicking it again lets go */
+    const pickOutcome = (o) => {
+      const keys = keysOf(o);
+      const already = keys.length === sel.outcomeKey.size && keys.every(k => sel.outcomeKey.has(k));
+      sel.outcomeKey.clear();
+      if (!already) keys.forEach(k => sel.outcomeKey.add(k));
+    };
     box.querySelectorAll('.cell[data-p]').forEach(td => td.addEventListener('click', () => {
-      sel.practice.clear(); sel.outcomeKey.clear();
-      sel.practice.add(td.dataset.p); sel.outcomeKey.add(td.dataset.o);
+      sel.practice.clear(); sel.practice.add(td.dataset.p);
+      sel.outcomeKey.clear(); keysOf(td.dataset.o).forEach(k => sel.outcomeKey.add(k));
       syncBoxes(); render();
     }));
     box.querySelectorAll('td.rowh[data-p]').forEach(td =>
       td.addEventListener('click', () => toggle('practice', td.dataset.p, true)));
     box.querySelectorAll('th[data-o]').forEach(th =>
-      th.addEventListener('click', () => toggle('outcomeKey', th.dataset.o, true)));
+      th.addEventListener('click', () => { pickOutcome(th.dataset.o); syncBoxes(); render(); }));
   }
 
   /* ---------- table ----------

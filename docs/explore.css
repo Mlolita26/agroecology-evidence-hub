@@ -115,11 +115,13 @@ body:has(#sel-badge.on) .maplegend{bottom:56px}
 .heat th:hover{color:var(--accent)}
 .heat th.rowh{left:0;z-index:5;text-align:left;min-width:150px;color:var(--ink-3);
   border-right:1px solid var(--rule);cursor:default}
-/* two header rows: the outcome group, then the outcome. The second row needs
-   its own sticky offset, or it scrolls under the first. */
-.heat thead tr:first-child th{height:24px;padding:4px 6px}
+/* three header rows: pillar, sub-pillar, outcome. Each lower row needs its own
+   sticky offset, or it scrolls under the one above. */
+.heat thead tr:nth-child(1) th,.heat thead tr:nth-child(2) th{height:24px;padding:4px 6px}
 .heat thead tr:nth-child(2) th{top:24px}
+.heat thead tr:nth-child(3) th{top:48px}
 .heat th.grp{border-left:1px solid var(--line);font-size:9px;color:var(--ink-3);cursor:default}
+.heat th.grp.pillar{font-size:9.5px;letter-spacing:.09em;color:var(--ink-2);border-bottom-color:var(--line)}
 .heat th.grp:hover{color:var(--ink-3)}
 .heat td.rowh{position:sticky;left:0;z-index:2;background:var(--panel);font-size:11px;color:var(--ink-2);
   padding:0 10px;border-right:1px solid var(--rule);white-space:nowrap;min-width:150px;cursor:pointer}
