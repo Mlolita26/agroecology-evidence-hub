@@ -78,7 +78,7 @@
     try { localStorage.setItem('kh-lang', lang); } catch (e) {}
     $('#theme-btn').textContent =
       document.documentElement.getAttribute('data-theme') === 'dark' ? t('themeLight') : t('themeDark');
-    if (started) { buildFilters(); buildHead(); buildLegend(); buildTicks(); clearSel(); render(); }
+    if (started) { buildFilters(); buildHead(); buildColPicker(); buildLegend(); buildTicks(); clearSel(); render(); }
   }
 
   Object.keys(window.KH_LANGS).forEach(code => {
@@ -316,9 +316,28 @@
     syncBoxes(); render();
   }
   $('#clear-all').addEventListener('click', () => {
-    DIMS.forEach(d => sel[d.key].clear()); syncBoxes(); clearSel(); render();
+    DIMS.forEach(d => sel[d.key].clear()); clearCols(); markFiltered(); syncBoxes(); clearSel(); render();
   });
-  const match = (r) => DIMS.every(d => sel[d.key].size === 0 || sel[d.key].has(r[d.key]));
+  /* Filters set from the table headings, Excel-style: a set of values for a
+     text column, a from/to range for a number column. They narrow everything,
+     not only the table, so the map, the heatmap and the sentence stay in step
+     with the rows. */
+  const colSel = {};
+  const colActive = (k) => !!colSel[k] && (colSel[k] instanceof Set ? colSel[k].size > 0 : (colSel[k].min !== null || colSel[k].max !== null));
+  const asText = (v) => (v === null || v === undefined) ? '' : String(v);
+  const matchOne = (r, k) => {
+    const f = colSel[k];
+    if (!f) return true;
+    if (f instanceof Set) return f.size === 0 || f.has(asText(r[k]));
+    if (f.min === null && f.max === null) return true;
+    const v = r[k];
+    if (v === null || v === undefined) return false;
+    return (f.min === null || v >= f.min) && (f.max === null || v <= f.max);
+  };
+  const matchCols = (r) => Object.keys(colSel).every(k => matchOne(r, k));
+  const clearCols = () => { Object.keys(colSel).forEach(k => delete colSel[k]); };
+  const anyFilter = () => DIMS.some(d => sel[d.key].size) || Object.keys(colSel).some(colActive);
+  const match = (r) => DIMS.every(d => sel[d.key].size === 0 || sel[d.key].has(r[d.key])) && matchCols(r);
 
   /* ---------- map ---------- */
   const HOME_VIEW = [[14, 12], 2];
@@ -376,11 +395,11 @@
     if (!map || !bounds || !bounds.isValid()) return;
     const size = map.getSize();
     if (!size.x || !size.y) return;   /* the page is hidden; route() fits it once shown */
-    /* room for the view button at the top right and the colour key at the bottom.
-       maxZoom matters: a selection whose points all share one site has bounds
-       with no area, and without a ceiling Leaflet zooms in without limit and
-       the map goes blank. */
-    map.fitBounds(bounds, { paddingTopLeft: [24, 24], paddingBottomRight: [24, 96], maxZoom: 8 });
+    /* fill the frame: a little room at the edges, and the colour key is glass,
+       so a corner under it is acceptable. maxZoom matters: a selection whose
+       points all share one site has bounds with no area, and without a ceiling
+       Leaflet zooms in without limit and the map goes blank. */
+    map.fitBounds(bounds, { paddingTopLeft: [14, 14], paddingBottomRight: [14, 28], maxZoom: 9 });
   }
   function dataBounds(rows) {
     const pts = (rows && rows.length ? rows : D).map(r => [r.lat, r.lon]);
@@ -439,7 +458,7 @@
   }
   $('#reset-view').addEventListener('click', () => {
     if (!map) return;
-    DIMS.forEach(d => sel[d.key].clear());
+    DIMS.forEach(d => sel[d.key].clear()); clearCols(); markFiltered();
     syncBoxes(); clearSel(); render();
     map.setView(HOME_VIEW[0], HOME_VIEW[1]);
     fitTo(dataBounds(D));
@@ -510,7 +529,6 @@
   function applyMapMode() {
     if (!map) return;
     const picked = [...sel.country];
-    const note = $('#map-mode');
     if (borders) { map.removeLayer(borders); borders = null; }
 
     /* world view: every country, fitted to whatever matches the filters */
@@ -520,7 +538,6 @@
          it, so its hover style never gets cleared. Reset it on the way back. */
       if (base) base.resetStyle();
       if (base && !map.hasLayer(base)) { base.addTo(map); base.bringToBack(); if (layer) layer.eachLayer(m => m.bringToFront()); }
-      if (note) note.textContent = '';
       fitTo(dataBounds(D.filter(match)));
       return;
     }
@@ -541,7 +558,6 @@
         if (base) base.bringToBack();
         if (layer) layer.eachLayer(m => m.bringToFront());
         if (feats.length) fitTo(borders.getBounds());
-        if (note) note.textContent = t('regionView', { names: [...sel.region].map(term).join(', ') });
       });
       return;
     }
@@ -559,10 +575,8 @@
         interactive: false
       }).addTo(map);
       borders.bringToBack();
-      if (feats.length) fitTo(borders.getBounds());
-      if (note) note.textContent = feats.length
-        ? t('countryView', { names: [...sel.country].map(term).join(', ') })
-        : t('noBoundary');
+      /* with no outline for the country, the points still give the bounds */
+      fitTo(feats.length ? borders.getBounds() : dataBounds(D.filter(match)));
       if (regions) regions.bringToFront();
       if (layer) layer.eachLayer(m => m.bringToFront());
     });
@@ -632,7 +646,7 @@
       put(t('noMatch') + ' ' + t('noMatchHint'));
       return;
     }
-    const filtered = DIMS.some(d => sel[d.key].size);
+    const filtered = anyFilter();
     /* yi is already turned so that positive means the practice did better;
        comparisons with no known direction stay out of the percentage */
     const known = rows.filter(r => r.yi !== null);
@@ -642,6 +656,7 @@
     const scope = DIMS.filter(d => d.key !== 'outcomeKey' && sel[d.key].size)
       .map(d => [...sel[d.key]].slice(0, 3).map(termKey).join(', ') +
         (sel[d.key].size > 3 ? t('andMore', { n: sel[d.key].size - 3 }) : ''));
+    Object.keys(colSel).filter(colActive).forEach(k => scope.push(describeCol(k)));
     /* which outcomes: the groups present, in plain words, or the outcomes picked */
     const listWords = (a) => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' ' + t('and') + ' ' + a[a.length - 1];
     const plain = (s) => { const k = 'group' + s.replace(/\W/g, ''); return k in window.KH_UI.en ? t(k) : term(s); };
@@ -807,15 +822,148 @@
   ];
   /* seasons and the source synthesis are in the download but not the table */
   const thr = $('#thead-row');
+  const colOf = (k) => COLS.find(c => c.k === k);
+  const colName = (c) => c.plain || t(c.label);
+
+  /* which columns the reader wants to see; remembered in this browser only */
+  let hiddenCols = new Set();
+  try { hiddenCols = new Set(JSON.parse(localStorage.getItem('kh-hidden-cols') || '[]')); } catch (e) {}
+  const shownCols = () => COLS.filter(c => !hiddenCols.has(c.k));
+
   function buildHead() {
-    thr.innerHTML = COLS.map(c =>
-      '<th data-k="' + c.k + '" title="' + t(c.h) + '">' + (c.plain || t(c.label)) + '<span class="ar"></span></th>').join('');
-    thr.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
-      const k = th.dataset.k;
-      const numeric = COLS.find(c => c.k === k).num;
-      sort = { key: k, dir: sort.key === k ? -sort.dir : (numeric ? -1 : 1) };
-      render();
-    }));
+    thr.innerHTML = shownCols().map(c =>
+      '<th data-k="' + c.k + '" title="' + t(c.h) + '"><span class="hl">' + colName(c) + '</span><span class="ar"></span>' +
+      (c.k === 'doi' ? '' : '<button type="button" class="cf" title="' + t('cfFilter') + '">▾</button>') + '</th>').join('');
+    thr.querySelectorAll('th[data-k]').forEach(th => {
+      th.addEventListener('click', e => {
+        if (e.target.closest('.cf')) return;
+        const k = th.dataset.k;
+        sort = { key: k, dir: sort.key === k ? -sort.dir : (colOf(k).num ? -1 : 1) };
+        render();
+      });
+      const cf = th.querySelector('.cf');
+      if (cf) cf.addEventListener('click', e => { e.stopPropagation(); openColFilter(th.dataset.k, cf); });
+    });
+    markFiltered();
+  }
+  function markFiltered() {
+    thr.querySelectorAll('th[data-k]').forEach(th => th.classList.toggle('filtered', colActive(th.dataset.k)));
+  }
+
+  /* ---------- the Columns button ---------- */
+  const colDD = $('#col-dd');
+  function buildColPicker() {
+    const list = $('#col-list');
+    list.innerHTML = '';
+    COLS.forEach(c => {
+      const l = document.createElement('label');
+      l.className = 'opt';
+      l.innerHTML = '<input type="checkbox"><span>' + colName(c) + '</span>';
+      const box = l.querySelector('input');
+      box.checked = !hiddenCols.has(c.k);
+      box.addEventListener('change', () => {
+        if (box.checked) hiddenCols.delete(c.k); else hiddenCols.add(c.k);
+        rememberCols(); buildHead(); render();
+      });
+      list.appendChild(l);
+    });
+    rememberCols();
+  }
+  function rememberCols() {
+    try { localStorage.setItem('kh-hidden-cols', JSON.stringify([...hiddenCols])); } catch (e) {}
+    $('#col-val').textContent = t('colsOf', { n: COLS.length - hiddenCols.size, total: COLS.length });
+  }
+  colDD.querySelector('button').addEventListener('click', e => {
+    e.stopPropagation();
+    const was = colDD.classList.contains('open');
+    document.querySelectorAll('.dd.open').forEach(o => o.classList.remove('open'));
+    if (!was) colDD.classList.add('open');
+  });
+  colDD.querySelector('.pop').addEventListener('click', e => e.stopPropagation());
+  $('#col-all').addEventListener('click', () => { hiddenCols.clear(); buildColPicker(); buildHead(); render(); });
+
+  /* ---------- Excel-style filters on the headings ----------
+     One floating panel, filled for whichever heading was clicked. Text
+     columns list their values with counts; number columns take a range.
+     Columns that already have a toolbar filter open that one instead. */
+  const TOOLBAR_FOR = { country: 'country', crop: 'crop', practice: 'practice', comparatorType: 'comparatorType' };
+  const fmtVal = (k, v) => v === '' ? t('cfEmpty')
+    : WORDS.includes(k) ? term(v)
+    : k === 'esType' ? (ES_SHORT[v] || v)
+    : k === 'direction' ? t(+v > 0 ? 'dirUp' : +v < 0 ? 'dirDown' : 'dirUnknown')
+    : v;
+  const describeCol = (k) => {
+    const f = colSel[k];
+    const what = f instanceof Set ? [...f].slice(0, 3).map(v => fmtVal(k, v)).join(', ') + (f.size > 3 ? t('andMore', { n: f.size - 3 }) : '')
+      : (f.min === null ? '…' : f.min) + '–' + (f.max === null ? '…' : f.max);
+    return colName(colOf(k)).toLowerCase() + ' ' + what;
+  };
+  let panel = null;
+  function openColFilter(k, anchor) {
+    if (TOOLBAR_FOR[k]) {
+      const dd = groups.querySelector('.dd[data-key="' + TOOLBAR_FOR[k] + '"]');
+      if (dd) { dd.scrollIntoView({ block: 'nearest' }); dd.querySelector('button').click(); }
+      return;
+    }
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.className = 'colfilter';
+      panel.addEventListener('click', e => e.stopPropagation());
+      document.body.appendChild(panel);
+      document.addEventListener('click', () => { panel.style.display = 'none'; });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') panel.style.display = 'none'; });
+    }
+    const col = colOf(k);
+    panel.innerHTML = '<div class="cf-head"><b>' + colName(col) + '</b><button type="button" class="x">✕</button></div>';
+    panel.querySelector('.x').addEventListener('click', () => { panel.style.display = 'none'; });
+    const done = () => { markFiltered(); render(); };
+
+    if (col.num) {
+      const f = colSel[k] || (colSel[k] = { min: null, max: null });
+      panel.insertAdjacentHTML('beforeend',
+        '<div class="cf-range"><label>' + t('cfFrom') + '<input type="number" step="any" class="min"></label>' +
+        '<label>' + t('cfTo') + '<input type="number" step="any" class="max"></label></div>' +
+        '<div class="cf-links"><button type="button" class="clear">' + t('cfClear') + '</button></div>');
+      const mn = panel.querySelector('.min'), mx = panel.querySelector('.max');
+      if (f.min !== null) mn.value = f.min;
+      if (f.max !== null) mx.value = f.max;
+      const apply = () => { f.min = mn.value === '' ? null : +mn.value; f.max = mx.value === '' ? null : +mx.value; done(); };
+      mn.addEventListener('input', apply);
+      mx.addEventListener('input', apply);
+      panel.querySelector('.clear').addEventListener('click', () => { mn.value = ''; mx.value = ''; apply(); });
+    } else {
+      const f = colSel[k] || (colSel[k] = new Set());
+      /* the values on offer are those left by every other filter */
+      const counts = {};
+      D.filter(r => DIMS.every(d => sel[d.key].size === 0 || sel[d.key].has(r[d.key])) &&
+        Object.keys(colSel).every(j => j === k || matchOne(r, j)))
+        .forEach(r => { const v = asText(r[k]); counts[v] = (counts[v] || 0) + 1; });
+      const values = Object.keys(counts).sort((a, b) => fmtVal(k, a).localeCompare(fmtVal(k, b)));
+      panel.insertAdjacentHTML('beforeend',
+        '<input class="search" type="text" placeholder="' + t('search') + '">' +
+        '<div class="cf-links"><button type="button" class="clear">' + t('cfClear') + '</button></div><div class="list"></div>');
+      const list = panel.querySelector('.list');
+      values.forEach(v => {
+        const l = document.createElement('label');
+        l.className = 'opt';
+        l.dataset.label = fmtVal(k, v);
+        l.innerHTML = '<input type="checkbox"><span>' + fmtVal(k, v) + '</span><span class="c">' + counts[v] + '</span>';
+        const box = l.querySelector('input');
+        box.checked = f.has(v);
+        box.addEventListener('change', () => { if (box.checked) f.add(v); else f.delete(v); done(); });
+        list.appendChild(l);
+      });
+      panel.querySelector('.search').addEventListener('input', e => {
+        const q = e.target.value.toLowerCase();
+        list.querySelectorAll('.opt').forEach(l => { l.style.display = l.dataset.label.toLowerCase().includes(q) ? '' : 'none'; });
+      });
+      panel.querySelector('.clear').addEventListener('click', () => { f.clear(); list.querySelectorAll('input').forEach(b => b.checked = false); done(); });
+      setTimeout(() => panel.querySelector('.search').focus(), 0);
+    }
+    const r = anchor.getBoundingClientRect();
+    panel.style.display = 'block';
+    panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 290)) + 'px';
+    panel.style.top = (r.bottom + 4) + 'px';
   }
 
   const MAXROWS = 300;
@@ -848,9 +996,10 @@
        is clipped by the stylesheet, so every text cell repeats itself as a
        tooltip */
     const tip = (c, v) => (c.num || c.k === 'doi') ? '' : ' title="' + String(v).replace(/"/g, '&quot;') + '"';
+    const cols = shownCols();
     $('#tbody').innerHTML = s.slice(0, MAXROWS).map(r =>
       '<tr data-id="' + r.id + '">' +
-      COLS.map((c, i) => { const v = fmt(c, r); return '<td class="' + (c.num ? 'v' : '') + '"' + tip(c, v) +
+      cols.map((c, i) => { const v = fmt(c, r); return '<td class="' + (c.num ? 'v' : '') + '"' + tip(c, v) +
         (i === 0 ? ' style="--sw:' + color(r.yi) + '"' : '') + '>' + v + '</td>'; }).join('') + '</tr>'
     ).join('');
     $('#tbody').querySelectorAll('tr').forEach(tr => {
@@ -874,13 +1023,26 @@
         c.querySelector('button').addEventListener('click', () => { sel[d.key].delete(v); syncBoxes(); render(); });
         box.appendChild(c);
       }));
+      /* the heading filters too: one chip per value, or one per range */
+      Object.keys(colSel).filter(colActive).forEach(k => {
+        const f = colSel[k], name = colName(colOf(k));
+        const items = f instanceof Set ? [...f].map(v => [fmtVal(k, v), () => f.delete(v)])
+          : [[(f.min === null ? '…' : f.min) + ' – ' + (f.max === null ? '…' : f.max), () => { delete colSel[k]; }]];
+        items.forEach(([text, drop]) => {
+          const c = document.createElement('span');
+          c.className = 'chip';
+          c.innerHTML = '<span>' + name + ': ' + text + '</span><button title="' + t('remove') + '">✕</button>';
+          c.querySelector('button').addEventListener('click', () => { drop(); markFiltered(); render(); });
+          box.appendChild(c);
+        });
+      });
     });
   }
 
   function counts() {
     groups.querySelectorAll('.opt').forEach(l => {
       const k = l.dataset.k, v = l.dataset.v;
-      const n = D.filter(r => r[k] === v && DIMS.every(d => d.key === k || sel[d.key].size === 0 || sel[d.key].has(r[d.key]))).length;
+      const n = D.filter(r => r[k] === v && matchCols(r) && DIMS.every(d => d.key === k || sel[d.key].size === 0 || sel[d.key].has(r[d.key]))).length;
       l.querySelector('.c').textContent = n;
       l.style.opacity = n === 0 ? .38 : 1;
     });
@@ -958,7 +1120,7 @@
     const rows = D.filter(match);
     $('#m-shown').textContent = rows.length;
     /* the selection download only makes sense once something is selected */
-    const filtered = DIMS.some(d => sel[d.key].size);
+    const filtered = anyFilter();
     $('#dl-sel').hidden = !filtered;
     $('#dl-n').textContent = filtered ? '(' + rows.length + ')' : '';
     drawPoints(rows); readout(rows); chart(rows); table(rows); chips(); counts(); ddLabels(); applyMapMode();
@@ -1048,6 +1210,7 @@
   setLang(savedLang || (navigator.language || 'en').slice(0, 2));
   buildFilters();
   buildHead();
+  buildColPicker();
   buildLegend();
   buildTicks();
   started = true;
