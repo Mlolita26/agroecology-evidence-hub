@@ -202,6 +202,18 @@ alternative, for one outcome, at one place.
   The build prints every swap and every pair set aside, so the list can be
   checked against the data. The list follows the draft scoring rule in
   `knowledge/control_treatment_scoring.md`; it is Andrea's to ratify.
+- A natural or semi-natural habitat is never the practice. Against farming it
+  is the comparator; against conventional farming, or another habitat, there
+  is no agroecological practice in the pair at all and it is set aside
+  (`HABITATS`). `comparatorType` says what the practice was set against: less
+  agroecological farming, a natural or semi-natural habitat, or another
+  agroecological practice. It is a filter, a column and a download field, and
+  the summary sentence names it, so a comparison with a forest is never pooled
+  silently with one against monoculture.
+- `esType` is the effect size the ontology assigns to the outcome, as the
+  source recorded it: log response ratio or standardised mean difference. The
+  site computes lnRR for every row regardless; SMD is not computed here yet,
+  and the column exists so nobody mistakes one for the other.
 - `pillar` and `subPillar` are the two levels of the outcome ontology above the
   indicator; `group` is the organism counted, for biodiversity outcomes.
   Together they are how the heatmap groups and names its columns.
