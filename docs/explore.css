@@ -150,8 +150,9 @@ body:has(#sel-badge.on) .maplegend{bottom:56px}
 .downloads .btn b{font-weight:600;opacity:.85}
 .downloads .btn[hidden]{display:none}
 .tbl-hint{margin:0 22px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
-/* the Columns picker shares the dropdown look; it opens to the left */
-#col-dd .pop{left:auto;right:0}
+/* the Columns picker sits beside the title and shares the dropdown look */
+.title-group{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+#col-dd .pop{max-height:420px}
 #col-dd .dl-val{font-weight:400;color:var(--ink-2)}
 
 /* Excel-style filter on each heading */

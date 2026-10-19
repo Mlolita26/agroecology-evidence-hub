@@ -11,7 +11,7 @@
     <link href="vendor/leaflet.css" rel="stylesheet"/>
     <link href="vendor/fonts.css" rel="stylesheet"/>
     <link href="styles.css?v=ccb721d7" rel="stylesheet"/>
-    <link href="explore.css?v=047a9691" rel="stylesheet"/>
+    <link href="explore.css?v=769a4e7b" rel="stylesheet"/>
   </head>
   <body>
     <header class="masthead">
@@ -120,14 +120,16 @@
         </aside>
       </div>
       <div class="section-h">
-        <h2 data-t="explore.15">Comparisons</h2>
-        <!-- which columns to show, remembered in this browser; the selection
-             download only shows once a filter is set -->
-        <div class="downloads">
+        <!-- the title with the column picker beside it; the downloads on the
+             right, the selection one only once a filter is set -->
+        <div class="title-group">
+          <h2 data-t="explore.15">Comparisons</h2>
           <div class="dd" id="col-dd">
             <button type="button"><span class="dl-name" data-t="explore.24">Columns</span><span class="dl-val" id="col-val"></span><span class="car">▾</span></button>
             <div class="pop"><div class="cf-links"><button type="button" id="col-all" data-t="explore.25">Show all columns</button></div><div class="list" id="col-list"></div></div>
           </div>
+        </div>
+        <div class="downloads">
           <button class="btn" id="dl-all" type="button" data-t="explore.22">Download the complete dataset</button>
           <button class="btn" id="dl-sel" type="button" hidden><span data-t="explore.23">Download this selection</span> <b id="dl-n"></b></button>
         </div>
