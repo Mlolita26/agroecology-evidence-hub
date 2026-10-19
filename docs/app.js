@@ -994,7 +994,9 @@
     panel.style.top = (r.bottom + 4) + 'px';
   }
 
-  const MAXROWS = 300;
+  /* every row is shown; the cap only returns if a dataset far larger than
+     today's ever arrives, and then the footer says so */
+  const MAXROWS = 5000;
   /* columns holding a controlled-vocabulary value, shown in the reader's language */
   const WORDS = ['country', 'region', 'crop', 'pillar', 'subPillar', 'outcome', 'subOutcome', 'group', 'practice', 'comparator', 'comparatorType'];
   const ES_SHORT = { 'Log Response Ratio': 'lnRR', 'Standardized Mean Difference': 'SMD' };
