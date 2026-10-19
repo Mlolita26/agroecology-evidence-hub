@@ -28,7 +28,8 @@
     { key: 'country', label: 'dimCountry' },
     { key: 'crop', label: 'dimCrop' },
     { key: 'outcomeKey', label: 'dimOutcome' },
-    { key: 'practice', label: 'dimPractice' }
+    { key: 'practice', label: 'dimPractice' },
+    { key: 'comparatorType', label: 'dimComparedWith' }
   ];
   const sel = {};
   DIMS.forEach(d => { sel[d.key] = new Set(); });
@@ -626,13 +627,9 @@
   /* ---------- generated text ---------- */
   function readout(rows) {
     const texts = document.querySelectorAll('[data-readout]');
-    const metas = document.querySelectorAll('[data-readmeta]');
-    const put = (html, m) => {
-      texts.forEach(n => n.innerHTML = html);
-      metas.forEach(n => n.textContent = m);
-    };
+    const put = (html) => texts.forEach(n => n.innerHTML = html);
     if (!rows.length) {
-      put(t('noMatch'), t('noMatchHint'));
+      put(t('noMatch') + ' ' + t('noMatchHint'));
       return;
     }
     const filtered = DIMS.some(d => sel[d.key].size);
@@ -660,8 +657,12 @@
     /* the typical difference, as a percentage the reader can picture */
     const pct = med === null ? null : Math.round((Math.exp(med) - 1) * 100);
     const diff = pct === null ? t('legUnknown') : pct > 0 ? t('betterBy', { p: pct }) : pct < 0 ? t('worseBy', { p: -pct }) : t('sameAs');
+    /* what the practice was compared with: a comparison against a natural
+       habitat is a different question, so the sentence says when it is one */
+    const habitat = rows.filter(r => /habitat/i.test(r.comparatorType)).length;
+    const vs = habitat === 0 ? t('vsFarming') : habitat === rows.length ? t('vsHabitat') : t('vsMixed', { n: habitat });
     let html = t('readout', {
-      count: plural(rows.length, 'comparison', 'comparisons'),
+      count: plural(rows.length, 'comparison', 'comparisons'), vs,
       scope: scope.length ? t('inScope', { scope: scope.join(', ') }) : '',
       outcomes, percent: known.length ? Math.round(better / known.length * 100) : '—', diff
     });
@@ -675,12 +676,7 @@
         .sort((a, b) => b[2] - a[2])[0];
       if (best) html += ' ' + t('readoutBest', { practice: term(best[0]), median: es(best[2]), n: best[1].length });
     }
-    /* how wide the selection is, in things people count */
-    put(html, [
-      plural(new Set(rows.map(r => r.country)).size, 'metaCountry', 'metaCountries'),
-      plural(new Set(rows.map(r => r.crop)).size, 'metaCrop', 'metaCrops'),
-      plural(new Set(rows.map(r => r.study)).size, 'metaStudy', 'metaStudies')
-    ].join(' · '));
+    put(html);
   }
 
   /* ---------- practice x outcome heatmap ---------- */
@@ -795,20 +791,21 @@
     { k: 'practiceDetail', label: 'colPracticeDetail', h: 'helpPracticeDetail' },
     { k: 'comparator', label: 'colComparator', h: 'helpComparator' },
     { k: 'comparatorDetail', label: 'colComparatorDetail', h: 'helpComparatorDetail' },
+    { k: 'comparatorType', label: 'colComparedWith', h: 'helpComparedWith' },
     { k: 'cMean', label: 'colCMean', h: 'helpCMean', num: 1 },
     { k: 'cSD', label: 'colCSD', h: 'helpCSD', num: 1 },
     { k: 'cN', label: 'colCN', h: 'helpCN', num: 1 },
     { k: 'tMean', label: 'colTMean', h: 'helpTMean', num: 1 },
     { k: 'tSD', label: 'colTSD', h: 'helpTSD', num: 1 },
     { k: 'tN', label: 'colTN', h: 'helpTN', num: 1 },
+    { k: 'esType', label: 'colEsType', h: 'helpEsType' },
     { k: 'direction', label: 'colDirection', h: 'helpDirection' },
     { k: 'yi', label: 'colES', h: 'helpYi', num: 1 },
     { k: 'se', label: 'colSE', h: 'helpSE', num: 1 },
     { k: 'vi', label: 'colVi', h: 'helpVi', num: 1 },
-    { k: 'years', label: 'colYears', h: 'helpYears', num: 1 },
-    { k: 'synthesis', label: 'colSynthesis', h: 'helpSynthesis' },
     { k: 'doi', label: 'colDoi', h: 'helpDoi' }
   ];
+  /* seasons and the source synthesis are in the download but not the table */
   const thr = $('#thead-row');
   function buildHead() {
     thr.innerHTML = COLS.map(c =>
@@ -823,10 +820,12 @@
 
   const MAXROWS = 300;
   /* columns holding a controlled-vocabulary value, shown in the reader's language */
-  const WORDS = ['country', 'region', 'crop', 'pillar', 'subPillar', 'outcome', 'subOutcome', 'group', 'practice', 'comparator'];
+  const WORDS = ['country', 'region', 'crop', 'pillar', 'subPillar', 'outcome', 'subOutcome', 'group', 'practice', 'comparator', 'comparatorType'];
+  const ES_SHORT = { 'Log Response Ratio': 'lnRR', 'Standardized Mean Difference': 'SMD' };
   const fmt = (c, r) => {
     const v = r[c.k];
     if (v === null || v === undefined || v === '') return '—';
+    if (c.k === 'esType') return ES_SHORT[v] || v;
     if (c.k === 'yi') return es(v);
     if (c.k === 'se') return v.toFixed(3);
     if (c.k === 'vi') return v.toFixed(4);
@@ -845,11 +844,14 @@
     thr.querySelectorAll('th[data-k]').forEach(th => {
       th.querySelector('.ar').textContent = th.dataset.k === sort.key ? (sort.dir > 0 ? ' ↑' : ' ↓') : '';
     });
-    /* the first cell carries the record's colour on its left edge */
+    /* the first cell carries the record's colour on its left edge; long text
+       is clipped by the stylesheet, so every text cell repeats itself as a
+       tooltip */
+    const tip = (c, v) => (c.num || c.k === 'doi') ? '' : ' title="' + String(v).replace(/"/g, '&quot;') + '"';
     $('#tbody').innerHTML = s.slice(0, MAXROWS).map(r =>
       '<tr data-id="' + r.id + '">' +
-      COLS.map((c, i) => '<td class="' + (c.num ? 'v' : '') + '"' +
-        (i === 0 ? ' style="--sw:' + color(r.yi) + '"' : '') + '>' + fmt(c, r) + '</td>').join('') + '</tr>'
+      COLS.map((c, i) => { const v = fmt(c, r); return '<td class="' + (c.num ? 'v' : '') + '"' + tip(c, v) +
+        (i === 0 ? ' style="--sw:' + color(r.yi) + '"' : '') + '>' + v + '</td>'; }).join('') + '</tr>'
     ).join('');
     $('#tbody').querySelectorAll('tr').forEach(tr => {
       tr.addEventListener('click', e => {

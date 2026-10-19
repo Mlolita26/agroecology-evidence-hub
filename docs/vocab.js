@@ -71,6 +71,13 @@ window.KH_VOCAB = {
     'Parasitoids of pests': 'Parasitoides de las plagas', 'Detritivores': 'Detritívoros',
     'Migrant': 'Migratorios', 'Resident': 'Residentes',
 
+    /* what the practice was compared with, and which effect size the analysis uses */
+    'Less agroecological farming': 'Cultivo menos agroecológico',
+    'Natural or semi-natural habitat': 'Hábitat natural o seminatural',
+    'Another agroecological practice': 'Otra práctica agroecológica',
+    'Log Response Ratio': 'Razón logarítmica de respuesta',
+    'Standardized Mean Difference': 'Diferencia de medias estandarizada',
+
     /* practices and comparators */
     'Agroforestry': 'Agroforestería', 'Bare Fallow': 'Barbecho desnudo', 'Natural Fallow': 'Barbecho natural',
     'Conventional Tillage': 'Labranza convencional', 'Crop rotation': 'Rotación de cultivos',
@@ -165,6 +172,13 @@ window.KH_VOCAB = {
     'Pests': 'Ravageurs', 'Weeds': 'Adventices', 'Natural enemies of pests': 'Ennemis naturels des ravageurs',
     'Parasitoids of pests': 'Parasitoïdes des ravageurs', 'Detritivores': 'Détritivores',
     'Migrant': 'Migrateurs', 'Resident': 'Résidents',
+
+    /* what the practice was compared with, and which effect size the analysis uses */
+    'Less agroecological farming': 'Agriculture moins agroécologique',
+    'Natural or semi-natural habitat': 'Habitat naturel ou semi-naturel',
+    'Another agroecological practice': 'Une autre pratique agroécologique',
+    'Log Response Ratio': 'Rapport de réponse logarithmique',
+    'Standardized Mean Difference': 'Différence de moyennes standardisée',
 
     /* practices and comparators */
     'Agroforestry': 'Agroforesterie', 'Bare Fallow': 'Jachère nue', 'Natural Fallow': 'Jachère naturelle',

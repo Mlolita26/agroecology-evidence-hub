@@ -92,10 +92,24 @@ COMPARATOR_TERMS = frozenset([
     "Irrigation", "Full irrigation", "No irrigation",
     # other absences
     "Unimproved variety", "No Inoculation", "No liming",
+    # a tree monoculture, the comparator of Paut's agroforestry pairs
+    "Timber plantation",
 ])
 # Left out on purpose: "Natural Fallow" (a rest period, the temporal arm in
-# Jones), "Timber plantation" (the comparator of Paut's agroforestry pairs),
-# "No Chemical Applied" (its pairs carry Inoculants on the same side).
+# Jones) and "No Chemical Applied" (its pairs carry Inoculants on the same side).
+
+# Natural and semi-natural habitats are not farming. A practice compared with
+# one of these is answering a different question from a practice compared with
+# conventional farming, so the comparison is marked and never pooled silently.
+# A pair with a habitat on one side and conventional farming, or another
+# habitat, on the other has no agroecological practice in it at all; it is set
+# aside, like the lateral pairs.
+HABITATS = frozenset(["Natural habitat", "Semi-natural habitat"])
+
+# What the practice was compared with, in the words the site uses.
+VS_FARMING = "Less agroecological farming"
+VS_HABITAT = "Natural or semi-natural habitat"
+VS_AGRO = "Another agroecological practice"
 
 # Which way is good, per sub-indicator, copied out of the ontology workbook by
 # tools/fetch_outcome_signs.py: 'p' means a higher value is better, 'n' that a
@@ -240,15 +254,25 @@ def contrast(row):
 
 
 def orient(sides):
-    """Which way round to publish the arms: 'keep', 'swap' or 'lateral'.
+    """Which way round to publish the arms: 'keep', 'swap', 'lateral' or 'no practice'.
 
     The practice is always the agroecological arm. If only the source's
     treatment carries a conventional term, the arms are the wrong way round
     for us and are swapped. If both do, neither arm is agroecological: the
-    comparison is lateral, set aside and not published.
+    comparison is lateral, set aside and not published. A habitat is never
+    the practice: against farming it is the comparator, and against
+    conventional farming or another habitat there is no practice at all.
     """
     c_conv = bool(sides["C"]["terms"] & COMPARATOR_TERMS)
     t_conv = bool(sides["T"]["terms"] & COMPARATOR_TERMS)
+    c_hab = bool(sides["C"]["terms"] & HABITATS)
+    t_hab = bool(sides["T"]["terms"] & HABITATS)
+    if (c_hab and t_hab) or (c_hab and t_conv) or (t_hab and c_conv):
+        return "no practice"
+    if t_hab:
+        return "swap"
+    if c_hab:
+        return "keep"
     if t_conv and c_conv:
         return "lateral"
     if t_conv:
@@ -299,7 +323,8 @@ def make_record(row, synthesis, serial):
     """One website record and how it was oriented, or why there is none.
 
     Returns (status, record). The status is 'kept' or 'swapped' when there is
-    a record, and 'no contrast', 'incomplete' or 'lateral' when there is not.
+    a record, and 'no contrast', 'incomplete', 'lateral' or 'no practice'
+    when there is not.
     """
     sides = contrast(row)
     if sides is None:
@@ -317,8 +342,8 @@ def make_record(row, synthesis, serial):
     # A record needs a place, a positive control to divide by, and a treatment.
     if lat is None or lon is None or not c_mean or c_mean <= 0 or t_mean is None:
         return "incomplete", None
-    if decision == "lateral":
-        return "lateral", None
+    if decision in ("lateral", "no practice"):
+        return decision, None
 
     c_sd, t_sd = std_dev(row, c), std_dev(row, t)
     c_n, t_n = number(arm(c, "_out_sample_size")), number(arm(t, "_out_sample_size"))
@@ -328,6 +353,9 @@ def make_record(row, synthesis, serial):
     country = first(either("_country"))
     practice, comparator = (sides["C"], sides["T"]) if decision == "swap" else (sides["T"], sides["C"])
     status = "swapped" if decision == "swap" else "kept"
+    compared_with = (VS_HABITAT if comparator["terms"] & HABITATS
+                     else VS_FARMING if comparator["terms"] & COMPARATOR_TERMS
+                     else VS_AGRO)
 
     # yi is the effect size the analysis uses, turned so that positive always
     # means the agroecological arm did better; vi is its variance. lnRR stays
@@ -363,12 +391,16 @@ def make_record(row, synthesis, serial):
         "practiceDetail": practice["detail"],
         "comparator": comparator["label"],
         "comparatorDetail": comparator["detail"],
+        "comparatorType": compared_with,
         "cMean": c_mean,
         "cSD": c_sd,
         "cN": c_n,
         "tMean": t_mean,
         "tSD": t_sd,
         "tN": t_n,
+        # the effect size the analysis assigns to this outcome, as the source
+        # recorded it; the site computes lnRR for every row regardless
+        "esType": clean(row.get("out_effect_size_type")),
         "lnRR": None if ln_rr is None else round(ln_rr, 4),
         "direction": way,
         "yi": yi,
@@ -398,7 +430,7 @@ def read_source(path):
     """
     synthesis = synthesis_name(path)
     records, tally = [], Counter()
-    pairs = {"swapped": Counter(), "lateral": Counter()}
+    pairs = {"swapped": Counter(), "lateral": Counter(), "no practice": Counter()}
     with open(path, newline="", encoding="utf-8-sig") as handle:
         for row in csv.DictReader(handle):
             status, record = make_record(row, synthesis, len(records) + 1)
@@ -411,9 +443,10 @@ def read_source(path):
 
     print(f"  {synthesis}: {len(records)} records "
           f"({tally['kept']} as the source had them, {tally['swapped']} swapped); "
-          f"{tally['lateral']} set aside as lateral; "
-          f"{tally['incomplete'] + tally['no contrast']} unusable")
-    for status, note in (("swapped", "swapped"), ("lateral", "set aside")):
+          f"{tally['lateral']} set aside as lateral, {tally['no practice']} with no agroecological "
+          f"practice; {tally['incomplete'] + tally['no contrast']} unusable")
+    for status, note in (("swapped", "swapped"), ("lateral", "set aside, lateral"),
+                         ("no practice", "set aside, no practice")):
         for (control, treatment), n in pairs[status].most_common():
             print(f"      {n:4d} {note}: source control '{control}' vs treatment '{treatment}'")
     return records
@@ -436,9 +469,9 @@ CSV_COLUMNS = [
     "id", "study_id", "synthesis", "study", "year", "doi", "journal", "title",
     "country", "region", "site", "lat", "lon", "crop", "cropFull",
     "pillar", "subPillar", "outcome", "subOutcome", "group", "unit",
-    "practice", "practiceDetail", "comparator", "comparatorDetail",
+    "practice", "practiceDetail", "comparator", "comparatorDetail", "comparatorType",
     "cMean", "cSD", "cN", "tMean", "tSD", "tN",
-    "lnRR", "direction", "yi", "se", "vi", "value", "years", "swapped",
+    "esType", "lnRR", "direction", "yi", "se", "vi", "value", "years", "swapped",
 ]
 
 
@@ -557,6 +590,8 @@ def main():
         print("  " + SKIP_SOURCES[name])
     countries = {r["country"] for r in records}
     print(f"\n{len(records)} records, {len(countries)} countries")
+    by_type = Counter(r["comparatorType"] for r in records)
+    print("  compared with: " + ", ".join(f"{k} {n}" for k, n in by_type.most_common()))
 
     unknown = Counter(r["outcomeKey"] if "outcomeKey" in r else
                       r["outcome"] + (" / " + r["group"] if r["group"] else "")
