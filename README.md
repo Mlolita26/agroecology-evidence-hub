@@ -6,9 +6,12 @@ The website shows what happens when farmers use agroecological practices instead
 of less agroecological ones. Every dot on the map is one field comparison from a
 published study: a place, a crop, an agroecological practice, the alternative it
 was compared with, and the effect size, lnRR. You can filter by UN region,
-country, crop, outcome and practice, read the summary that is written from
-whatever you picked, see the median effect by practice and outcome, and download
-your selection as a spreadsheet.
+country, crop, outcome, practice and what it was compared with, or from any
+table heading the way a spreadsheet does; read the summary that is written from
+whatever you picked; see the median effect by practice and outcome; choose which
+columns to show; and download the whole dataset or your selection as a
+spreadsheet. Every filter narrows the map, the heatmap, the sentence and the
+table together, so they never disagree.
 
 Under the hood it is a static site. A Python script turns the harmonised
 effect-size tables into one data file, and the browser does the rest. There is
