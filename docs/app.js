@@ -316,6 +316,7 @@
     syncBoxes(); render();
   }
   $('#clear-all').addEventListener('click', () => {
+    if (anyFilter()) remember();
     DIMS.forEach(d => sel[d.key].clear()); clearCols(); markFiltered(); syncBoxes(); clearSel(); render();
   });
   /* Filters set from the table headings, Excel-style: a set of values for a
@@ -338,6 +339,31 @@
   const clearCols = () => { Object.keys(colSel).forEach(k => delete colSel[k]); };
   const anyFilter = () => DIMS.some(d => sel[d.key].size) || Object.keys(colSel).some(colActive);
   const match = (r) => DIMS.every(d => sel[d.key].size === 0 || sel[d.key].has(r[d.key])) && matchCols(r);
+
+  /* ---------- going back ----------
+     A click on the heatmap or the map, Clear all and World view replace the
+     selection in one go, so the view before each is kept and the Back
+     button in the findings panel restores it, most recent first. */
+  const past = [];
+  const snapshot = () => ({
+    sel: DIMS.map(d => [d.key, [...sel[d.key]]]),
+    cols: Object.entries(colSel).map(([k, f]) => [k, f instanceof Set ? [...f] : { min: f.min, max: f.max }])
+  });
+  function remember() {
+    past.push(snapshot());
+    if (past.length > 20) past.shift();
+    $('#back').hidden = false;
+  }
+  function goBack() {
+    const s = past.pop();
+    if (!s) return;
+    s.sel.forEach(([k, values]) => { sel[k] = new Set(values); });
+    clearCols();
+    s.cols.forEach(([k, f]) => { colSel[k] = Array.isArray(f) ? new Set(f) : f; });
+    markFiltered(); syncBoxes(); clearSel(); render();
+    $('#back').hidden = past.length === 0;
+  }
+  $('#back').addEventListener('click', goBack);
 
   /* ---------- map ---------- */
   const HOME_VIEW = [[14, 12], 2];
@@ -449,7 +475,7 @@
             ? { weight: 1.2, color: cssVar('--ink-2'), fillColor: cssVar('--geo-hover') }
             : { weight: .8, color: cssVar('--geo-line') }));
           l.on('mouseout', () => l.setStyle(styleFor(n)));
-          if (country) l.on('click', () => toggle('country', country, true));
+          if (country) l.on('click', () => { remember(); toggle('country', country, true); });
         }
       }).addTo(map);
       base.bringToBack();
@@ -458,6 +484,7 @@
   }
   $('#reset-view').addEventListener('click', () => {
     if (!map) return;
+    if (anyFilter()) remember();
     DIMS.forEach(d => sel[d.key].clear()); clearCols(); markFiltered();
     syncBoxes(); clearSel(); render();
     map.setView(HOME_VIEW[0], HOME_VIEW[1]);
@@ -774,14 +801,15 @@
       if (!already) keys.forEach(k => sel.outcomeKey.add(k));
     };
     box.querySelectorAll('.cell[data-p]').forEach(td => td.addEventListener('click', () => {
+      remember();
       sel.practice.clear(); sel.practice.add(td.dataset.p);
       sel.outcomeKey.clear(); keysOf(td.dataset.o).forEach(k => sel.outcomeKey.add(k));
       syncBoxes(); render();
     }));
     box.querySelectorAll('td.rowh[data-p]').forEach(td =>
-      td.addEventListener('click', () => toggle('practice', td.dataset.p, true)));
+      td.addEventListener('click', () => { remember(); toggle('practice', td.dataset.p, true); }));
     box.querySelectorAll('th[data-o]').forEach(th =>
-      th.addEventListener('click', () => { pickOutcome(th.dataset.o); syncBoxes(); render(); }));
+      th.addEventListener('click', () => { remember(); pickOutcome(th.dataset.o); syncBoxes(); render(); }));
   }
 
   /* ---------- table ----------

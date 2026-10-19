@@ -76,6 +76,12 @@
   border-left:1px solid var(--rule);padding:18px 22px 26px}
 .findings p[data-readout]{margin:8px 0 0;font-family:var(--display);font-size:19px;line-height:1.35;
   color:var(--ink);text-wrap:pretty}
+/* the kicker and, once there is somewhere to go back to, the Back button */
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.findings .back{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--accent-soft);border:1px solid var(--accent);color:var(--ink);padding:5px 10px;cursor:pointer}
+.findings .back:hover{background:var(--accent);color:#fff}
+.findings .back[hidden]{display:none}
 /* the highlight is ink, not accent: accent pink is now the colour of a decrease */
 .findings p[data-readout] b{font-weight:500;color:var(--ink)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
