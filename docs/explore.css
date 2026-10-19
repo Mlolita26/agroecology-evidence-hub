@@ -144,9 +144,15 @@ body:has(#sel-badge.on) .maplegend{bottom:56px}
   color:var(--ink-3);margin-top:4px}
 
 /* ---- table ---- */
-.section-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:20px 22px 10px;flex-wrap:wrap}
+.section-h{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px 6px;flex-wrap:wrap}
 .section-h h2{font-family:var(--display);font-size:22px;font-weight:400}
-.section-h .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+/* the downloads: big, bold, coloured, next to the title */
+.downloads{display:flex;gap:8px;flex-wrap:wrap}
+.downloads .btn{font-size:14px;font-weight:600;padding:11px 18px;background:var(--accent);border-color:var(--accent);color:#fff}
+.downloads .btn:hover{background:var(--ink);border-color:var(--ink)}
+.downloads .btn b{font-weight:600;opacity:.85}
+.downloads .btn[hidden]{display:none}
+.tbl-hint{margin:0 22px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 .tablewrap{overflow:auto;max-height:560px;border-top:1px solid var(--rule)}
 /* 28 columns: the table is as wide as it needs to be and scrolls sideways */
 table{width:max-content;min-width:100%;border-collapse:collapse;font-size:12.5px}

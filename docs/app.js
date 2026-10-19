@@ -921,9 +921,9 @@
   $('#sel-clear').addEventListener('click', clearSel);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') clearSel(); });
 
-  /* ---------- CSV of the current selection ---------- */
-  function csv() {
-    const rows = D.filter(match);
+  /* ---------- CSV: the whole dataset, or the current selection ---------- */
+  function csv(everything) {
+    const rows = everything ? D : D.filter(match);
     /* the same columns, in the same order, as data.csv; build.py writes the list */
     const keys = window.KH_COLUMNS || Object.keys(rows[0] || {}).filter(k => k !== 'outcomeKey');
     const esc = (v) => v === null || v === undefined ? '' :
@@ -931,12 +931,12 @@
     const body = [keys.join(','), ...rows.map(r => keys.map(k => esc(r[k])).join(','))].join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([body], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'agroecology-evidence-hub-' + rows.length + '-comparisons.csv';
+    a.download = 'agroecology-evidence-hub-' + (everything ? 'complete' : 'selection') + '-' + rows.length + '-comparisons.csv';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
-  $('#dl-csv').addEventListener('click', csv);
-  $('#dl-csv-2').addEventListener('click', csv);
+  $('#dl-all').addEventListener('click', () => csv(true));
+  $('#dl-sel').addEventListener('click', () => csv(false));
 
   /* ---------- colour key ----------
      Built from BREAKS and RAMP_VARS, so it cannot drift from the colours the
@@ -955,6 +955,10 @@
   function render() {
     const rows = D.filter(match);
     $('#m-shown').textContent = rows.length;
+    /* the selection download only makes sense once something is selected */
+    const filtered = DIMS.some(d => sel[d.key].size);
+    $('#dl-sel').hidden = !filtered;
+    $('#dl-n').textContent = filtered ? '(' + rows.length + ')' : '';
     drawPoints(rows); readout(rows); chart(rows); table(rows); chips(); counts(); ddLabels(); applyMapMode();
   }
 

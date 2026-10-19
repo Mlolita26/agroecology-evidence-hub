@@ -11,7 +11,7 @@
     <link href="vendor/leaflet.css" rel="stylesheet"/>
     <link href="vendor/fonts.css" rel="stylesheet"/>
     <link href="styles.css?v=ccb721d7" rel="stylesheet"/>
-    <link href="explore.css?v=d7dd6b4b" rel="stylesheet"/>
+    <link href="explore.css?v=b689f9c3" rel="stylesheet"/>
   </head>
   <body>
     <header class="masthead">
@@ -84,7 +84,6 @@
         <div class="dds" id="filter-groups"></div>
         <button class="linkish" data-t="explore.01" id="clear-all">Clear all</button>
         <span class="tb-n"><b id="m-shown">0</b> / <span id="m-total">0</span> <span data-t="explore.18">comparisons</span></span>
-        <button class="btn sm" data-t="explore.04" id="dl-csv">Download</button>
       </div>
       <!-- the map and the findings sit side by side, so nothing is behind a click -->
       <div class="stage">
@@ -123,8 +122,13 @@
       </div>
       <div class="section-h">
         <h2 data-t="explore.15">Comparisons</h2>
-        <span class="hint" data-t="explore.16">Click a row to find it on the map, a heading to sort</span>
+        <!-- the selection button only shows once a filter is set -->
+        <div class="downloads">
+          <button class="btn" id="dl-all" type="button" data-t="explore.22">Download the complete dataset</button>
+          <button class="btn" id="dl-sel" type="button" hidden><span data-t="explore.23">Download this selection</span> <b id="dl-n"></b></button>
+        </div>
       </div>
+      <p class="hint tbl-hint" data-t="explore.16">Click a row to find it on the map, a heading to sort</p>
       <div class="tablewrap">
         <table>
           <thead><tr id="thead-row"></tr></thead>
@@ -133,7 +137,6 @@
       </div>
       <div class="tfoot">
         <span id="t-note"></span>
-        <button class="btn sm ghost" data-t="explore.17" id="dl-csv-2" style="margin-left:auto">Download selection</button>
       </div>
     </div>
   </main>
@@ -461,8 +464,8 @@
 <script src="vendor/topojson-client.min.js"></script>
 <script src="data.js?v=3a56f1a0"></script>
 <script src="iso3.js?v=fbe9a473"></script>
-<script src="i18n.js?v=c83f5131"></script>
+<script src="i18n.js?v=c8f7a02a"></script>
 <script src="vocab.js?v=9bd9520a"></script>
-<script src="app.js?v=55339b77"></script>
+<script src="app.js?v=dd1328e3"></script>
 </body>
 </html>
