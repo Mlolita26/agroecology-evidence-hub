@@ -41,6 +41,9 @@ a:hover{color:var(--accent);border-bottom-color:var(--accent)}
 .mark{display:flex;align-items:center;padding:12px 0;border:0}
 .mark:hover{color:inherit}
 .mark-t{font-family:var(--display);font-size:26px;line-height:1.05}
+/* the explore page runs edge to edge, so there the masthead does too: the
+   site title lines up with the filters instead of floating in from the left */
+body:has(#page-explore.on) .mh-2-in{max-width:none;padding-left:20px;padding-right:20px}
 nav.main{display:flex;margin-left:auto;align-items:stretch;overflow-x:auto;scrollbar-width:none}
 nav.main::-webkit-scrollbar{display:none}
 nav.main a{display:flex;align-items:center;white-space:nowrap;padding:0 12px;font-size:13px;color:var(--ink-2);border:0;position:relative}
