@@ -30,8 +30,10 @@ docs/        the website itself, and the folder GitHub Pages serves
   vocab.js     the data vocabulary in Spanish and French, display only
   img/         hero photographs; see img/README.md
   vendor/      other people's code, fonts and map data; see vendor/README.md
+outcome_signs.csv  which way is good for each outcome, copied from the ontology
 tools/
-  fetch_boundaries.py   downloads and trims the country region files
+  fetch_boundaries.py     downloads and trims the country region files
+  fetch_outcome_signs.py  copies the Sign column out of the ontology workbook
 ```
 
 The site loads nothing from anyone else's server. Leaflet, the fonts and the
@@ -134,6 +136,12 @@ way to check a new source before publishing it. If your copy of the Hub is
 somewhere other than the default OneDrive path, edit `SOURCE_DIR` at the top of
 `build.py`. Only the standard library is needed, so there is nothing to install.
 
+It also says how many comparisons have no known good direction, and names any
+sub-indicator that has neither a `Sign` in the ontology nor an entry in
+`SIGN_FIXES`. When the ontology's `01_outcomes` sheet changes, refresh the copy
+the build reads with `python tools/fetch_outcome_signs.py` (this one needs
+`openpyxl`; it opens the workbook read-only and never writes to it).
+
 It also tells you when a country in the data has no boundary file, and prints
 the command that fetches one:
 
@@ -195,9 +203,22 @@ alternative, for one outcome, at one place.
 - `pillar` and `subPillar` are the two levels of the outcome ontology above the
   indicator; `group` is the organism counted, for biodiversity outcomes.
   Together they are how the heatmap groups and names its columns.
-- `lnRR` is `ln(T/C)` with T the agroecological arm; above zero the practice had
-  the higher value. `lnRR_SE` is its standard error, empty where the source
-  reported no usable dispersion, which is most of Paut.
+- `lnRR` is `ln(T/C)` with T the agroecological arm, exactly as computed from
+  the two means. `direction` says which way is good for that outcome: +1 where
+  higher is better (yield, income, richness), -1 where lower is (costs,
+  erosion, pests, weeds), 0 where nobody has said. It comes from the `Sign`
+  column of the ontology's `01_outcomes` sheet, copied into `outcome_signs.csv`
+  by `tools/fetch_outcome_signs.py`, plus two things written in `build.py`:
+  the obvious reading of the four sub-indicators the ontology leaves blank
+  (`SIGN_FIXES`), and a rule for Abundance, which the ontology marks "higher
+  is better" although more weeds or pests is worse (`BAD_ORGANISMS`). Both
+  belong in the workbook eventually.
+- `yi` is `lnRR × direction`: the effect size the analysis uses, turned so
+  that positive always means the agroecological arm did better. It is what the
+  map, the heatmap and the summary sentence show. `se` is its standard error
+  and `vi` its variance, the names R's `metafor` uses; both are empty where
+  the source reported no usable dispersion, which is most of Paut. `yi` is
+  empty where `direction` is 0, and those points are grey.
 - `value` is the percentage change of T against C. It is in the download as a
   reading aid and shown nowhere on the site.
 - `KH_COLUMNS` in `data.js` is the column order of `data.csv` and of the

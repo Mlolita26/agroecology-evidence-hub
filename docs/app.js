@@ -27,7 +27,7 @@
   ];
   const sel = {};
   DIMS.forEach(d => { sel[d.key] = new Set(); });
-  let sort = { key: 'lnRR', dir: -1 };
+  let sort = { key: 'yi', dir: -1 };
   let selId = null;
   let map, layer, base, borders, regions, world = null, worldPending = null;
   let started = false;  /* true once the first render has run, so the theme
@@ -139,6 +139,8 @@
   const es = (v) => (v === null || v === undefined) ? '—' : (v > 0 ? '+' : '') + v.toFixed(2);
   const ratio = (v) => (v === null || v === undefined) ? '—' : '×' + Math.exp(v).toFixed(2);
   const times = (v) => (v === null || v === undefined) ? '—' : Math.exp(v).toFixed(2);   /* for prose */
+  /* the word for the sign of an effect size: yi is turned so positive is better */
+  const verdict = (v) => (v === null || v === undefined) ? t('legUnknown') : v > 0 ? t('legBetter') : v < 0 ? t('legWorse') : t('legSame');
   /* the median of the numbers present; null when there are none */
   const median = (a) => {
     const s = a.filter(x => x !== null && x !== undefined && !Number.isNaN(x)).sort((x, y) => x - y);
@@ -149,13 +151,13 @@
   const plural = (n, one, many) => t(n === 1 ? one : many, { n });
 
   /* lookups built once from the data */
-  const REGION_OF = {}, SUB_OF = {};
-  D.forEach(r => { REGION_OF[r.country] = r.region; SUB_OF[r.outcome] = r.subPillar; });
+  const REGION_OF = {}, SUB_OF = {}, PILLAR_OF = {};
+  D.forEach(r => { REGION_OF[r.country] = r.region; SUB_OF[r.outcome] = r.subPillar; PILLAR_OF[r.subPillar] = r.pillar; });
   /* the order the heatmap groups outcomes in, by pillar then sub-pillar;
      anything the data adds later is appended at the end */
   const PILLAR_ORDER = {
     Productivity: ['Yield', 'Economics'],
-    Resilience: ['Physical', 'Efficiency', 'Biodiversity', 'Social'],
+    Resilience: ['Biodiversity', 'Physical', 'Efficiency', 'Social'],
     Mitigation: ['Emissions', 'Carbon Stocks', 'Cookstove'],
     Other: ['Livestock Diet']
   };
@@ -421,14 +423,14 @@
     const groupBy = box.dataset.art;
     const byValue = (a, b) => a - b;
     let values;
-    const drawn = D.filter(r => r.lnRR !== null);
+    const drawn = D.filter(r => r.yi !== null);
     if (groupBy) {
       const bands = {};
-      drawn.forEach(r => (bands[r[groupBy]] = bands[r[groupBy]] || []).push(r.lnRR));
+      drawn.forEach(r => (bands[r[groupBy]] = bands[r[groupBy]] || []).push(r.yi));
       values = Object.values(bands).sort((a, b) => b.length - a.length)
         .flatMap(band => band.sort(byValue));
     } else {
-      values = drawn.map(r => r.lnRR).sort(byValue);
+      values = drawn.map(r => r.yi).sort(byValue);
     }
     if (!values.length) return;
 
@@ -559,13 +561,13 @@
       const other = selId && !isSel;
       const m = L.circleMarker([r.lat, r.lon], {
         radius: (3.5 + Math.min(n, 30) / 7) * (isSel ? 1.9 : 1),
-        fillColor: other ? dimmed : color(r.lnRR),
+        fillColor: other ? dimmed : color(r.yi),
         fillOpacity: other ? .22 : .9,
         color: isSel ? cssVar('--ink') : stroke,
         weight: isSel ? 2 : 1
       });
       m.bindTooltip(
-        '<div class="tv">' + t('tipES', { es: es(r.lnRR), ratio: ratio(r.lnRR) }) + ', ' + termKey(r.outcomeKey) + '</div>' +
+        '<div class="tv">' + t('tipES', { es: es(r.yi), word: verdict(r.yi) }) + ', ' + termKey(r.outcomeKey) + '</div>' +
         '<div>' + t('tipVs', { practice: term(r.practice), comparator: term(r.comparator) }) + '</div>' +
         '<div class="tm">' + term(r.crop) + ', ' + term(r.country) + (r.tN ? ', ' + t('tipN', { n: r.tN }) : '') + '</div>',
         { className: 'tip', direction: 'top', offset: [0, -3] }
@@ -589,8 +591,11 @@
       return;
     }
     const filtered = DIMS.some(d => sel[d.key].size);
-    const med = median(rows.map(r => r.lnRR));
-    const pos = rows.filter(r => r.lnRR > 0).length;
+    /* yi is already turned so that positive means the practice did better;
+       comparisons with no known direction stay out of the percentage */
+    const known = rows.filter(r => r.yi !== null);
+    const med = median(known.map(r => r.yi));
+    const better = known.filter(r => r.yi > 0).length;
     /* where: every filter except the outcome, which gets its own clause */
     const scope = DIMS.filter(d => d.key !== 'outcomeKey' && sel[d.key].size)
       .map(d => [...sel[d.key]].slice(0, 3).map(termKey).join(', ') +
@@ -599,34 +604,42 @@
     const listWords = (a) => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' ' + t('and') + ' ' + a[a.length - 1];
     const plain = (s) => { const k = 'group' + s.replace(/\W/g, ''); return k in window.KH_UI.en ? t(k) : term(s); };
     const subs = SUB_ORDER.filter(s => rows.some(r => r.subPillar === s));
+    /* the pillars present, each with its groups: "productivity (yield, income and costs)" */
+    const pillars = Object.keys(PILLAR_ORDER).filter(p => subs.some(s => PILLAR_OF[s] === p));
+    subs.forEach(s => { if (!pillars.includes(PILLAR_OF[s])) pillars.push(PILLAR_OF[s]); });
+    /* commas only inside the brackets: "income and costs" already has an "and" */
+    const described = pillars.map(p => plain(p) + ' (' + subs.filter(s => PILLAR_OF[s] === p).map(plain).join(', ') + ')');
     const outcomes = sel.outcomeKey.size ? t('onOutcomes', { list: listWords([...sel.outcomeKey].map(termKey)) })
       : subs.length === 1 ? t('onGroup', { group: plain(subs[0]) })
-      : t('acrossAll', { groups: listWords(subs.map(plain)) });
+      : t('acrossAll', { groups: listWords(described) });
     /* the typical difference, as a percentage the reader can picture */
     const pct = med === null ? null : Math.round((Math.exp(med) - 1) * 100);
-    const diff = pct === null ? '—' : pct > 0 ? t('moreBy', { p: pct }) : pct < 0 ? t('lessBy', { p: -pct }) : t('sameAs');
+    const diff = pct === null ? t('legUnknown') : pct > 0 ? t('betterBy', { p: pct }) : pct < 0 ? t('worseBy', { p: -pct }) : t('sameAs');
     let html = t('readout', {
       count: plural(rows.length, 'comparison', 'comparisons'),
       scope: scope.length ? t('inScope', { scope: scope.join(', ') }) : '',
-      outcomes, percent: Math.round(pos / rows.length * 100), diff
+      outcomes, percent: known.length ? Math.round(better / known.length * 100) : '—', diff
     });
     /* which practice leads is only said once the reader has narrowed things
        down; across the whole dataset it would set unlike against unlike */
     if (filtered) {
       const byP = {};
-      rows.forEach(r => (byP[r.practice] = byP[r.practice] || []).push(r.lnRR));
+      known.forEach(r => (byP[r.practice] = byP[r.practice] || []).push(r.yi));
       const best = Object.entries(byP).map(e => [e[0], e[1], median(e[1])])
         .filter(e => e[1].length >= 5 && e[2] !== null)
         .sort((a, b) => b[2] - a[2])[0];
       if (best) html += ' ' + t('readoutBest', { practice: term(best[0]), median: es(best[2]), n: best[1].length });
     }
     const ns = rows.map(r => r.tN).filter(Boolean);
-    put(html, [
+    const meta = [
       plural(new Set(rows.map(r => r.country)).size, 'metaCountry', 'metaCountries'),
       plural(new Set(rows.map(r => r.crop)).size, 'metaCrop', 'metaCrops'),
       plural(new Set(rows.map(r => r.study)).size, 'metaStudy', 'metaStudies'),
       ns.length ? t('metaMedianN', { n: median(ns) }) : t('metaNoN')
-    ].join(' · '));
+    ];
+    /* no effect size: the good direction is unknown, or a mean was zero */
+    if (known.length < rows.length) meta.push(t('metaNoEffect', { n: rows.length - known.length }));
+    put(html, meta.join(' · '));
   }
 
   /* ---------- practice x outcome heatmap ---------- */
@@ -637,7 +650,7 @@
     const cells = {}, pCount = {}, oCount = {};
     rows.forEach(r => {
       const k = r.practice + '||' + r.outcomeKey;
-      (cells[k] = cells[k] || []).push(r.lnRR);
+      (cells[k] = cells[k] || []).push(r.yi);
       pCount[r.practice] = (pCount[r.practice] || 0) + 1;
       oCount[r.outcomeKey] = (oCount[r.outcomeKey] || 0) + 1;
     });
@@ -718,8 +731,10 @@
     { k: 'tMean', label: 'colTMean', h: 'helpTMean', num: 1 },
     { k: 'tSD', label: 'colTSD', h: 'helpTSD', num: 1 },
     { k: 'tN', label: 'colTN', h: 'helpTN', num: 1 },
-    { k: 'lnRR', label: 'colES', h: 'helpLnRR', num: 1 },
-    { k: 'lnRR_SE', label: 'colSE', h: 'helpSE', num: 1 },
+    { k: 'direction', label: 'colDirection', h: 'helpDirection' },
+    { k: 'yi', label: 'colES', h: 'helpYi', num: 1 },
+    { k: 'se', label: 'colSE', h: 'helpSE', num: 1 },
+    { k: 'vi', label: 'colVi', h: 'helpVi', num: 1 },
     { k: 'years', label: 'colYears', h: 'helpYears', num: 1 },
     { k: 'synthesis', label: 'colSynthesis', h: 'helpSynthesis' },
     { k: 'doi', label: 'colDoi', h: 'helpDoi' }
@@ -742,8 +757,10 @@
   const fmt = (c, r) => {
     const v = r[c.k];
     if (v === null || v === undefined || v === '') return '—';
-    if (c.k === 'lnRR') return es(v);
-    if (c.k === 'lnRR_SE') return v.toFixed(3);
+    if (c.k === 'yi') return es(v);
+    if (c.k === 'se') return v.toFixed(3);
+    if (c.k === 'vi') return v.toFixed(4);
+    if (c.k === 'direction') return t(v > 0 ? 'dirUp' : v < 0 ? 'dirDown' : 'dirUnknown');
     if (['cMean', 'tMean', 'cSD', 'tSD'].includes(c.k)) return Number.isInteger(v) ? String(v) : v.toFixed(2);
     if (c.k === 'doi') return '<a href="https://doi.org/' + v + '" target="_blank" rel="noopener">' + v + '</a>';
     return WORDS.includes(c.k) ? term(v) : v;
@@ -762,7 +779,7 @@
     $('#tbody').innerHTML = s.slice(0, MAXROWS).map(r =>
       '<tr data-id="' + r.id + '">' +
       COLS.map((c, i) => '<td class="' + (c.num ? 'v' : '') + '"' +
-        (i === 0 ? ' style="--sw:' + color(r.lnRR) + '"' : '') + '>' + fmt(c, r) + '</td>').join('') + '</tr>'
+        (i === 0 ? ' style="--sw:' + color(r.yi) + '"' : '') + '>' + fmt(c, r) + '</td>').join('') + '</tr>'
     ).join('');
     $('#tbody').querySelectorAll('tr').forEach(tr => {
       tr.addEventListener('click', e => {
@@ -860,7 +877,7 @@
     const lo = BREAKS[0], hi = BREAKS[BREAKS.length - 1];
     swatches.innerHTML = RAMP_VARS.map(v => '<i style="background:var(' + v + ')"></i>').join('');
     labels.innerHTML = '<span>' + tick(lo) + '</span><span>0</span><span>' + tick(hi) + '</span>';
-    ratios.innerHTML = '<span>' + ratio(lo) + '</span><span>×1</span><span>' + ratio(hi) + '</span>';
+    ratios.innerHTML = '<span>' + t('legWorse') + '</span><span>' + t('legSame') + '</span><span>' + t('legBetter') + '</span>';
   }
 
   function render() {

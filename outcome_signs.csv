@@ -1,0 +1,166 @@
+subindicator,sign,pillar,subpillar,indicator
+Aboveground Carbon Biomass,p,Mitigation,Carbon Stocks,Carbon Stocks
+Belowground Carbon Biomass,p,Mitigation,Carbon Stocks,Carbon Stocks
+Soil Carbon Stocks,p,Mitigation,Carbon Stocks,Carbon Stocks
+Fuel Use,n,Mitigation,Cookstove,Costs
+Cooking Time,n,Mitigation,Cookstove,Fuel Efficiency
+Cookstove Emissions,n,Mitigation,Cookstove,Fuel Efficiency
+Fuel Savings,p,Mitigation,Cookstove,Fuel Efficiency
+Specific Fuel Use,n,Mitigation,Cookstove,Fuel Efficiency
+Carbon Dioxide Emissions,n,Mitigation,Emissions,Emissions
+CO2 Equivalent Emissions,n,Mitigation,Emissions,Emissions
+Emissions Intensity,n,Mitigation,Emissions,Emissions
+Methane Emissions,n,Mitigation,Emissions,Emissions
+Nitrous Oxide Emissions,n,Mitigation,Emissions,Emissions
+Feed Intake,n,Other,Livestock Diet,Feed Intake
+Fixed Cost,n,Productivity,Economics,Costs
+Fixed Cost per Asset,n,Productivity,Economics,Costs
+Fixed Cost per Unit Product,n,Productivity,Economics,Costs
+Labour Cost,n,Productivity,Economics,Costs
+Labour Cost per Asset,n,Productivity,Economics,Costs
+Labour Cost per Unit Product,n,Productivity,Economics,Costs
+Total Cost,n,Productivity,Economics,Costs
+Total Cost (Unconfirmed),n,Productivity,Economics,Costs
+Total Cost per Asset,n,Productivity,Economics,Costs
+Total Cost per Unit Product,n,Productivity,Economics,Costs
+Variable Cost,n,Productivity,Economics,Costs
+Variable Cost per Asset,n,Productivity,Economics,Costs
+Variable Cost per Unit Product,n,Productivity,Economics,Costs
+Benefit Cost Ratio (GMTC),p,Productivity,Economics,Economic Performance
+Benefit Cost Ratio (GMVC),p,Productivity,Economics,Economic Performance
+Benefit Cost Ratio (GRTC),p,Productivity,Economics,Economic Performance
+Benefit Cost Ratio (GRVC),p,Productivity,Economics,Economic Performance
+Benefit Cost Ratio (NRTC),p,Productivity,Economics,Economic Performance
+Benefit Cost Ratio (NRVC),p,Productivity,Economics,Economic Performance
+Benefit Cost Ratio (Unspecified),p,Productivity,Economics,Economic Performance
+Cost Benefit Ratio (TCGR),n,Productivity,Economics,Economic Performance
+Cost Benefit Ratio (TCNR),n,Productivity,Economics,Economic Performance
+Cost Benefit Ratio (VCGR),n,Productivity,Economics,Economic Performance
+Internal Rate of Return,p,Productivity,Economics,Economic Performance
+Marginal Rate of Return,p,Productivity,Economics,Economic Performance
+Net Present Value,p,Productivity,Economics,Economic Performance
+Payback Period,n,Productivity,Economics,Economic Performance
+Return on Investment,p,Productivity,Economics,Economic Performance
+Gross Margin,p,Productivity,Economics,Income
+Gross Return,p,Productivity,Economics,Income
+Net Return,p,Productivity,Economics,Income
+Crop Residue Yield,p,Productivity,Yield,Non-Product Yield
+Area Time Equivalent Ratio,p,Productivity,Yield,Product Yield
+Biomass Yield,p,Productivity,Yield,Product Yield
+Crop Yield,p,Productivity,Yield,Product Yield
+Egg Yield,p,Productivity,Yield,Product Yield
+Extraction Yield,p,Productivity,Yield,Product Yield
+Land Equivalent Ratio,p,Productivity,Yield,Product Yield
+Meat Yield-Slaughter Body,p,Productivity,Yield,Product Yield
+Meat Yield-Hot Carcass,p,Productivity,Yield,Product Yield
+Final Body Weight,p,Productivity,Yield,Product Yield
+Meat Yield-Final Body Weight,p,Productivity,Yield,Product Yield
+Meat Yield-Empty Carcass Meat Yield,p,Productivity,Yield,Product Yield
+Meat Yield-Cold Carcass,p,Productivity,Yield,Product Yield
+Meat Yield,p,Productivity,Yield,Product Yield
+Milk Fat Content,p,Productivity,Yield,Product Yield
+Milk Fat Yield,p,Productivity,Yield,Product Yield
+Milk Yield,p,Productivity,Yield,Product Yield
+Other Animal Product Yield,p,Productivity,Yield,Product Yield
+Partial Land Equivalent Ratio,,Productivity,Yield,Product Yield
+Reproductive Rate,p,Productivity,Yield,Product Yield
+Reproductive Yield,p,Productivity,Yield,Product Yield
+Offspring Body Weight-Birth Weight,,Productivity,Yield,Product Yield
+Specific Growth Rate,,Productivity,Yield,Product Yield
+Offspring Body Weight-Weaning Weight,,Productivity,Yield,Product Yield
+Weight Gain,p,Productivity,Yield,Product Yield
+Abundance,p,Resilience,Biodiversity,Abundance
+Activity-density,p,Resilience,Biodiversity,Abundance
+Colonisation percent,p,Resilience,Biodiversity,Abundance
+Nodule biomass,,Resilience,Biodiversity,Abundance
+Number,p,Resilience,Biodiversity,Abundance
+Number of orders,p,Resilience,Biodiversity,Abundance
+Visitation frequency,p,Resilience,Biodiversity,Abundance
+Abundance weighted mean CWM,p,Resilience,Biodiversity,Community Trait
+Effective number of species,p,Resilience,Biodiversity,Diversity Index
+Fisher Alpha,p,Resilience,Biodiversity,Diversity Index
+Margalef Index,p,Resilience,Biodiversity,Diversity Index
+Shannon Index,p,Resilience,Biodiversity,Diversity Index
+Shannon-Wiener Index,p,Resilience,Biodiversity,Diversity Index
+Simpson Index,p,Resilience,Biodiversity,Diversity Index
+Simpson's dominance index,p,Resilience,Biodiversity,Diversity Index
+Simpson's reciprocal index,p,Resilience,Biodiversity,Diversity Index
+Taxonomic diversity,p,Resilience,Biodiversity,Diversity Index
+Taxonomic Richness,,Resilience,Biodiversity,Richness
+Area under disease progress curve (AUDPC),p,Resilience,Biodiversity,Ecosystem Function
+Soil respiration,p,Resilience,Biodiversity,Ecosystem Function
+Pielou Index,p,Resilience,Biodiversity,Evenness Index
+Shannon Evenness Index,p,Resilience,Biodiversity,Evenness Index
+Species Evenness,p,Resilience,Biodiversity,Evenness Index
+Microbial biomass,p,Resilience,Biodiversity,Abundance
+Species Richness,p,Resilience,Biodiversity,Richness
+Bootstrap estimator,p,Resilience,Biodiversity,Richness Estimator
+Chao1 Index,p,Resilience,Biodiversity,Richness Estimator
+Chao2 Estimator,p,Resilience,Biodiversity,Richness Estimator
+Jack-knife Species Richness,p,Resilience,Biodiversity,Richness Estimator
+Rarefied Species Richness,p,Resilience,Biodiversity,Richness Estimator
+Berger-Parker dominance (d),p,Resilience,Biodiversity,Dominance index
+Jaccard Similarity Index,p,Resilience,Biodiversity,Similarity Index
+Relative activity,p,Resilience,Biodiversity,Activity/Habitat-use index
+Water Use (Irrigation),n,Resilience,Efficiency,Efficiency
+Depreciated - Water Use (Unspecified),n,Resilience,Efficiency,Efficiency
+Depreciated -Water Use (Rain & Irrigation),n,Resilience,Efficiency,Efficiency
+Energy Use Efficiency,,Resilience,Efficiency,Efficiency
+Feed Conversion Ratio (In Out),n,Resilience,Efficiency,Efficiency
+Feed Conversion Ratio (Out In),p,Resilience,Efficiency,Efficiency
+Nitrogen (Apparent Efficiency Animals Feed),p,Resilience,Efficiency,Efficiency
+Nitrogen Agronomic Efficiency,p,Resilience,Efficiency,Efficiency
+Nitrogen Agronomic Efficiency (AGB),p,Resilience,Efficiency,Efficiency
+Nitrogen Factor Productivity,p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (ARE AGB),p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (ARE Product),p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (ARE Unspecificed),p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (Isotopic AGB),p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (Isotopic Product),p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (PNB AGB),p,Resilience,Efficiency,Efficiency
+Nitrogen Use Efficiency (PNB Product),p,Resilience,Efficiency,Efficiency
+Phosphorus Agronomic Efficiency,p,Resilience,Efficiency,Efficiency
+Phosphorus Factor Productivity,p,Resilience,Efficiency,Efficiency
+Phosphorus Use Efficiency (ARE AGB),p,Resilience,Efficiency,Efficiency
+Phosphorus Use Efficiency (ARE Product),p,Resilience,Efficiency,Efficiency
+Phosphorus Use Efficiency (ARE Unspecified),p,Resilience,Efficiency,Efficiency
+Potassium Agronomic Efficiency,p,Resilience,Efficiency,Efficiency
+Potassium Factor Productivity,p,Resilience,Efficiency,Efficiency
+Potassium Use Efficiency (ARE AGB),p,Resilience,Efficiency,Efficiency
+Potassium Use Efficiency (ARE Product),p,Resilience,Efficiency,Efficiency
+Potassium Use Efficiency (ARE Unspecified),p,Resilience,Efficiency,Efficiency
+Protein Conversion Ratio (In Out),n,Resilience,Efficiency,Efficiency
+Protein Conversion Ratio (Out In),p,Resilience,Efficiency,Efficiency
+Total Factor Productivity,p,Resilience,Efficiency,Efficiency
+Water Use,n,Resilience,Efficiency,Efficiency
+Water Use Efficiency,p,Resilience,Efficiency,Efficiency
+Animal Mortality,n,Resilience,Physical,Animal Survival
+Animal Survival,p,Resilience,Physical,Animal Survival
+Beneficial Organisms,p,Resilience,Physical,Biodiversity
+Pest & Pathogen (Losses),n,Resilience,Physical,Pest & Pathogen
+Pest & Pathogen (Numbers),n,Resilience,Physical,Pest & Pathogen
+Pest & Pathogen (Product Weight),p,Resilience,Physical,Pest & Pathogen
+Cation Exchange Capacity,p,Resilience,Physical,Soil Quality
+Effective Cation Exchange Capacity,p,Resilience,Physical,Soil Quality
+Erosion,n,Resilience,Physical,Soil Quality
+Infiltration Rate,p,Resilience,Physical,Soil Quality
+Runoff,n,Resilience,Physical,Soil Quality
+Soil Available Nitrogen,p,Resilience,Physical,Soil Quality
+Soil Available Potassium,,Resilience,Physical,Soil Quality
+Soil Available Phosphorus,,Resilience,Physical,Soil Quality
+Soil Moisture,p,Resilience,Physical,Soil Quality
+Soil NH4,p,Resilience,Physical,Soil Quality
+Soil Nitrogen,p,Resilience,Physical,Soil Quality
+Soil NO3,p,Resilience,Physical,Soil Quality
+Soil Organic Carbon,p,Resilience,Physical,Soil Quality
+Soil Organic Carbon (Change),p,Resilience,Physical,Soil Quality
+Soil Organic Matter,p,Resilience,Physical,Soil Quality
+Soil Total Nitrogen,p,Resilience,Physical,Soil Quality
+Yield Stability,p,Resilience,Physical,Yield Stability
+Income Female,p,Resilience,Social,Gender Equity
+Income Male,p,Resilience,Social,Gender Equity
+Labour Female,n,Resilience,Social,Gender Equity
+Labour Male,n,Resilience,Social,Gender Equity
+Labour Person Hours,n,Resilience,Social,Labour
+Return to Labour,p,Resilience,Social,Labour
+Damage caused by pest,,Resilience,Physical,Pest & Pathogen

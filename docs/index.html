@@ -10,8 +10,8 @@
     <!-- everything the page needs is in this repository; see vendor/README.md -->
     <link href="vendor/leaflet.css" rel="stylesheet"/>
     <link href="vendor/fonts.css" rel="stylesheet"/>
-    <link href="styles.css?v=6dc7134f" rel="stylesheet"/>
-    <link href="explore.css?v=8ff23aff" rel="stylesheet"/>
+    <link href="styles.css?v=ccb721d7" rel="stylesheet"/>
+    <link href="explore.css?v=e5132683" rel="stylesheet"/>
   </head>
   <body>
     <header class="masthead">
@@ -55,6 +55,11 @@
           </figure>
       </div>
     </header>
+    <!-- a second, louder way into the data, for people who scroll past the header -->
+    <a class="band" href="#explore">
+      <span class="band-say" data-t="home.30">See every comparison on a map, filter by region, crop, outcome and practice, and download what you pick.</span>
+      <span class="btn" data-t="home.31">Explore the data</span>
+    </a>
     <div class="doc solo">
       <div class="doc-main">
         <div class="copy">
@@ -111,8 +116,8 @@
           <div class="sum-sec">
             <h2 data-t="explore.09">Median effect size by practice and outcome</h2>
             <div class="chart" id="chart"></div>
-            <p class="sum-caption" data-t="explore.21">Each cell is the median effect size of the comparisons for that agroecological practice and that outcome; n is how many comparisons are behind it. It is computed from the same rows as the table below. Click a cell to keep that pair, a row or column heading to keep one of them.</p>
-            <p class="sum-note" data-t="explore.14">Pink is a decrease against the less agroecological alternative, teal an increase, pale sand is near zero. The effect size is the log response ratio, ln(treatment ÷ comparator). The scale is cut at ±1, which is about 0.37 to 2.7 times the comparator.</p>
+            <p class="sum-caption" data-t="explore.21">Each cell is the median effect size of the comparisons for that agroecological practice and that outcome, positive meaning the practice did better; n is how many comparisons are behind it. It is computed from the same rows as the table below. Click a cell to keep that pair, a row or column heading to keep one of them.</p>
+            <p class="sum-note" data-t="explore.14">Pink means the agroecological practice did worse than the less agroecological alternative, teal that it did better, pale sand about the same. The effect size is the log response ratio, ln(treatment ÷ comparator), turned so that positive is always better: for costs, pests and weeds, lower is better. The scale is cut at ±1. Grey points have no effect size: the good direction is unknown, or one of the means was zero.</p>
           </div>
         </aside>
       </div>
@@ -245,7 +250,7 @@
         <tr><td data-t="methodology.30">Intervention</td><td data-t="methodology.31">agroecological practice and its detail, comparator and its detail</td></tr>
         <tr><td data-t="methodology.32">Outcome</td><td data-t="methodology.33">pillar, sub-pillar, outcome, sub-indicator, organism group, unit</td></tr>
         <tr><td data-t="methodology.34">Values</td><td data-t="methodology.35">control and treatment mean, SD, sample size</td></tr>
-        <tr><td data-t="methodology.36">Effect size</td><td data-t="methodology.37">lnRR and its standard error; percentage change in the download only</td></tr>
+        <tr><td data-t="methodology.36">Effect size</td><td data-t="methodology.37">effect size yi (log response ratio, positive = the practice did better), its standard error and variance vi; percentage change in the download only</td></tr>
         <tr><td data-t="methodology.38">Provenance</td><td data-t="methodology.39">study, year, journal, DOI, source synthesis</td></tr>
       </table>
     </div>
@@ -454,10 +459,10 @@
 </footer>
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/topojson-client.min.js"></script>
-<script src="data.js?v=e53136dd"></script>
+<script src="data.js?v=3a56f1a0"></script>
 <script src="iso3.js?v=fbe9a473"></script>
-<script src="i18n.js?v=b5874b48"></script>
+<script src="i18n.js?v=9f270737"></script>
 <script src="vocab.js?v=9bd9520a"></script>
-<script src="app.js?v=afc77276"></script>
+<script src="app.js?v=3a9ea3eb"></script>
 </body>
 </html>
